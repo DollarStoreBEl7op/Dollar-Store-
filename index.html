@@ -1324,71 +1324,42 @@
             renderChat();
             startTimer();
             initWavesCanvas();
-        };// --- متجر التمساح: طرق الدفع والشات المباشر المحدث ---
+        };// --- متجر التمساح: أزرار الدعم، الواتساب، والديسكورد وطرق الدفع ---
     document.body.insertAdjacentHTML('beforeend', `
-      <!-- صندوق طرق الدفع -->
-      <div style="background: #0b1d22; padding: 20px; border-radius: 12px; margin: 30px auto; max-width: 600px; color: #fff; text-align: center; border: 1px solid #143840; font-family: Cairo, sans-serif;">
-        <h3 style="color: #10b981; margin-bottom: 15px; font-size: 20px;">💳 طرق الدفع المتاحة</h3>
+      <div style="background: #0b1d22; padding: 25px; border-radius: 14px; margin: 30px auto; max-width: 600px; color: #fff; text-align: center; border: 1px solid #143840; font-family: Cairo, sans-serif; box-shadow: 0 8px 24px rgba(0,0,0,0.4);">
         
-        <div style="margin-bottom: 12px; padding: 10px; border-bottom: 1px solid #143840;">
-          <p style="margin: 5px 0;"><strong>Vodafone Cash:</strong> <span dir="ltr" style="color: #10b981; font-weight: bold;">01031652348</span></p>
+        <!-- أزرار التواصل السريع (ديسكورد + واتساب) -->
+        <div style="display: flex; gap: 12px; justify-content: center; margin-bottom: 25px; flex-wrap: wrap;">
+          <a href="https://discord.gg/YOUR_INVITE_LINK" target="_blank" style="background: #5865F2; color: #fff; padding: 12px 22px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; font-size: 15px; transition: 0.2s;">
+            🎮 انضم لسيرفر الديسكورد
+          </a>
+          <a href="https://wa.me/201031652348" target="_blank" style="background: #25D366; color: #fff; padding: 12px 22px; border-radius: 8px; text-decoration: none; font-weight: bold; display: inline-flex; align-items: center; gap: 8px; font-size: 15px; transition: 0.2s;">
+            💬 الدعم الفني عبر واتساب
+          </a>
+        </div>
+        
+        <h3 style="color: #10b981; margin-bottom: 18px; font-size: 20px; border-bottom: 2px solid #143840; padding-bottom: 8px;">💳 طرق الدفع المتاحة</h3>
+        
+        <!-- فودافون كاش -->
+        <div style="margin-bottom: 15px; padding: 12px; background: #071317; border-radius: 8px; border: 1px solid #143840;">
+          <p style="margin: 5px 0; font-size: 16px;"><strong>Vodafone Cash:</strong> <span dir="ltr" style="color: #10b981; font-weight: bold; font-size: 17px;">01031652348</span></p>
           <p style="margin: 5px 0; font-size: 14px; color: #aaa;">باسم: حسام حسن</p>
         </div>
 
-        <div style="margin-bottom: 12px; padding: 10px; border-bottom: 1px solid #143840;">
-          <p style="margin: 5px 0;"><strong>InstaPay Egypt:</strong> <span dir="ltr" style="color: #10b981; font-weight: bold;">01200086093</span></p>
+        <!-- إنستاباي -->
+        <div style="margin-bottom: 15px; padding: 12px; background: #071317; border-radius: 8px; border: 1px solid #143840;">
+          <p style="margin: 5px 0; font-size: 16px;"><strong>InstaPay Egypt:</strong> <span dir="ltr" style="color: #10b981; font-weight: bold; font-size: 17px;">01200086093</span></p>
           <p style="margin: 5px 0; font-size: 14px; color: #aaa;">باسم: ناه</p>
         </div>
 
-        <div style="padding: 10px;">
-          <p style="margin: 5px 0;"><strong>Binance Pay ID:</strong> <span dir="ltr" style="color: #10b981; font-weight: bold;">467365311</span></p>
+        <!-- باينانس -->
+        <div style="padding: 12px; background: #071317; border-radius: 8px; border: 1px solid #143840;">
+          <p style="margin: 5px 0; font-size: 16px;"><strong>Binance Pay ID:</strong> <span dir="ltr" style="color: #10b981; font-weight: bold; font-size: 17px;">467365311</span></p>
           <p style="margin: 5px 0; font-size: 14px; color: #aaa;">باسم: Mahmuud</p>
         </div>
-      </div>
 
-      <!-- نظام الشات المباشر الداخلي -->
-      <div id="temsah-chat-widget" style="position: fixed; bottom: 20px; left: 20px; z-index: 99999; font-family: Cairo, sans-serif;">
-        <button onclick="toggleTemsahChat()" style="background: #10b981; color: #fff; border: none; padding: 12px 18px; border-radius: 50px; font-weight: bold; cursor: pointer; box-shadow: 0 4px 12px rgba(0,0,0,0.3); display: flex; align-items: center; gap: 8px; font-size: 15px;">
-          💬 تواصل معنا مباشر
-        </button>
-        
-        <div id="temsah-chat-box" style="display: none; width: 320px; background: #0b1d22; border: 1px solid #143840; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.5); overflow: hidden; margin-bottom: 10px; color: #fff;">
-          <div style="background: #0e242b; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #143840;">
-            <span style="font-weight: bold; color: #10b981;">دعم متجر التمساح 🟢</span>
-            <button onclick="toggleTemsahChat()" style="background: none; border: none; color: #aaa; cursor: pointer; font-size: 16px;">✕</button>
-          </div>
-          <div id="temsah-chat-messages" style="height: 200px; padding: 10px; overflow-y: auto; font-size: 13px; display: flex; flex-direction: column; gap: 8px;">
-            <div style="background: #143840; padding: 8px 12px; border-radius: 8px; max-width: 80%; align-self: flex-start;">
-              أهلاً بيك يا غالي في متجر التمساح! سيب رسالتك وهنرد عليك فوراً.
-            </div>
-          </div>
-          <div style="padding: 10px; border-top: 1px solid #143840; display: flex; gap: 5px;">
-            <input type="text" id="temsah-chat-input" placeholder="اكتب رسالتك هنا..." style="flex: 1; background: #071317; border: 1px solid #143840; border-radius: 6px; padding: 8px; color: #fff; font-size: 13px; outline: none;">
-            <button onclick="sendTemsahMessage()" style="background: #10b981; color: #fff; border: none; padding: 8px 12px; border-radius: 6px; cursor: pointer; font-weight: bold;">إرسال</button>
-          </div>
-        </div>
       </div>
-
-      <script>
-        function toggleTemsahChat() {
-          var box = document.getElementById('temsah-chat-box');
-          box.style.display = box.style.display === 'none' ? 'block' : 'none';
-        }
-        function sendTemsahMessage() {
-          var input = document.getElementById('temsah-chat-input');
-          var text = input.value.trim();
-          if(text !== '') {
-            var messages = document.getElementById('temsah-chat-messages');
-            messages.innerHTML += '<div style="background: #10b981; color: #fff; padding: 8px 12px; border-radius: 8px; max-width: 80%; align-self: flex-end;">' + text + '</div>';
-            input.value = '';
-            messages.scrollTop = messages.scrollHeight;
-            
-            setTimeout(function() {
-              messages.innerHTML += '<div style="background: #143840; padding: 8px 12px; border-radius: 8px; max-width: 80%; align-self: flex-start;">تم استلام رسالتك بنجاح، فريق التمساح هيراجعها ويرد عليك قريباً!</div>';
-              messages.scrollTop = messages.scrollHeight;
-            }, 1000);
-          }
-        }
+    `);
       </script>
     `);
     `);
