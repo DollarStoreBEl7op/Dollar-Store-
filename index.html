@@ -172,7 +172,7 @@
                     <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3.5 text-slate-400"></i>
                 </div>
 
-                <!-- Right Action Bar & Interactive User Dropdown -->
+                <!-- Right Action Bar & Styled Circular Profile/Auth Buttons -->
                 <div class="flex items-center gap-3">
                     <div class="hidden lg:flex items-center gap-1.5 bg-temsah-card border border-temsah-cardBorder px-3 py-1.5 rounded-xl text-xs font-bold text-temsah-gold">
                         <i class="fa-solid fa-coins"></i>
@@ -195,28 +195,23 @@
                         <span class="hidden sm:inline">فتح تيكيت</span>
                     </button>
 
-                    <!-- Google Authentication Profile Widget (Interactive Login Menu) -->
-                    <div class="relative group">
-                        <div id="userProfileBtn" onclick="toggleProfileDropdown()" class="flex items-center gap-2 bg-temsah-card hover:bg-temsah-cardBorder p-1.5 rounded-xl border border-temsah-cardBorder cursor-pointer transition">
-                            <img id="userAvatar" src="https://api.dicebear.com/7.x/bottts/svg?seed=HossamHassan" alt="User Avatar" class="w-8 h-8 rounded-lg bg-temsah-bg border border-temsah-primary/40">
-                            <div class="hidden xl:block text-right pr-1">
-                                <p class="text-xs font-bold text-white leading-none" id="usernameDisplay">حسام حسن</p>
-                                <span class="text-[10px] text-temsah-primary font-bold" id="userRoleBadge">عضو مشترك VIP</span>
-                            </div>
-                            <i class="fa-solid fa-chevron-down text-xs text-slate-400 px-1" id="dropdownArrow"></i>
-                        </div>
+                    <!-- Circular Styled Action Buttons (Cart, Wallet, Profile Login Modal Trigger) -->
+                    <div class="flex items-center gap-2">
+                        <!-- Cart Icon Button -->
+                        <button onclick="showToast('السلة فارغة حالياً')" class="relative w-10 h-10 rounded-full bg-temsah-card border border-temsah-cardBorder text-temsah-primary flex items-center justify-center hover:border-temsah-primary transition shadow-md" title="سلة المشتريات">
+                            <i class="fa-solid fa-cart-shopping text-sm"></i>
+                            <span class="absolute -top-1 -right-1 w-4 h-4 rounded-full bg-temsah-primary text-black font-bold text-[9px] flex items-center justify-center">0</span>
+                        </button>
 
-                        <!-- Dropdown Menu -->
-                        <div id="profileDropdown" class="absolute left-0 mt-2 w-56 bg-temsah-card border border-temsah-cardBorder rounded-xl shadow-2xl py-2 hidden z-50">
-                            <div class="px-4 py-2 border-b border-temsah-cardBorder">
-                                <p class="text-xs font-bold text-white truncate" id="dropdownEmail">hossam@gmail.com</p>
-                                <p class="text-[10px] text-temsah-gold font-bold mt-0.5"><i class="fa-solid fa-circle text-[8px] ml-1"></i> مسجل بدخول جوجل</p>
-                            </div>
-                            <a href="#" onclick="showToast('تم فتح ملفك الشخصي')" class="block px-4 py-2 text-xs text-slate-300 hover:bg-temsah-cardBorder hover:text-temsah-primary"><i class="fa-solid fa-user ml-2"></i> حسابي وإعداداتي</a>
-                            <a href="#" onclick="showToast('عرض سجل المعاملات والمشتريات')" class="block px-4 py-2 text-xs text-slate-300 hover:bg-temsah-cardBorder hover:text-temsah-primary"><i class="fa-solid fa-receipt ml-2"></i> مشترياتي وطلباتي</a>
-                            <div class="border-t border-temsah-cardBorder my-1"></div>
-                            <button onclick="toggleSubscriberStatus()" class="w-full text-right px-4 py-2 text-xs text-temsah-gold font-bold hover:bg-temsah-cardBorder" id="subStatusToggleBtn">
-                                <i class="fa-solid fa-crown ml-2"></i> إلغاء/تفعيل اشتراك الشات
+                        <!-- Wallet Icon Button -->
+                        <button onclick="showToast('رصيدك الحالي: 0.00 ج.م')" class="w-10 h-10 rounded-full bg-temsah-card border border-temsah-cardBorder text-temsah-gold flex items-center justify-center hover:border-temsah-gold transition shadow-md" title="المحفظة">
+                            <i class="fa-solid fa-wallet text-sm"></i>
+                        </button>
+
+                        <!-- Profile / Login Modal Trigger -->
+                        <div class="relative">
+                            <button onclick="toggleAuthModal()" class="w-10 h-10 rounded-full bg-gradient-to-tr from-temsah-card via-temsah-cardBorder to-temsah-primary text-white border border-temsah-primary flex items-center justify-center hover:scale-105 transition shadow-lg shadow-temsah-primary/20" title="تسجيل الدخول / الحساب">
+                                <i class="fa-solid fa-user text-sm text-temsah-primary"></i>
                             </button>
                         </div>
                     </div>
@@ -238,7 +233,7 @@
                     <div class="flex flex-wrap items-center gap-2 mb-3">
                         <span class="bg-temsah-primary/20 text-temsah-primary border border-temsah-primary/40 px-3 py-1 rounded-full text-xs font-bold badge-pulse flex items-center gap-1.5">
                             <span class="w-2 h-2 rounded-full bg-temsah-primary animate-ping"></span>
-                            منصة التمساح Eldorado-Style v2.4
+                            منصة التمساح Eldorado-Style v2.5
                         </span>
                         <span class="bg-temsah-gold/20 text-temsah-gold border border-temsah-gold/40 px-3 py-1 rounded-full text-xs font-bold">
                             <i class="fa-solid fa-bolt ml-1"></i> تسليم فوري وتلقائي
@@ -462,14 +457,14 @@
             </div>
         </div>
 
-        <!-- Live Community Chat Room -->
+        <!-- Live Community Chat Room (Discord Style Tickets / Private Channels) -->
         <div class="glass-panel rounded-2xl border border-temsah-cardBorder p-4 sm:p-6 space-y-4">
             <div class="flex flex-wrap items-center justify-between border-b border-temsah-cardBorder pb-3 gap-2">
                 <div class="flex items-center gap-3">
                     <div class="w-3 h-3 rounded-full bg-temsah-primary animate-pulse"></div>
                     <h3 class="text-sm font-bold text-white flex items-center gap-2">
                         <i class="fa-solid fa-comments text-temsah-cyan"></i>
-                        <span>غرفة دردشة مجتمع التمساح Muted Chat Room</span>
+                        <span>غرفة دردشة مجتمع التمساح والتيكيتات الخاصة (Discord Style)</span>
                     </h3>
                 </div>
                 
@@ -484,13 +479,13 @@
             </div>
 
             <!-- Chat Messages Log Box -->
-            <div id="chatContainer" class="h-52 overflow-y-auto space-y-3 p-3.5 bg-temsah-bg/95 rounded-xl border border-temsah-cardBorder text-xs scrollbar-thin">
+            <div id="chatContainer" class="h-64 overflow-y-auto space-y-3 p-3.5 bg-temsah-bg/95 rounded-xl border border-temsah-cardBorder text-xs scrollbar-thin">
                 <div class="chat-msg-enter bg-temsah-card p-2.5 rounded-xl border border-temsah-cardBorder">
                     <div class="flex items-center justify-between mb-1">
                         <span class="font-bold text-temsah-primary flex items-center gap-1"><i class="fa-solid fa-shield-halved text-[10px]"></i> نظام التمساح الآلي</span>
                         <span class="text-[9px] text-slate-500">الآن</span>
                     </div>
-                    <p class="text-slate-300 text-xs">أهلاً بك يا حسام في متجر التمساح الرقمي. يمكنك الآن تصفح الحسابات وإتمام عمليات الدفع بكل أمان.</p>
+                    <p class="text-slate-300 text-xs">أهلاً بك يا حسام في متجر التمساح الرقمي. عند اختيار أي منتج واختيار طريقة الدفع، سيتم إنشاء قناة تيكيت خاصة بك وحدك هنا تلقائياً.</p>
                 </div>
             </div>
 
@@ -541,6 +536,101 @@
 
     </main>
 
+    <!-- Modal 1: Checkout & Payment Modal (Matches Image 1) -->
+    <div id="checkoutModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-lg rounded-2xl border border-temsah-cardBorder p-6 relative space-y-6 shadow-2xl">
+            <!-- Close Button -->
+            <button onclick="closeCheckoutModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white text-lg font-bold">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div>
+                <span class="bg-temsah-primary/20 text-temsah-primary text-[10px] font-bold px-2.5 py-1 rounded-full border border-temsah-primary/30">تأكيد طلب الشراء</span>
+                <h3 id="modalProductTitle" class="text-xl font-extrabold text-white mt-2">اسم المنتج هنا</h3>
+                <p id="modalProductPrice" class="text-lg font-black text-temsah-gold mt-1">0 EGP</p>
+            </div>
+
+            <div class="bg-temsah-bg/90 p-4 rounded-xl border border-temsah-cardBorder text-xs text-slate-300 space-y-2">
+                <p id="modalProductDesc">وصف المنتج وتفاصيل الضمان التلقائي تظهر هنا...</p>
+                <p class="text-temsah-primary font-bold flex items-center gap-1.5"><i class="fa-solid fa-shield-halved"></i> محمي بنظام الضمان المباشر والتسليم التلقائي</p>
+            </div>
+
+            <div>
+                <label class="block text-xs font-bold text-slate-300 mb-3">اختر طريقة الدفع المناسبة:</label>
+                <div class="grid grid-cols-3 gap-3">
+                    <!-- Vodafone Cash -->
+                    <label onclick="selectPaymentMethod('vodafone')" id="payOptVodafone" class="cursor-pointer bg-temsah-primary/10 border-2 border-temsah-primary p-3 rounded-xl text-center transition flex flex-col items-center gap-2 shadow-lg shadow-temsah-primary/20">
+                        <input type="radio" name="paymentMethod" value="vodafone" class="accent-emerald-500 hidden" checked>
+                        <i class="fa-solid fa-mobile-screen text-temsah-primary text-base"></i>
+                        <span class="text-xs font-bold text-white">فودافون كاش</span>
+                    </label>
+                    <!-- InstaPay -->
+                    <label onclick="selectPaymentMethod('instapay')" id="payOptInstapay" class="cursor-pointer bg-temsah-bg border border-temsah-cardBorder hover:border-temsah-primary p-3 rounded-xl text-center transition flex flex-col items-center gap-2">
+                        <input type="radio" name="paymentMethod" value="instapay" class="accent-emerald-500 hidden">
+                        <i class="fa-solid fa-building-columns text-temsah-cyan text-base"></i>
+                        <span class="text-xs font-bold text-white">InstaPay</span>
+                    </label>
+                    <!-- Meeza Cards -->
+                    <label onclick="selectPaymentMethod('meeza')" id="payOptMeeza" class="cursor-pointer bg-temsah-bg border border-temsah-cardBorder hover:border-temsah-primary p-3 rounded-xl text-center transition flex flex-col items-center gap-2">
+                        <input type="radio" name="paymentMethod" value="meeza" class="accent-emerald-500 hidden">
+                        <i class="fa-solid fa-credit-card text-temsah-gold text-base"></i>
+                        <span class="text-xs font-bold text-white">كروت ميزة</span>
+                    </label>
+                </div>
+            </div>
+
+            <button onclick="confirmPurchaseAndOpenChannel()" class="w-full bg-temsah-primary hover:bg-temsah-primaryHover text-black font-black py-3.5 rounded-xl text-xs flex items-center justify-center gap-2 glow-btn transition">
+                <i class="fa-solid fa-circle-check text-sm"></i>
+                <span>تأكيد الشراء واستلام بيانات الحساب (فتح تيكيت خاص)</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- Modal 2: Styled Login / Authentication Modal (Matches Image 2 & 3 Dark Theme) -->
+    <div id="authModal" class="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4 hidden">
+        <div class="glass-panel w-full max-w-md rounded-2xl border border-temsah-cardBorder p-6 relative space-y-6 shadow-2xl">
+            <button onclick="toggleAuthModal()" class="absolute top-4 left-4 text-slate-400 hover:text-white text-lg font-bold">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="text-center pb-2 border-b border-temsah-cardBorder">
+                <h3 class="text-xl font-black text-white">تسجيل الدخول لمتجر التمساح</h3>
+                <p class="text-xs text-slate-400 mt-1">الوصول لحسابك ومشترياتك ورصيدك بكل أمان</p>
+            </div>
+
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">اسم المستخدم أو البريد الإلكتروني *</label>
+                    <input type="text" required placeholder="name@example.com" class="w-full bg-temsah-bg border border-temsah-cardBorder rounded-xl p-3 text-xs text-white focus:border-temsah-primary focus:outline-none">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-300 mb-1.5">كلمة السر *</label>
+                    <input type="password" required placeholder="••••••••" class="w-full bg-temsah-bg border border-temsah-cardBorder rounded-xl p-3 text-xs text-white focus:border-temsah-primary focus:outline-none">
+                </div>
+
+                <div class="flex items-center justify-between text-xs text-slate-400">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" class="accent-emerald-500 rounded">
+                        <span>تذكرني</span>
+                    </label>
+                    <a href="#" class="text-temsah-primary hover:underline">نسيت كلمة السر؟</a>
+                </div>
+
+                <button type="submit" class="w-full bg-temsah-primary hover:bg-temsah-primaryHover text-black font-black py-3 rounded-xl text-xs transition glow-btn">
+                    تسجيل الدخول
+                </button>
+            </form>
+
+            <div class="pt-4 border-t border-temsah-cardBorder text-center">
+                <div class="w-12 h-12 mx-auto rounded-full bg-temsah-bg border border-temsah-cardBorder flex items-center justify-center text-slate-400 mb-2">
+                    <i class="fa-solid fa-user-plus text-sm"></i>
+                </div>
+                <p class="text-xs text-slate-400">ليس لديك حساب؟</p>
+                <button onclick="showToast('جاري فتح نافذة التسجيل الجديد...')" class="text-xs font-bold text-temsah-cyan hover:underline mt-1">تسجيل حساب جديد</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="glass-panel border-t border-temsah-cardBorder py-6 text-center text-slate-400 text-xs mt-12">
         <p>© 2026 متجر التمساح (El-Temsah Store) - جميع الحقوق محفوظة.</p>
@@ -585,21 +675,21 @@
 
         // Products Database
         const products = [
-            { id: 1, title: 'أكونت League of Legends Level 30+ (Unranked)', category: 'partition-1', price: 190, oldPrice: 250, rating: 4.9, stock: 14, tag: 'أكثر مبيعاً', img: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500&auto=format&fit=crop&q=60' },
-            { id: 2, title: 'حساب Valorant رانك ذهبي (سيرفر EU)', category: 'partition-1', price: 340, oldPrice: 420, rating: 4.8, stock: 6, tag: 'مميز', img: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=500&auto=format&fit=crop&q=60' },
-            { id: 3, title: 'أكونت لول لفل 1 مع كبسولات لوت ومضمون', category: 'partition-1', price: 95, oldPrice: 130, rating: 4.7, stock: 30, tag: 'فوري', img: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500&auto=format&fit=crop&q=60' },
-            { id: 4, title: 'Xbox Game Pass Ultimate - اشتراك رسمي 3 شهور', category: 'partition-2', price: 220, oldPrice: 300, rating: 5.0, stock: 19, tag: 'رسمي 100%', img: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500&auto=format&fit=crop&q=60' },
-            { id: 5, title: 'Xbox Game Pass PC - شهر واحد (سيرفر مصر)', category: 'partition-2', price: 85, oldPrice: 110, rating: 4.9, stock: 45, tag: 'توصيل فوري', img: 'https://images.unsplash.com/photo-1612287233302-3f1d062fc71d?w=500&auto=format&fit=crop&q=60' },
-            { id: 6, title: 'اشتراك Netflix Premium 4K UHD (شاشة خاصة)', category: 'partition-3', price: 115, oldPrice: 160, rating: 4.8, stock: 12, tag: 'ضمان كامل', img: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=500&auto=format&fit=crop&q=60' },
-            { id: 7, title: 'اشتراك Shahid VIP الرياضية والمسلسلات', category: 'partition-3', price: 90, oldPrice: 140, rating: 4.7, stock: 22, tag: 'عروض اليوم', img: 'https://images.unsplash.com/photo-1585647347382-2234dbb9b4ae?w=500&auto=format&fit=crop&q=60' },
-            { id: 8, title: 'اشتراك Crunchyroll Mega Fan سنوي', category: 'partition-3', price: 150, oldPrice: 210, rating: 4.9, stock: 8, tag: 'أنمي HD', img: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop&q=60' },
-            { id: 9, title: 'تلفيل حسابات Valorant / Placement Games (10 أجيام)', category: 'partition-1', price: 650, oldPrice: 800, rating: 5.0, stock: 5, tag: 'خدمة احترافية', img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60' },
+            { id: 1, title: 'أكونت League of Legends Level 30+ (Unranked)', category: 'partition-1', price: 190, oldPrice: 250, rating: 4.9, stock: 14, tag: 'أكثر مبيعاً', img: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=500&auto=format&fit=crop&q=60', desc: 'حساب لول لفل 30 فريش وغير مربوط مع ضمان كامل واستلام فوري.' },
+            { id: 2, title: 'حساب Valorant رانك ذهبي (سيرفر EU)', category: 'partition-1', price: 340, oldPrice: 420, rating: 4.8, stock: 6, tag: 'مميز', img: 'https://images.unsplash.com/photo-1538481199705-c710c4e965fc?w=500&auto=format&fit=crop&q=60', desc: 'حساب فالورانت سيرفر أوروبا رانك ذهبي مع سكنات مميزة وبطاقة تغيير الأسم.' },
+            { id: 3, title: 'أكونت لول لفل 1 مع كبسولات لوت ومضمون', category: 'partition-1', price: 95, oldPrice: 130, rating: 4.7, stock: 30, tag: 'فوري', img: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=500&auto=format&fit=crop&q=60', desc: 'أكونت لفل 1 بوهيميا جوهرة وكبسولات لوت مضمونة.' },
+            { id: 4, title: 'Xbox Game Pass Ultimate - اشتراك رسمي 3 شهور', category: 'partition-2', price: 220, oldPrice: 300, rating: 5.0, stock: 19, tag: 'رسمي 100%', img: 'https://images.unsplash.com/photo-1607604276583-eef5d076aa5f?w=500&auto=format&fit=crop&q=60', desc: 'اشتراك إكس بوكس ألتيميت للتحميل وألعاب الأبليكيشن والكمبيوتر.' },
+            { id: 5, title: 'Xbox Game Pass PC - شهر واحد (سيرفر مصر)', category: 'partition-2', price: 85, oldPrice: 110, rating: 4.9, stock: 45, tag: 'توصيل فوري', img: 'https://images.unsplash.com/photo-1612287233302-3f1d062fc71d?w=500&auto=format&fit=crop&q=60', desc: 'جيم باس بي سي شهر واحد متوافق مع سيرفرات مصر والشرق الأوسط.' },
+            { id: 6, title: 'اشتراك Netflix Premium 4K UHD (شاشة خاصة)', category: 'partition-3', price: 115, oldPrice: 160, rating: 4.8, stock: 12, tag: 'ضمان كامل', img: 'https://images.unsplash.com/photo-1574375927938-d5a98e8ffe85?w=500&auto=format&fit=crop&q=60', desc: 'شاشة خاصة برمز سري وبجودة 4K UHD مع ضمان طوال فترة الاشتراك.' },
+            { id: 7, title: 'اشتراك Shahid VIP الرياضية والمسلسلات', category: 'partition-3', price: 90, oldPrice: 140, rating: 4.7, stock: 22, tag: 'عروض اليوم', img: 'https://images.unsplash.com/photo-1585647347382-2234dbb9b4ae?w=500&auto=format&fit=crop&q=60', desc: 'اشتراك شاهد في آي بي للمسلسلات والرياضة بجودة عالية.' },
+            { id: 8, title: 'اشتراك Crunchyroll Mega Fan سنوي', category: 'partition-3', price: 150, oldPrice: 210, rating: 4.9, stock: 8, tag: 'أنمي HD', img: 'https://images.unsplash.com/photo-1534447677768-be436bb09401?w=500&auto=format&fit=crop&q=60', desc: 'حساب كرنشيرول ميجا فان لمشاهدة جميع الأنميات بدون إعلانات.' },
+            { id: 9, title: 'تلفيل حسابات Valorant / Placement Games (10 أجيام)', category: 'partition-1', price: 650, oldPrice: 800, rating: 5.0, stock: 5, tag: 'خدمة احترافية', img: 'https://images.unsplash.com/photo-1550745165-9bc0b252726f?w=500&auto=format&fit=crop&q=60', desc: 'تلفيل وفتح الرانك ولعب الـ 10 أجيام الأولى بأمان تام وبدون أي برامج ضارة.' },
         ];
 
         let activeTab = 'all';
         let currentRole = 'buyer';
-        let isSubscriber = true;
-        let soundEnabled = true;
+        let selectedPayment = 'vodafone';
+        let currentSelectedProduct = null;
 
         // Render Products Marketplace
         function renderProducts() {
@@ -644,12 +734,87 @@
                             <span class="text-xs text-slate-500 line-through ml-1.5">${p.oldPrice} ج.م</span>
                             <span class="text-base font-black text-temsah-primary">${p.price} <small class="text-[10px] font-normal">ج.م</small></span>
                         </div>
-                        <button onclick="buyProduct('${p.title}', ${p.price})" class="bg-temsah-primary hover:bg-temsah-primaryHover text-black font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition glow-btn">
+                        <button onclick="openCheckoutModal('${p.title}', ${p.price}, '${p.desc}')" class="bg-temsah-primary hover:bg-temsah-primaryHover text-black font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition glow-btn">
                             <i class="fa-solid fa-cart-shopping"></i> اشتري الآن
                         </button>
                     </div>
                 </div>
             `).join('');
+        }
+
+        // Checkout Modal & Payment Selection
+        function openCheckoutModal(title, price, desc) {
+            currentSelectedProduct = { title, price };
+            document.getElementById('modalProductTitle').innerText = title;
+            document.getElementById('modalProductPrice').innerText = price + ' EGP';
+            document.getElementById('modalProductDesc').innerText = desc;
+            document.getElementById('checkoutModal').classList.remove('hidden');
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').classList.add('hidden');
+        }
+
+        function selectPaymentMethod(method) {
+            selectedPayment = method;
+            ['vodafone', 'instapay', 'meeza'].forEach(m => {
+                const el = document.getElementById('payOpt' + m.charAt(0).toUpperCase() + m.slice(1));
+                if (el) el.className = "cursor-pointer bg-temsah-bg border border-temsah-cardBorder hover:border-temsah-primary p-3 rounded-xl text-center transition flex flex-col items-center gap-2";
+            });
+            const activeEl = document.getElementById('payOpt' + method.charAt(0).toUpperCase() + method.slice(1));
+            if (activeEl) activeEl.className = "cursor-pointer bg-temsah-primary/10 border-2 border-temsah-primary p-3 rounded-xl text-center transition flex flex-col items-center gap-2 shadow-lg shadow-temsah-primary/20";
+        }
+
+        // Confirm purchase & generate Discord-style private ticket/channel
+        function confirmPurchaseAndOpenChannel() {
+            closeCheckoutModal();
+            let paymentInfo = "";
+            let paymentName = "";
+            if (selectedPayment === 'vodafone') {
+                paymentInfo = "01031652348";
+                paymentName = "فودافون كاش (باسم: حسام حسن)";
+            } else if (selectedPayment === 'instapay') {
+                paymentInfo = "01200086093";
+                paymentName = "InstaPay (باسم: ناه)";
+            } else {
+                paymentInfo = "تحويل بنكي / كروت ميزة";
+                paymentName = "كروت ميزة";
+            }
+
+            showToast('تم فتح تيكيت وقناة خاصة بك بنجاح!');
+
+            setTimeout(() => {
+                const container = document.getElementById('chatContainer');
+                const div = document.createElement('div');
+                div.className = "chat-msg-enter bg-temsah-card p-3 rounded-xl border border-temsah-primary";
+                div.innerHTML = `
+                    <div class="flex items-center justify-between mb-1">
+                        <span class="font-bold text-temsah-primary flex items-center gap-1"><i class="fa-solid fa-ticket text-xs"></i> تيكيت دفع خاصة (#ticket-${Math.floor(Math.random()*9000+1000)})</span>
+                        <span class="text-[9px] text-slate-400">الآن (قناة خاصة)</span>
+                    </div>
+                    <p class="text-slate-200 text-xs mb-2">أهلاً بك يا حسام! طلبك لشراء: <strong>${currentSelectedProduct.title}</strong> بمبلغ <strong>${currentSelectedProduct.price} EGP</strong>.</p>
+                    <div class="bg-temsah-bg p-2 rounded border border-temsah-cardBorder mb-2">
+                        <p class="text-temsah-gold text-xs font-bold">طريقة الدفع المختارة: ${paymentName}</p>
+                        <p class="text-white text-xs font-mono font-black mt-1">رقم الحساب / المحفظة: ${paymentInfo}</p>
+                    </div>
+                    <p class="text-slate-300 text-[11px]">برجاء تحويل المبلغ وإرسال سكرين الإيصال هنا، وسيقوم البائع بالرد الفوري لتسليمك الحساب.</p>
+                `;
+                container.appendChild(div);
+                container.scrollTop = container.scrollHeight;
+                container.scrollIntoView({ behavior: 'smooth' });
+            }, 600);
+        }
+
+        // Auth Modal Toggle
+        function toggleAuthModal() {
+            const modal = document.getElementById('authModal');
+            modal.classList.toggle('hidden');
+        }
+
+        function handleAuthSubmit(e) {
+            e.preventDefault();
+            toggleAuthModal();
+            showToast('تم تسجيل الدخول بنجاح! أهلاً بك يا حسام في متجر التمساح.');
         }
 
         // Tab Switching Logic
@@ -697,7 +862,7 @@
                             <span class="text-xs text-slate-500 line-through">${p.oldPrice} ج.م</span>
                             <span class="text-base font-black text-red-400 mr-2">${Math.round(p.price * 0.65)} ج.م</span>
                         </div>
-                        <button onclick="buyProduct('${p.title}', ${Math.round(p.price * 0.65)})" class="bg-red-500 hover:bg-red-600 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs transition">
+                        <button onclick="openCheckoutModal('${p.title}', ${Math.round(p.price * 0.65)}, '${p.desc}')" class="bg-red-500 hover:bg-red-600 text-white font-bold px-3.5 py-1.5 rounded-xl text-xs transition">
                             اغتنم العرض
                         </button>
                     </div>
@@ -719,46 +884,6 @@
                 bBtn.className = "px-3 py-1.5 rounded-lg transition-all font-bold text-slate-400 hover:text-white";
                 showToast('تم التحويل لوضع البائع (تعديل وعرض العروض)');
             }
-        }
-
-        // Profile Dropdown Toggle
-        function toggleProfileDropdown() {
-            const dropdown = document.getElementById('profileDropdown');
-            const arrow = document.getElementById('dropdownArrow');
-            dropdown.classList.toggle('hidden');
-            arrow.classList.toggle('rotate-180');
-        }
-
-        window.addEventListener('click', function(e) {
-            const btn = document.getElementById('userProfileBtn');
-            const menu = document.getElementById('profileDropdown');
-            if (btn && menu && !btn.contains(e.target) && !menu.contains(e.target)) {
-                menu.classList.add('hidden');
-                document.getElementById('dropdownArrow').classList.remove('rotate-180');
-            }
-        });
-
-        // Subscriber Status Toggle
-        function toggleSubscriberStatus() {
-            isSubscriber = !isSubscriber;
-            const badge = document.getElementById('subscriberBadge');
-            const roleBadge = document.getElementById('userRoleBadge');
-            if (isSubscriber) {
-                badge.className = "text-[10px] bg-temsah-gold/20 text-temsah-gold border border-temsah-gold/30 px-2.5 py-1 rounded-lg font-bold";
-                badge.innerHTML = '<i class="fa-solid fa-crown ml-1"></i> مشترك VIP (إمكانية إرسال الرسائل)';
-                roleBadge.innerText = 'عضو مشترك VIP';
-                showToast('تم تفعيل اشتراك الشات بنجاح');
-            } else {
-                badge.className = "text-[10px] bg-red-500/20 text-red-400 border border-red-500/30 px-2.5 py-1 rounded-lg font-bold";
-                badge.innerHTML = '<i class="fa-solid fa-ban ml-1"></i> غير مشترك (موقوف عن الشات)';
-                roleBadge.innerText = 'عضو زائر';
-                showToast('تم إلغاء تفعيل اشتراك الشات');
-            }
-        }
-
-        // Buy Product Action
-        function buyProduct(title, price) {
-            showToast(`تم بدء طلب شراء: ${title} بسعر ${price} ج.م`);
         }
 
         // Custom Request Submission
@@ -792,10 +917,6 @@
         // Chat Room Logic
         function sendChatMessage(e) {
             e.preventDefault();
-            if (!isSubscriber) {
-                showToast('عذراً، يجب تفعيل اشتراك الشات أولاً للإرسال!');
-                return;
-            }
             const input = document.getElementById('chatInput');
             const msg = input.value.trim();
             if (!msg) return;
@@ -829,6 +950,7 @@
         }
 
         // Sound Toggle
+        let soundEnabled = true;
         function toggleSound() {
             soundEnabled = !soundEnabled;
             const icon = document.getElementById('soundIcon');
@@ -844,9 +966,8 @@
             }
         }
 
-        // Language Switcher Stub
         function toggleLanguage() {
-            showToast('اللغة الحالية: العربية (مصر). قريباً دعم الإنجليزية!');
+            showToast('اللغة الحالية: العربية (مصر).');
         }
 
         function openDiscordTicketModal() {
@@ -873,7 +994,8 @@
         // Initial Load
         window.onload = function() {
             renderProducts();
-            console.log("El-Temsah Store Full Code Loaded Successfully!");
+            console.log("El-Temsah Store with Discord-Style Tickets Loaded Successfully!");
         };
     </script>
 </body>
+</html>
