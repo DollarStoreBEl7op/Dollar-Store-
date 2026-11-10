@@ -1,210 +1,3 @@
-/**
- * DOLLAR STORE - Core Backend Server
- * Built for High Scalability, Live Escrow Tickets, & Admin-Protected Trade Hub
- */
-
-const express = require('express');
-const http = require('http');
-const { Server } = require('socket.io');
-const cors = require('cors');
-
-const app = express();
-app.use(cors());
-app.use(express.json());
-
-const server = http.createServer(app);
-const io = new Server(server, {
-    cors: { origin: "*", methods: ["GET", "POST"] }
-});
-
-// ==========================================
-// 1. IN-MEMORY DATA STORES (Mock Database Models)
-// ==========================================
-const USERS = new Map(); // id -> user profile & wallet
-const TICKETS = new Map(); // ticketId -> ticket details
-const TRADES = new Map(); // tradeId -> trade state & active participants
-
-// Registered Stats & Live Counters
-let totalSearches = 45210;
-let registeredCount = 3890;
-
-// Anti-Offsite Trading Filter (منع التسريب والروابط)
-const BANNED_PATTERNS = /(http|https|www|\.com|\.gg|discord\.gg|wa\.me|01[0-9]{9})/gi;
-
-// ==========================================
-// 2. REST API ENDPOINTS
-// ==========================================
-
-// GET: Server Stats & Active Counters
-app.get('/api/stats', (req, res) => {
-    res.json({
-        onlineUsers: io.engine.clientsCount || 1,
-        registeredAccounts: registeredCount,
-        totalSearches: totalSearches,
-        escrowVaultBalance: 14250 // EGP
-    });
-});
-
-// POST: Register / Login Profile
-app.post('/api/auth/login', (req, res) => {
-    const { username, role } = req.body; // role: 'buyer' | 'seller' | 'admin'
-    if (!username) return res.status(400).json({ error: 'اسم المستخدم مطلوب' });
-
-    const userId = username.toLowerCase().trim();
-    if (!USERS.has(userId)) {
-        USERS.set(userId, {
-            id: userId,
-            username,
-            role: role || 'buyer',
-            walletBalance: 0,
-            pendingPayouts: 0,
-            reviews: []
-        });
-        registeredCount++;
-    }
-
-    res.json({ success: true, user: USERS.get(userId) });
-});
-
-// POST: Create Escrow Purchase Ticket
-app.post('/api/tickets/create', (req, res) => {
-    const { buyerId, sellerId, itemTitle, price } = req.body;
-    const ticketId = 'TCK-' + Math.floor(100000 + Math.random() * 900000);
-
-    const newTicket = {
-        id: ticketId,
-        buyerId,
-        sellerId,
-        itemTitle,
-        price,
-        status: 'ACTIVE', // ACTIVE | COMPLETED | FROZEN
-        createdAt: new Date(),
-        messages: [{
-            sender: 'SYSTEM_BOT',
-            text: `[SYSTEM] تم فتح التيكيت بنجاح. المبلغ (${price} EGP) مٌحتجز آلياً في صندوق وساطة Dollar Store لحين تأكيد التسليم.`,
-            timestamp: new Date()
-        }]
-    };
-
-    TICKETS.set(ticketId, newTicket);
-    io.emit('ticket_updated', newTicket);
-
-    res.json({ success: true, ticket: newTicket });
-});
-
-// POST: Mandatory Review Submission
-app.post('/api/tickets/review', (req, res) => {
-    const { ticketId, stars, reviewText, sellerId } = req.body;
-    
-    if (!reviewText || !stars) {
-        return res.status(400).json({ error: 'التقييم اللغوي والنجوم إجباري لاستكمال العملية' });
-    }
-
-    const seller = USERS.get(sellerId.toLowerCase());
-    if (seller) {
-        seller.reviews.push({
-            stars: Number(stars),
-            text: reviewText,
-            date: new Date()
-        });
-        // Release funds to seller's pending wallet
-        const ticket = TICKETS.get(ticketId);
-        if (ticket) {
-            seller.walletBalance += ticket.price;
-            ticket.status = 'COMPLETED';
-        }
-    }
-
-    res.json({ success: true, message: 'تم تسجيل التقييم والإفراج عن المستحقات' });
-});
-
-// ==========================================
-// 3. REAL-TIME WEBSOCKETS HUB (Escrow & Trade)
-// ==========================================
-
-io.on('connection', (socket) => {
-    console.log(`[RETRO CONNECT] Socket Joined: ${socket.id}`);
-
-    // Join Ticket Room
-    socket.on('join_ticket', ({ ticketId, username }) => {
-        socket.join(ticketId);
-        console.log(`User ${username} joined Ticket ${ticketId}`);
-    });
-
-    // Send Ticket Message with Anti-Abuse Shield
-    socket.on('send_ticket_message', ({ ticketId, sender, text }) => {
-        const ticket = TICKETS.get(ticketId);
-        if (!ticket) return;
-
-        if (ticket.status === 'FROZEN') {
-            socket.emit('error_message', '⚠️ هذه التيكيت مجمدة حالياً بواسطة الأدمن للفصل في النزاع.');
-            return;
-        }
-
-        // Anti-Offsite Check
-        if (BANNED_PATTERNS.test(text)) {
-            socket.emit('anti_abuse_warning', '⚠️ تحذير Dollar Store: يمنع كتابة الروابط الخارجية أو أرقام الهواتف لحماية حقك!');
-            return;
-        }
-
-        const msg = { sender, text, timestamp: new Date() };
-        ticket.messages.push(msg);
-        io.to(ticketId).emit('receive_ticket_message', msg);
-    });
-
-    // Admin Intervention (Freeze Ticket)
-    socket.on('admin_freeze_ticket', ({ ticketId }) => {
-        const ticket = TICKETS.get(ticketId);
-        if (ticket) {
-            ticket.status = 'FROZEN';
-            const sysMsg = {
-                sender: 'ADMIN_HOSSAM',
-                text: '🔒 تم تجميد التيكيت والتدخل المباشر بواسطة الأدمن (حسام حسن). تم إيقاف المراسلات لحين حسم النزاع.',
-                timestamp: new Date()
-            };
-            ticket.messages.push(sysMsg);
-            io.to(ticketId).emit('receive_ticket_message', sysMsg);
-            io.emit('ticket_updated', ticket);
-        }
-    });
-
-    // TRADE HUB (الشرط الخاص: لا يتم التريد إلا بحضور الأدمن الإجباري)
-    socket.on('join_trade_room', ({ tradeId, username, role }) => {
-        socket.join(tradeId);
-        
-        let trade = TRADES.get(tradeId) || {
-            id: tradeId,
-            participants: [],
-            adminPresent: false,
-            status: 'WAITING_FOR_ADMIN'
-        };
-
-        if (!trade.participants.includes(username)) {
-            trade.participants.push(username);
-        }
-
-        if (role === 'admin' || username.toLowerCase().includes('hossam')) {
-            trade.adminPresent = true;
-            trade.status = 'ADMIN_ACTIVE';
-        }
-
-        TRADES.set(tradeId, trade);
-        io.to(tradeId).emit('trade_state_changed', trade);
-    });
-
-    socket.on('disconnect', () => {
-        console.log(`[RETRO DISCONNECT] Socket Left: ${socket.id}`);
-    });
-});
-
-const PORT = process.env.PORT || 5000;
-server.listen(PORT, () => {
-    console.log(`🎮 DOLLAR STORE Engine Live on Port http://localhost:${PORT}`);
-});
-🎨 المرحلة الثانية: واجهة العرض الرسومية المتكاملة (90s Retro Arcade UI)
-الآن، اربط ملف index.html مع السيرفر أعلاه للعمل بنظام 90s Arcade المتكامل الشامل لجميع الوظائف والخيارات:
-
-HTML
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
@@ -216,8 +9,6 @@ HTML
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Pixel & Arabic Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
-    <!-- Socket.io Client Engine -->
-    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -366,7 +157,7 @@ HTML
                     <h4 class="font-bold text-sm text-white">حساب League of Legends - Level 30 Unranked</h4>
                     <div class="flex justify-between items-center pt-2 border-t border-arcade-border">
                         <span class="font-pixel text-xs text-arcade-gold">150 EGP</span>
-                        <button onclick="buyProduct('Dollar Store Official', 'League of Legends Level 30', 150)" class="arcade-btn !text-[9px] !py-1.5">شراء عبر الوساطة</button>
+                        <button onclick="openTicketsModal()" class="arcade-btn !text-[9px] !py-1.5">شراء عبر الوساطة</button>
                     </div>
                 </div>
             </div>
@@ -395,15 +186,15 @@ HTML
             </div>
         </div>
 
-        <!-- SECTION 3: TRADE HUB (حضور الأدمن الإجباري) -->
+        <!-- SECTION 3: TRADE HUB -->
         <div id="sectionTrade" class="hidden space-y-4">
             <div class="arcade-box p-6 space-y-4">
                 <h3 class="font-pixel text-xs text-arcade-gold"><i class="fa-solid fa-handshake"></i> غرفة المقايضة والـ TRADE (شرط حضور الأدمن)</h3>
-                <p class="text-xs text-slate-300">لا يتم تنفيذ أي عملية مقايضة إلا في حالة وجود حالة الأدمن: <strong class="text-arcade-green font-pixel">ACTIVE</strong>.</p>
+                <p class="text-xs text-slate-300">لا يتم تنفيذ أي عملية مقايضة إلا بحضور الأدمن (حسام حسن) للوساطة والتأكيد.</p>
                 
                 <div id="tradeChatBox" class="bg-black border-2 border-arcade-border p-4 rounded h-64 overflow-y-auto space-y-2 text-xs">
                     <div class="bg-arcade-panel p-2 border border-arcade-border text-arcade-gold font-pixel text-[9px]">
-                        [SYSTEM]: جاري انتظار دخول الأدمن (حسام حسن) للغرفة للبدء...
+                        [SYSTEM]: غرف الشات مع الأدمن جاهزة للبدء...
                     </div>
                 </div>
             </div>
@@ -444,8 +235,6 @@ HTML
     </div>
 
     <script>
-        const socket = io('http://localhost:5000'); // سيرفر الخلفية المحلي
-
         function switchTab(tab) {
             document.getElementById('sectionHome').classList.add('hidden');
             document.getElementById('sectionGames').classList.add('hidden');
@@ -454,30 +243,13 @@ HTML
 
             if(tab === 'home') document.getElementById('sectionHome').classList.remove('hidden');
             if(tab === 'games') document.getElementById('sectionGames').classList.remove('hidden');
-            if(tab === 'trade') {
-                document.getElementById('sectionTrade').classList.remove('hidden');
-                socket.emit('join_trade_room', { tradeId: 'TRADE-MAIN', username: 'GuestUser', role: 'buyer' });
-            }
+            if(tab === 'trade') document.getElementById('sectionTrade').classList.remove('hidden');
         }
 
         function openGameHub(gameName) {
             document.getElementById('sectionGames').classList.add('hidden');
             document.getElementById('sectionGameStore').classList.remove('hidden');
             document.getElementById('gameStoreTitle').innerText = `أوردرات لعبة: ${gameName}`;
-        }
-
-        function buyProduct(seller, title, price) {
-            fetch('http://localhost:5000/api/tickets/create', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ buyerId: 'User1', sellerId: seller, itemTitle: title, price: price })
-            })
-            .then(res => res.json())
-            .then(data => {
-                alert(`تم إنشاء التيكيت بنجاح رقم: ${data.ticket.id}`);
-                openTicketsModal();
-            })
-            .catch(() => openTicketsModal());
         }
 
         function toggleAdminPanel() { document.getElementById('adminSidebar').classList.toggle('translate-x-full'); }
