@@ -50,11 +50,10 @@
     <div class="bg-[#07090d] border-b border-eldorado-border py-1.5 px-4 text-xs flex justify-between items-center text-slate-400">
         <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-eldorado-accent animate-pulse"></span>
-            <span class="text-white font-bold text-[11px]">Dollar Store Escrow & Referral Engine Active</span>
+            <span class="text-white font-bold text-[11px]">Dollar Store Escrow & DB Live</span>
         </div>
         <div class="flex items-center gap-4 text-[11px]">
-            <span>أونلاين الآن: <strong class="text-eldorado-accent font-mono">184</strong></span>
-            <span>نظام الإحالة: <strong class="text-eldorado-gold font-mono">2.5% للمزكي + 2.5% للمنصة</strong></span>
+            <span>حالة القاعدة: <strong id="dbStatus" class="text-eldorado-accent font-mono">متصل متزامن</strong></span>
         </div>
     </div>
 
@@ -77,144 +76,106 @@
             </div>
 
             <div class="flex items-center gap-2">
-                <button onclick="toggleAdminPanel()" class="bg-eldorado-card hover:bg-eldorado-border text-eldorado-gold border border-eldorado-gold/40 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-user-shield"></i> <span class="hidden sm:inline">الإدارة والأرباح</span>
+                <button onclick="openVendorModal()" class="bg-eldorado-accent text-black font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 hover:bg-emerald-400 transition">
+                    <i class="fa-solid fa-user-plus"></i> <span class="hidden sm:inline">تسجيل كبائع</span>
                 </button>
-                <button onclick="openTicketsModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-ticket"></i> التيكيتات
+                <button onclick="openAddOfferModal()" class="bg-eldorado-gold text-black font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 hover:bg-amber-400 transition">
+                    <i class="fa-solid fa-plus"></i> <span class="hidden sm:inline">إضافة عرض</span>
                 </button>
             </div>
         </div>
 
-        <!-- Sub Navigation Categories -->
+        <!-- Navigation Tabs -->
         <div class="max-w-7xl mx-auto flex items-center gap-6 mt-3 pt-2 border-t border-eldorado-border/40 text-xs text-slate-300 overflow-x-auto">
-            <button onclick="switchTab('home')" class="hover:text-eldorado-accent font-bold flex items-center gap-1 text-eldorado-accent"><i class="fa-solid fa-fire"></i> الشائع (Popular)</button>
-            <button onclick="switchTab('games')" class="hover:text-eldorado-accent font-bold flex items-center gap-1"><i class="fa-solid fa-user-gear"></i> الحسابات (Accounts)</button>
-            <button onclick="switchTab('referral')" class="hover:text-eldorado-gold font-bold flex items-center gap-1 text-eldorado-gold"><i class="fa-solid fa-users"></i> برنامج الشركاء والإحالة</button>
-            <button onclick="switchTab('trade')" class="hover:text-eldorado-gold font-bold flex items-center gap-1 text-eldorado-gold"><i class="fa-solid fa-handshake"></i> شات الـ Trade</button>
+            <button onclick="switchTab('home')" class="hover:text-eldorado-accent font-bold flex items-center gap-1 text-eldorado-accent"><i class="fa-solid fa-fire"></i> السوق العام</button>
+            <button onclick="switchTab('referral')" class="hover:text-eldorado-gold font-bold flex items-center gap-1 text-eldorado-gold"><i class="fa-solid fa-users"></i> برنامج الإحالة (2.5%)</button>
+            <button onclick="switchTab('trade')" class="hover:text-eldorado-purple font-bold flex items-center gap-1"><i class="fa-solid fa-handshake"></i> شات الـ Trade</button>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-8">
 
-        <!-- Banner Actions -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div onclick="switchTab('home')" class="eldorado-card p-4 rounded-2xl cursor-pointer flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-eldorado-accent/20 text-eldorado-accent flex items-center justify-center"><i class="fa-solid fa-store"></i></div>
-                <div><h3 class="font-bold text-xs text-white">السوق العام المباشر</h3><p class="text-[10px] text-slate-400">تصفح كافة العروض</p></div>
-            </div>
-            <div onclick="switchTab('referral')" class="eldorado-card p-4 rounded-2xl cursor-pointer flex items-center gap-3 border-eldorado-gold/40">
-                <div class="w-10 h-10 rounded-lg bg-eldorado-gold/20 text-eldorado-gold flex items-center justify-center"><i class="fa-solid fa-users-rectangle"></i></div>
-                <div><h3 class="font-bold text-xs text-white">برنامج إحالة البائعين (2.5%)</h3><p class="text-[10px] text-slate-400">ادعُ بائعين واكسب من مبيعاتهم</p></div>
-            </div>
-            <div onclick="switchTab('trade')" class="eldorado-card p-4 rounded-2xl cursor-pointer flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-eldorado-purple/20 text-eldorado-purple flex items-center justify-center"><i class="fa-solid fa-handshake"></i></div>
-                <div><h3 class="font-bold text-xs text-white">شات المقايضة (Trade Hub)</h3><p class="text-[10px] text-slate-400">بحضور الأدمن الإجباري</p></div>
-            </div>
-        </div>
-
         <!-- SECTION 1: HOME MARKET -->
         <div id="sectionHome" class="space-y-4">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-fire text-eldorado-gold"></i> العروض الشائعة (Popular Offers)</h2>
-            
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                <div class="eldorado-card p-3 rounded-xl space-y-2">
-                    <div class="h-32 bg-slate-900 rounded-lg flex items-center justify-center relative overflow-hidden">
-                        <i class="fa-solid fa-shield-halved text-4xl text-blue-400"></i>
-                        <span class="absolute top-2 right-2 bg-blue-500/80 text-white text-[9px] px-1.5 py-0.5 rounded">League of Legends</span>
-                    </div>
-                    <h4 class="text-xs font-bold text-white truncate">LoL Unranked Level 30 Account</h4>
-                    <p class="text-[10px] text-slate-400">أول 30 بيعة بدون أي عمولة للبائع!</p>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldorado-border">
-                        <span class="text-xs font-bold text-eldorado-accent font-mono">150 EGP</span>
-                        <button onclick="openTicketsModal()" class="bg-eldorado-accent text-black font-bold px-2.5 py-1 rounded-lg text-[10px]">شراء</button>
-                    </div>
-                </div>
+            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-store text-eldorado-accent"></i> جميع العروض المتاحة بالسوق</h2>
+            <div id="offersContainer" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+                <div class="col-span-full text-center text-slate-400 text-xs py-8">جاري تحميل العروض من قاعدة البيانات...</div>
             </div>
         </div>
 
-        <!-- SECTION: VENDOR REFERRAL DASHBOARD -->
+        <!-- SECTION 2: VENDOR REFERRAL DASHBOARD -->
         <div id="sectionReferral" class="hidden space-y-4">
             <div class="eldorado-card p-6 rounded-2xl space-y-4 border border-eldorado-gold/40">
                 <h3 class="text-sm font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-users text-eldorado-gold"></i> نظام إحالة البائعين (اكسب 2.5% مدى الحياة)
+                    <i class="fa-solid fa-users text-eldorado-gold"></i> نظام إحالة البائعين (2.5% من الأرباح)
                 </h3>
                 <p class="text-xs text-slate-300">
-                    شارك رابط الإحالة الخاص بك مع أصدقائك البائعين. عندما يسجلون عبر رابطك ويتخطوا أول 30 بيعة، سيتم خصم 5% عمولة من مبيعاتهم: 
-                    <strong class="text-eldorado-accent">2.5% تضاف لمحفظتك أنت مباشرة</strong>، و2.5% للمنصة!
+                    شارك رابط الإحالة الخاص بك. البائع الذي يسجل من خلالك، سيكسبك 2.5% من مبيعاته بعد البيعة الـ 30!
                 </p>
 
                 <div class="bg-black/60 p-4 rounded-xl border border-eldorado-border space-y-3">
                     <label class="text-xs text-slate-400 block">رابط الإحالة الخاص بك:</label>
                     <div class="flex gap-2">
-                        <input type="text" id="referralLink" readonly value="https://asdhossamhassan11-lgtm.github.io/Dollar-Store-/?ref=hossam_admin" class="w-full bg-[#151a23] border border-eldorado-border rounded-xl p-2.5 text-xs text-eldorado-accent font-mono focus:outline-none">
+                        <input type="text" id="referralLink" readonly value="" class="w-full bg-[#151a23] border border-eldorado-border rounded-xl p-2.5 text-xs text-eldorado-accent font-mono focus:outline-none">
                         <button onclick="copyReferralLink()" class="bg-eldorado-gold text-black font-bold px-4 py-2 rounded-xl text-xs hover:bg-amber-400 transition">نسخ الرابط</button>
                     </div>
                 </div>
-
-                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-center text-xs">
-                    <div class="bg-slate-900/60 p-3 rounded-xl border border-eldorado-border">
-                        <span class="text-slate-400 block mb-1">عدد البائعين المدعوين</span>
-                        <strong class="text-white text-base font-mono">0 بائع</strong>
-                    </div>
-                    <div class="bg-slate-900/60 p-3 rounded-xl border border-eldorado-border">
-                        <span class="text-slate-400 block mb-1">نسبة أرباحك من الإحالة</span>
-                        <strong class="text-eldorado-accent text-base font-mono">2.5%</strong>
-                    </div>
-                    <div class="bg-slate-900/60 p-3 rounded-xl border border-eldorado-border">
-                        <span class="text-slate-400 block mb-1">إجمالي أرباح الإحالة</span>
-                        <strong class="text-eldorado-gold text-base font-mono">0.00 EGP</strong>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SECTION 2: GAMES HUB -->
-        <div id="sectionGames" class="hidden space-y-4">
-            <h2 class="text-sm font-bold text-white">تصفح حسب اللعبة:</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div onclick="openGameHub('League of Legends')" class="eldorado-card p-4 rounded-xl text-center cursor-pointer space-y-2"><i class="fa-solid fa-shield-halved text-3xl text-blue-400"></i><p class="text-xs font-bold text-white">League of Legends</p></div>
-                <div onclick="openGameHub('Valorant')" class="eldorado-card p-4 rounded-xl text-center cursor-pointer space-y-2"><i class="fa-solid fa-crosshairs text-3xl text-red-400"></i><p class="text-xs font-bold text-white">Valorant</p></div>
             </div>
         </div>
 
         <!-- SECTION 3: TRADE HUB -->
         <div id="sectionTrade" class="hidden space-y-4">
-            <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-eldorado-gold/40">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-handshake text-eldorado-gold"></i> غرفة شات الـ TRADE (بإشراف حسام حسن)</h3>
-                <p class="text-xs text-slate-400">شات ثلاثي آمن لمبادلة الحسابات بحضور الأدمن وتأكيده.</p>
+            <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-eldorado-purple/40">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-handshake text-eldorado-purple"></i> غرفة شات الـ TRADE (إشراف الأدمن)</h3>
+                <p class="text-xs text-slate-400">شات ثلاثة أطراف مبادلة آمن للخدمات والحسابات.</p>
                 <div class="bg-black p-3 rounded-xl h-44 overflow-y-auto space-y-2 text-xs border border-eldorado-border">
-                    <div class="text-eldorado-gold"><strong>ADMIN (حسام):</strong> غرفة التريد مفتوحة، تفضلوا بتأكيد بيانات الحسابين.</div>
+                    <div class="text-eldorado-gold"><strong>ADMIN:</strong> مرحباً بكم في غرفة مبادلة الحسابات الآمنة!</div>
                 </div>
-            </div>
-        </div>
-
-        <!-- GAME SPECIFIC HUB VIEW -->
-        <div id="sectionGameStore" class="hidden space-y-4">
-            <div class="eldorado-card p-4 rounded-xl flex justify-between items-center">
-                <h2 id="gameStoreTitle" class="text-sm font-bold text-white">أوردرات اللعبة</h2>
-                <button onclick="switchTab('games')" class="text-xs text-eldorado-cyan">عودة</button>
             </div>
         </div>
 
     </main>
 
-    <!-- ADMIN SIDEBAR -->
-    <div id="adminSidebar" class="fixed top-0 right-0 h-full w-80 bg-[#151a23] border-l border-eldorado-border z-50 transform translate-x-full transition-transform duration-200 flex flex-col p-4 space-y-4 shadow-2xl">
-        <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
-            <h3 class="text-xs font-bold text-eldorado-gold"><i class="fa-solid fa-user-shield"></i> لوحة الأدمن والعمولات</h3>
-            <button onclick="toggleAdminPanel()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
+    <!-- MODAL 1: VENDOR SIGNUP -->
+    <div id="vendorModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="eldorado-card w-full max-w-md p-6 rounded-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
+                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-user-plus text-eldorado-accent"></i> تسجيل بائع جديد</h3>
+                <button onclick="closeVendorModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="text-slate-300 block mb-1">اسم البائع / المتجر:</label>
+                    <input type="text" id="vendorUsername" placeholder="مثال: Ahmed_Gamer" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white focus:outline-none focus:border-eldorado-accent">
+                </div>
+                <div>
+                    <label class="text-slate-300 block mb-1">رمز المُحيل (Referred By):</label>
+                    <input type="text" id="vendorReferredBy" readonly placeholder="لا يوجد مُحيل" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-slate-400 focus:outline-none">
+                </div>
+                <button onclick="submitVendorSignup()" class="w-full bg-eldorado-accent text-black font-bold py-2.5 rounded-xl hover:bg-emerald-400 transition">إنشاء الحساب للبائع</button>
+            </div>
         </div>
-        <p class="text-xs text-slate-300">مراقبة الـ 30 بيعة المجانية، وتوزيع الـ 2.5% للبائعين المُحيلين تلقائياً.</p>
     </div>
 
-    <!-- TICKETS MODAL -->
-    <div id="ticketsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="eldorado-card w-full max-w-lg p-5 rounded-2xl space-y-4 text-center">
-            <h3 class="text-sm font-bold text-white">تيكيت الوساطة والشات الفوري</h3>
-            <p class="text-xs text-slate-300">استلم الحساب بأمان وأكد تقييمك الإجباري بعد الفحص.</p>
-            <button onclick="closeTicketsModal()" class="bg-eldorado-accent text-black font-bold px-4 py-2 rounded-xl text-xs">إغلاق</button>
+    <!-- MODAL 2: ADD OFFER -->
+    <div id="addOfferModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="eldorado-card w-full max-w-md p-6 rounded-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
+                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-cart-plus text-eldorado-gold"></i> إضافة عرض جديد</h3>
+                <button onclick="closeAddOfferModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <div>
+                    <label class="text-slate-300 block mb-1">اسم اللعبة / الخدمة:</label>
+                    <input type="text" id="offerGameName" placeholder="مثال: League of Legends Level 30" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white focus:outline-none focus:border-eldorado-gold">
+                </div>
+                <div>
+                    <label class="text-slate-300 block mb-1">السعر (بالجنيه/الدولار):</label>
+                    <input type="number" id="offerAmount" placeholder="150" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white focus:outline-none focus:border-eldorado-gold">
+                </div>
+                <button onclick="submitNewOffer()" class="w-full bg-eldorado-gold text-black font-bold py-2.5 rounded-xl hover:bg-amber-400 transition">نشر العرض بالسوق</button>
+            </div>
         </div>
     </div>
 
@@ -224,41 +185,114 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_2HPQNM4LN_XHKizBIORz_A_qhLRF...';
 
         let supabaseClient = null;
+        let currentRef = null;
+
         try {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-            console.log("Supabase Connected Successfully!");
         } catch (e) {
             console.error("DB Init Error:", e);
         }
 
+        window.onload = function() {
+            // التقاط كود الإحالة من الرابط
+            const urlParams = new URLSearchParams(window.location.search);
+            currentRef = urlParams.get('ref') || 'admin';
+            document.getElementById('vendorReferredBy').value = currentRef;
+
+            // توليد رابط إحالة جديد
+            const baseUrl = window.location.href.split('?')[0];
+            document.getElementById('referralLink').value = `${baseUrl}?ref=my_seller_id`;
+
+            loadOffers();
+        };
+
         function switchTab(tab) {
             document.getElementById('sectionHome').classList.add('hidden');
-            document.getElementById('sectionGames').classList.add('hidden');
             document.getElementById('sectionReferral').classList.add('hidden');
             document.getElementById('sectionTrade').classList.add('hidden');
-            document.getElementById('sectionGameStore').classList.add('hidden');
 
             if(tab === 'home') document.getElementById('sectionHome').classList.remove('hidden');
-            if(tab === 'games') document.getElementById('sectionGames').classList.remove('hidden');
             if(tab === 'referral') document.getElementById('sectionReferral').classList.remove('hidden');
             if(tab === 'trade') document.getElementById('sectionTrade').classList.remove('hidden');
         }
 
-        function openGameHub(gameName) {
-            document.getElementById('sectionGames').classList.add('hidden');
-            document.getElementById('sectionGameStore').classList.remove('hidden');
-            document.getElementById('gameStoreTitle').innerText = `أوردرات لعبة: ${gameName}`;
+        function openVendorModal() { document.getElementById('vendorModal').classList.remove('hidden'); }
+        function closeVendorModal() { document.getElementById('vendorModal').classList.add('hidden'); }
+        function openAddOfferModal() { document.getElementById('addOfferModal').classList.remove('hidden'); }
+        function closeAddOfferModal() { document.getElementById('addOfferModal').classList.add('hidden'); }
+
+        // تسجيل بائع في Supabase
+        async function submitVendorSignup() {
+            const username = document.getElementById('vendorUsername').value.trim();
+            if(!username) return alert("يرجى كتابة اسم البائع!");
+
+            const { data, error } = await supabaseClient
+                .from('vendors')
+                .insert([{ username: username, referred_by: currentRef }]);
+
+            if(error) {
+                alert("خطأ أثناء التسجيل: " + error.message);
+            } else {
+                alert(`تم تسجيل البائع (${username}) بنجاح!`);
+                closeVendorModal();
+            }
         }
 
-        function toggleAdminPanel() { document.getElementById('adminSidebar').classList.toggle('translate-x-full'); }
-        function openTicketsModal() { document.getElementById('ticketsModal').classList.remove('hidden'); }
-        function closeTicketsModal() { document.getElementById('ticketsModal').classList.add('hidden'); }
+        // إضافة عرض جديد في Supabase
+        async function submitNewOffer() {
+            const gameName = document.getElementById('offerGameName').value.trim();
+            const amount = document.getElementById('offerAmount').value.trim();
+
+            if(!gameName || !amount) return alert("يرجى ملء جميع الحقول!");
+
+            const { data, error } = await supabaseClient
+                .from('orders')
+                .insert([{ game_name: gameName, amount: parseFloat(amount), status: 'active' }]);
+
+            if(error) {
+                alert("خطأ أثناء إضافة العرض: " + error.message);
+            } else {
+                alert("تم إدراج العرض بنجاح في السوق!");
+                closeAddOfferModal();
+                loadOffers();
+            }
+        }
+
+        // جلب العروض من Supabase
+        async function loadOffers() {
+            const container = document.getElementById('offersContainer');
+            const { data: orders, error } = await supabaseClient.from('orders').select('*');
+
+            if(error || !orders || orders.length === 0) {
+                container.innerHTML = `
+                    <div class="col-span-full text-center text-slate-500 text-xs py-8">
+                        لا يوجد عروض مضافة حالياً. اضغط على "إضافة عرض" لنشر أول عرض!
+                    </div>`;
+                return;
+            }
+
+            container.innerHTML = '';
+            orders.forEach(item => {
+                container.innerHTML += `
+                    <div class="eldorado-card p-3 rounded-xl space-y-2">
+                        <div class="h-28 bg-slate-900 rounded-lg flex items-center justify-center text-center p-2">
+                            <i class="fa-solid fa-gamepad text-3xl text-eldorado-cyan"></i>
+                        </div>
+                        <h4 class="text-xs font-bold text-white truncate">${item.game_name}</h4>
+                        <p class="text-[10px] text-slate-400">حالة العرض: ${item.status}</p>
+                        <div class="flex justify-between items-center pt-2 border-t border-eldorado-border">
+                            <span class="text-xs font-bold text-eldorado-accent font-mono">${item.amount} EGP</span>
+                            <button onclick="alert('تم تنفيذ طلب الشراء عبر الوساطة!')" class="bg-eldorado-accent text-black font-bold px-2.5 py-1 rounded-lg text-[10px]">شراء</button>
+                        </div>
+                    </div>`;
+            });
+        }
 
         function copyReferralLink() {
             const copyText = document.getElementById("referralLink");
             copyText.select();
             navigator.clipboard.writeText(copyText.value);
-            alert("تم نسخ رابط الإحالة بنجاح! شاركه مع أصدقائك البائعين.");
+            alert("تم نسخ رابط الإحالة بنجاح!");
         }
     </script>
 </body>
