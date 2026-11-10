@@ -91,7 +91,7 @@
             <button onclick="switchTab('home')" class="hover:text-eldorado-accent font-bold flex items-center gap-1 text-eldorado-accent"><i class="fa-solid fa-fire"></i> الشائع (Popular)</button>
             <button onclick="switchTab('games')" class="hover:text-eldorado-accent font-bold flex items-center gap-1"><i class="fa-solid fa-user-gear"></i> الحسابات (Accounts)</button>
             <button onclick="switchTab('referral')" class="hover:text-eldorado-gold font-bold flex items-center gap-1 text-eldorado-gold"><i class="fa-solid fa-users"></i> برنامج الشركاء والإحالة</button>
-            <button onclick="switchTab('trade')" class="hover:text-eldorado-gold font-bold flex items-center gap-1"><i class="fa-solid fa-handshake"></i> شات الـ Trade</button>
+            <button onclick="switchTab('trade')" class="hover:text-eldorado-gold font-bold flex items-center gap-1 text-eldorado-gold"><i class="fa-solid fa-handshake"></i> شات الـ Trade</button>
         </div>
     </header>
 
@@ -220,13 +220,13 @@
 
     <!-- SCRIPT LOGIC -->
     <script>
-        // ضع هنا رابط ومفتاح Supabase الخاص بك لاحقاً
-        const SUPABASE_URL = 'https://afzyerpeoirbcxwymsqg.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'ضع_مفتاح_الـ_anon_هنا';
+        const SUPABASE_URL = 'https://afzyerpeoirbcxwymsqg.supabase.co';
+        const SUPABASE_ANON_KEY = 'sb_publishable_2HPQNM4LN_XHKizBIORz_A_qhLRF...';
 
         let supabaseClient = null;
         try {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+            console.log("Supabase Connected Successfully!");
         } catch (e) {
             console.error("DB Init Error:", e);
         }
