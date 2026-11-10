@@ -1,15 +1,223 @@
+/**
+ * DOLLAR STORE - Core Backend Server
+ * Built for High Scalability, Live Escrow Tickets, & Admin-Protected Trade Hub
+ */
+
+const express = require('express');
+const http = require('http');
+const { Server } = require('socket.io');
+const cors = require('cors');
+
+const app = express();
+app.use(cors());
+app.use(express.json());
+
+const server = http.createServer(app);
+const io = new Server(server, {
+    cors: { origin: "*", methods: ["GET", "POST"] }
+});
+
+// ==========================================
+// 1. IN-MEMORY DATA STORES (Mock Database Models)
+// ==========================================
+const USERS = new Map(); // id -> user profile & wallet
+const TICKETS = new Map(); // ticketId -> ticket details
+const TRADES = new Map(); // tradeId -> trade state & active participants
+
+// Registered Stats & Live Counters
+let totalSearches = 45210;
+let registeredCount = 3890;
+
+// Anti-Offsite Trading Filter (منع التسريب والروابط)
+const BANNED_PATTERNS = /(http|https|www|\.com|\.gg|discord\.gg|wa\.me|01[0-9]{9})/gi;
+
+// ==========================================
+// 2. REST API ENDPOINTS
+// ==========================================
+
+// GET: Server Stats & Active Counters
+app.get('/api/stats', (req, res) => {
+    res.json({
+        onlineUsers: io.engine.clientsCount || 1,
+        registeredAccounts: registeredCount,
+        totalSearches: totalSearches,
+        escrowVaultBalance: 14250 // EGP
+    });
+});
+
+// POST: Register / Login Profile
+app.post('/api/auth/login', (req, res) => {
+    const { username, role } = req.body; // role: 'buyer' | 'seller' | 'admin'
+    if (!username) return res.status(400).json({ error: 'اسم المستخدم مطلوب' });
+
+    const userId = username.toLowerCase().trim();
+    if (!USERS.has(userId)) {
+        USERS.set(userId, {
+            id: userId,
+            username,
+            role: role || 'buyer',
+            walletBalance: 0,
+            pendingPayouts: 0,
+            reviews: []
+        });
+        registeredCount++;
+    }
+
+    res.json({ success: true, user: USERS.get(userId) });
+});
+
+// POST: Create Escrow Purchase Ticket
+app.post('/api/tickets/create', (req, res) => {
+    const { buyerId, sellerId, itemTitle, price } = req.body;
+    const ticketId = 'TCK-' + Math.floor(100000 + Math.random() * 900000);
+
+    const newTicket = {
+        id: ticketId,
+        buyerId,
+        sellerId,
+        itemTitle,
+        price,
+        status: 'ACTIVE', // ACTIVE | COMPLETED | FROZEN
+        createdAt: new Date(),
+        messages: [{
+            sender: 'SYSTEM_BOT',
+            text: `[SYSTEM] تم فتح التيكيت بنجاح. المبلغ (${price} EGP) مٌحتجز آلياً في صندوق وساطة Dollar Store لحين تأكيد التسليم.`,
+            timestamp: new Date()
+        }]
+    };
+
+    TICKETS.set(ticketId, newTicket);
+    io.emit('ticket_updated', newTicket);
+
+    res.json({ success: true, ticket: newTicket });
+});
+
+// POST: Mandatory Review Submission
+app.post('/api/tickets/review', (req, res) => {
+    const { ticketId, stars, reviewText, sellerId } = req.body;
+    
+    if (!reviewText || !stars) {
+        return res.status(400).json({ error: 'التقييم اللغوي والنجوم إجباري لاستكمال العملية' });
+    }
+
+    const seller = USERS.get(sellerId.toLowerCase());
+    if (seller) {
+        seller.reviews.push({
+            stars: Number(stars),
+            text: reviewText,
+            date: new Date()
+        });
+        // Release funds to seller's pending wallet
+        const ticket = TICKETS.get(ticketId);
+        if (ticket) {
+            seller.walletBalance += ticket.price;
+            ticket.status = 'COMPLETED';
+        }
+    }
+
+    res.json({ success: true, message: 'تم تسجيل التقييم والإفراج عن المستحقات' });
+});
+
+// ==========================================
+// 3. REAL-TIME WEBSOCKETS HUB (Escrow & Trade)
+// ==========================================
+
+io.on('connection', (socket) => {
+    console.log(`[RETRO CONNECT] Socket Joined: ${socket.id}`);
+
+    // Join Ticket Room
+    socket.on('join_ticket', ({ ticketId, username }) => {
+        socket.join(ticketId);
+        console.log(`User ${username} joined Ticket ${ticketId}`);
+    });
+
+    // Send Ticket Message with Anti-Abuse Shield
+    socket.on('send_ticket_message', ({ ticketId, sender, text }) => {
+        const ticket = TICKETS.get(ticketId);
+        if (!ticket) return;
+
+        if (ticket.status === 'FROZEN') {
+            socket.emit('error_message', '⚠️ هذه التيكيت مجمدة حالياً بواسطة الأدمن للفصل في النزاع.');
+            return;
+        }
+
+        // Anti-Offsite Check
+        if (BANNED_PATTERNS.test(text)) {
+            socket.emit('anti_abuse_warning', '⚠️ تحذير Dollar Store: يمنع كتابة الروابط الخارجية أو أرقام الهواتف لحماية حقك!');
+            return;
+        }
+
+        const msg = { sender, text, timestamp: new Date() };
+        ticket.messages.push(msg);
+        io.to(ticketId).emit('receive_ticket_message', msg);
+    });
+
+    // Admin Intervention (Freeze Ticket)
+    socket.on('admin_freeze_ticket', ({ ticketId }) => {
+        const ticket = TICKETS.get(ticketId);
+        if (ticket) {
+            ticket.status = 'FROZEN';
+            const sysMsg = {
+                sender: 'ADMIN_HOSSAM',
+                text: '🔒 تم تجميد التيكيت والتدخل المباشر بواسطة الأدمن (حسام حسن). تم إيقاف المراسلات لحين حسم النزاع.',
+                timestamp: new Date()
+            };
+            ticket.messages.push(sysMsg);
+            io.to(ticketId).emit('receive_ticket_message', sysMsg);
+            io.emit('ticket_updated', ticket);
+        }
+    });
+
+    // TRADE HUB (الشرط الخاص: لا يتم التريد إلا بحضور الأدمن الإجباري)
+    socket.on('join_trade_room', ({ tradeId, username, role }) => {
+        socket.join(tradeId);
+        
+        let trade = TRADES.get(tradeId) || {
+            id: tradeId,
+            participants: [],
+            adminPresent: false,
+            status: 'WAITING_FOR_ADMIN'
+        };
+
+        if (!trade.participants.includes(username)) {
+            trade.participants.push(username);
+        }
+
+        if (role === 'admin' || username.toLowerCase().includes('hossam')) {
+            trade.adminPresent = true;
+            trade.status = 'ADMIN_ACTIVE';
+        }
+
+        TRADES.set(tradeId, trade);
+        io.to(tradeId).emit('trade_state_changed', trade);
+    });
+
+    socket.on('disconnect', () => {
+        console.log(`[RETRO DISCONNECT] Socket Left: ${socket.id}`);
+    });
+});
+
+const PORT = process.env.PORT || 5000;
+server.listen(PORT, () => {
+    console.log(`🎮 DOLLAR STORE Engine Live on Port http://localhost:${PORT}`);
+});
+🎨 المرحلة الثانية: واجهة العرض الرسومية المتكاملة (90s Retro Arcade UI)
+الآن، اربط ملف index.html مع السيرفر أعلاه للعمل بنظام 90s Arcade المتكامل الشامل لجميع الوظائف والخيارات:
+
+HTML
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DOLLAR STORE | 90s Arcade Retro Gaming Marketplace</title>
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS & FontAwesome -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts (Pixel / Retro 90s Gaming) -->
+    <!-- Google Pixel & Arabic Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
+    <!-- Socket.io Client Engine -->
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -44,7 +252,7 @@
             background-image: 
                 radial-gradient(circle at 50% 50%, rgba(61, 35, 107, 0.25) 0%, transparent 85%),
                 linear-gradient(rgba(16, 12, 31, 0.5) 2px, transparent 2px);
-            background-size: 100% 4px; /* تأثير شاشات الـ CRT الكلاسيكية */
+            background-size: 100% 4px;
         }
 
         .arcade-box {
@@ -67,7 +275,6 @@
             padding: 10px 14px;
             box-shadow: 3px 3px 0px #00ff66;
             cursor: pointer;
-            transition: 0.1s;
         }
         .arcade-btn:active {
             transform: translate(2px, 2px);
@@ -82,10 +289,13 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between">
 
-    <!-- Top Arcade Bar -->
+    <!-- Top Live Tracker Bar -->
     <div class="bg-arcade-panel border-b-2 border-arcade-border py-2 px-4 text-[10px] flex justify-between items-center text-arcade-cyan font-pixel">
-        <span>INSERT COIN TO START 🕹️ | DOLLAR STORE ARCADE v1.0</span>
-        <span class="text-arcade-green animate-pulse">ONLINE PLAYERS: 245</span>
+        <span>INSERT COIN 🕹️ | DOLLAR STORE RETRO ENGINE</span>
+        <div class="flex items-center gap-4">
+            <span class="text-arcade-green animate-pulse">PLAYERS ONLINE: <strong id="valOnline">142</strong></span>
+            <span class="text-arcade-gold">TOTAL SEARCHES: <strong id="valSearches">45,210</strong></span>
+        </div>
     </div>
 
     <!-- Header -->
@@ -93,20 +303,20 @@
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
                 <div class="w-10 h-10 bg-arcade-green flex items-center justify-center border-2 border-white shadow-[3px_3px_0px_#ffb700]">
-                    <i class="fa-solid fa-gamepad text-black text-xl"></i>
+                    <i class="fa-solid fa-dollar-sign text-black text-2xl font-black"></i>
                 </div>
                 <div>
                     <h1 class="pixel-title text-sm md:text-base text-arcade-green tracking-wider">DOLLAR STORE</h1>
-                    <p class="text-[8px] text-arcade-gold font-pixel">RETRO 90S GAMING MARKET</p>
+                    <p class="text-[8px] text-arcade-gold font-pixel">RETRO 90S ESCROW MARKETPLACE</p>
                 </div>
             </div>
 
             <div class="flex items-center gap-2">
                 <button onclick="toggleAdminPanel()" class="arcade-btn !border-arcade-gold !text-arcade-gold !shadow-[3px_3px_0px_#ffb700]">
-                    <i class="fa-solid fa-shield-halved"></i> الإدارة والفلوس
+                    <i class="fa-solid fa-user-shield"></i> لوحة الأدمن والفلوس
                 </button>
                 <button onclick="openTicketsModal()" class="arcade-btn !border-arcade-cyan !text-arcade-cyan !shadow-[3px_3px_0px_#00f0ff]">
-                    <i class="fa-solid fa-ticket"></i> التيكيتات
+                    <i class="fa-solid fa-ticket"></i> التيكيتات المباشرة
                 </button>
             </div>
         </div>
@@ -115,40 +325,37 @@
     <!-- Main Arcade Container -->
     <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
 
-        <!-- 🕹️ الخيارات الثلاثة البارزة (ستايل أركيد التسعينات التفاعلي) -->
+        <!-- ⭐ 3 Prominent Selections -->
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <!-- 1. General Market -->
             <div onclick="switchTab('home')" class="arcade-box p-5 cursor-pointer text-center space-y-2">
                 <div class="w-12 h-12 mx-auto bg-arcade-green/20 text-arcade-green border border-arcade-green flex items-center justify-center text-xl">
                     <i class="fa-solid fa-store"></i>
                 </div>
                 <h3 class="font-pixel text-[11px] text-white">الواجهة العامة للسوق</h3>
-                <p class="text-xs text-slate-400">تصفح كافة حسابات وألعاب المنصة المباشرة.</p>
+                <p class="text-xs text-slate-400">تصفح كافة الحسابات والمنتجات المعروضة.</p>
             </div>
 
-            <!-- 2. Game Market Hub -->
             <div onclick="switchTab('games')" class="arcade-box p-5 cursor-pointer text-center space-y-2 !border-arcade-cyan !shadow-[4px_4px_0px_#00f0ff]">
                 <div class="w-12 h-12 mx-auto bg-arcade-cyan/20 text-arcade-cyan border border-arcade-cyan flex items-center justify-center text-xl">
                     <i class="fa-solid fa-gamepad"></i>
                 </div>
                 <h3 class="font-pixel text-[11px] text-white">سوق الألعاب المخصص</h3>
-                <p class="text-xs text-slate-400">واجهة مستقلة لكل لعبة بأوردراتها الكاملة.</p>
+                <p class="text-xs text-slate-400">واجهات مستقلة لأوردرات وحسابات كل لعبة.</p>
             </div>
 
-            <!-- 3. Trade Hub (شات التريد بحضور الأدمن الإجباري) -->
             <div onclick="switchTab('trade')" class="arcade-box p-5 cursor-pointer text-center space-y-2 !border-arcade-gold !shadow-[4px_4px_0px_#ffb700]">
                 <div class="w-12 h-12 mx-auto bg-arcade-gold/20 text-arcade-gold border border-arcade-gold flex items-center justify-center text-xl">
                     <i class="fa-solid fa-handshake"></i>
                 </div>
-                <h3 class="font-pixel text-[11px] text-white">شات التريد والمقايضة</h3>
+                <h3 class="font-pixel text-[11px] text-white">شات المقايضة والـ TRADE</h3>
                 <p class="text-xs text-slate-400">تبادل الحسابات بحضور الأدمن (حسام) حصرياً.</p>
             </div>
         </div>
 
-        <!-- SECTION 1: HOME MARKETPLACE -->
+        <!-- SECTION 1: HOME MARKET -->
         <div id="sectionHome" class="space-y-4">
             <div class="arcade-box p-4 flex justify-between items-center">
-                <h2 class="font-pixel text-xs text-arcade-green">STAGE 1: أحدث الحسابات والمنتجات المعروضة</h2>
+                <h2 class="font-pixel text-xs text-arcade-green">STAGE 1: أحدث الحسابات والمنتجات</h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="arcade-box p-4 space-y-3">
@@ -159,76 +366,72 @@
                     <h4 class="font-bold text-sm text-white">حساب League of Legends - Level 30 Unranked</h4>
                     <div class="flex justify-between items-center pt-2 border-t border-arcade-border">
                         <span class="font-pixel text-xs text-arcade-gold">150 EGP</span>
-                        <button onclick="openTicketsModal()" class="arcade-btn !text-[9px] !py-1.5">شراء عبر التيكيت</button>
+                        <button onclick="buyProduct('Dollar Store Official', 'League of Legends Level 30', 150)" class="arcade-btn !text-[9px] !py-1.5">شراء عبر الوساطة</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 2: GAMES MARKET HUB (واجهات مخصصة لكل لعبة) -->
+        <!-- SECTION 2: GAME HUB -->
         <div id="sectionGames" class="hidden space-y-4">
-            <h2 class="font-pixel text-xs text-arcade-cyan">SELECT YOUR GAME:</h2>
+            <h2 class="font-pixel text-xs text-arcade-cyan">SELECT GAME HUB:</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div onclick="openGameStore('League of Legends')" class="arcade-box p-4 text-center cursor-pointer space-y-2">
+                <div onclick="openGameHub('League of Legends')" class="arcade-box p-4 text-center cursor-pointer space-y-2">
                     <i class="fa-solid fa-shield-halved text-3xl text-arcade-cyan"></i>
                     <p class="font-pixel text-[10px] text-white">League of Legends</p>
                 </div>
-                <div onclick="openGameStore('Valorant')" class="arcade-box p-4 text-center cursor-pointer space-y-2">
+                <div onclick="openGameHub('Valorant')" class="arcade-box p-4 text-center cursor-pointer space-y-2">
                     <i class="fa-solid fa-crosshairs text-3xl text-arcade-red"></i>
                     <p class="font-pixel text-[10px] text-white">Valorant</p>
                 </div>
-                <div onclick="openGameStore('Roblox')" class="arcade-box p-4 text-center cursor-pointer space-y-2">
+                <div onclick="openGameHub('Roblox')" class="arcade-box p-4 text-center cursor-pointer space-y-2">
                     <i class="fa-solid fa-cube text-3xl text-arcade-gold"></i>
                     <p class="font-pixel text-[10px] text-white">Roblox</p>
                 </div>
-                <div onclick="openGameStore('Call of Duty')" class="arcade-box p-4 text-center cursor-pointer space-y-2">
+                <div onclick="openGameHub('Call of Duty')" class="arcade-box p-4 text-center cursor-pointer space-y-2">
                     <i class="fa-solid fa-person-rifle text-3xl text-arcade-green"></i>
                     <p class="font-pixel text-[10px] text-white">Call of Duty</p>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 3: TRADE HUB (شات التريد بحضور الأدمن الإجباري) -->
+        <!-- SECTION 3: TRADE HUB (حضور الأدمن الإجباري) -->
         <div id="sectionTrade" class="hidden space-y-4">
             <div class="arcade-box p-6 space-y-4">
-                <h3 class="font-pixel text-xs text-arcade-gold"><i class="fa-solid fa-handshake"></i> غرفة شات المقايضة والـ TRADE (بإشراف الأدمن إجبارياً)</h3>
-                <p class="text-xs text-slate-300">هنا يتم تبادل الحسابات بين العميلين. الأدمن (حسام حسن) متواجد في الغرفة بشكل إجباري ورئيسي لضمان الأمان والوساطة.</p>
+                <h3 class="font-pixel text-xs text-arcade-gold"><i class="fa-solid fa-handshake"></i> غرفة المقايضة والـ TRADE (شرط حضور الأدمن)</h3>
+                <p class="text-xs text-slate-300">لا يتم تنفيذ أي عملية مقايضة إلا في حالة وجود حالة الأدمن: <strong class="text-arcade-green font-pixel">ACTIVE</strong>.</p>
                 
-                <div class="bg-black border-2 border-arcade-border p-4 rounded h-64 overflow-y-auto space-y-2 text-xs">
-                    <div class="bg-arcade-panel p-2 border border-arcade-border">
-                        <span class="text-arcade-gold font-pixel text-[9px]">ADMIN [حسام حسن]:</span> أهلاً بكم في غرفة التريد. تم تجميد الحسابين لحين مراجعة البيانات.
+                <div id="tradeChatBox" class="bg-black border-2 border-arcade-border p-4 rounded h-64 overflow-y-auto space-y-2 text-xs">
+                    <div class="bg-arcade-panel p-2 border border-arcade-border text-arcade-gold font-pixel text-[9px]">
+                        [SYSTEM]: جاري انتظار دخول الأدمن (حسام حسن) للغرفة للبدء...
                     </div>
-                </div>
-                <div class="flex gap-2">
-                    <input type="text" placeholder="اكتب رسالتك في شات التريد..." class="flex-grow bg-black border-2 border-arcade-border p-2.5 text-xs text-white font-pixel focus:outline-none">
-                    <button onclick="alert('تم إرسال الرسالة بحضور الأدمن.')" class="arcade-btn">إرسال</button>
                 </div>
             </div>
         </div>
 
-        <!-- GAME SPECIFIC STORE VIEW -->
+        <!-- GAME SPECIFIC HUB VIEW -->
         <div id="sectionGameStore" class="hidden space-y-4">
             <div class="arcade-box p-4 flex justify-between items-center">
                 <div>
-                    <button onclick="switchTab('games')" class="text-xs text-arcade-cyan font-pixel mb-1 block"><i class="fa-solid fa-arrow-right"></i> عودة للألعاب</button>
+                    <button onclick="switchTab('games')" class="text-xs text-arcade-cyan font-pixel mb-1 block"><i class="fa-solid fa-arrow-right"></i> عودة لسوق الألعاب</button>
                     <h2 id="gameStoreTitle" class="font-pixel text-xs text-arcade-green">أوردرات اللعبة</h2>
                 </div>
             </div>
             <div class="arcade-box p-4 space-y-3">
-                <p class="text-xs text-slate-300">جميع الحسابات والأوردرات المضافة لهذه اللعبة من طرفك أو من البائعين المسجلين.</p>
-                <button onclick="openTicketsModal()" class="arcade-btn">شراء هذا الأوردر</button>
+                <p class="text-xs text-slate-300">كافة المنتجات والحسابات المتاحة لهذه اللعبة.</p>
+                <button onclick="openTicketsModal()" class="arcade-btn">فتح تيكيت شراء</button>
             </div>
         </div>
 
     </main>
 
-    <!-- ADMIN PANEL SIDEBAR (لوحة تحكم الأدمن والفلوس) -->
+    <!-- ADMIN SIDEBAR PANEL -->
     <div id="adminSidebar" class="fixed top-0 right-0 h-full w-80 bg-arcade-panel border-l-4 border-arcade-border z-50 transform translate-x-full transition-transform duration-200 flex flex-col p-4 space-y-4">
         <div class="flex justify-between items-center border-b-2 border-arcade-border pb-2">
             <h3 class="font-pixel text-[10px] text-arcade-gold">لوحة تحكم الأدمن والفلوس</h3>
             <button onclick="toggleAdminPanel()" class="text-white font-pixel">X</button>
         </div>
-        <p class="text-xs text-slate-300">مراقبة تيكيتات الشات وأرصدة البائعين (فودافون كاش / إنستاباي).</p>
+        <p class="text-xs text-slate-300">مراقبة التيكيتات، تجميد الشات، وإدارة تحويلات البائعين.</p>
     </div>
 
     <!-- TICKETS MODAL -->
@@ -241,6 +444,8 @@
     </div>
 
     <script>
+        const socket = io('http://localhost:5000'); // سيرفر الخلفية المحلي
+
         function switchTab(tab) {
             document.getElementById('sectionHome').classList.add('hidden');
             document.getElementById('sectionGames').classList.add('hidden');
@@ -249,17 +454,32 @@
 
             if(tab === 'home') document.getElementById('sectionHome').classList.remove('hidden');
             if(tab === 'games') document.getElementById('sectionGames').classList.remove('hidden');
-            if(tab === 'trade') document.getElementById('sectionTrade').classList.remove('hidden');
+            if(tab === 'trade') {
+                document.getElementById('sectionTrade').classList.remove('hidden');
+                socket.emit('join_trade_room', { tradeId: 'TRADE-MAIN', username: 'GuestUser', role: 'buyer' });
+            }
         }
 
-        function openGameStore(gameName) {
+        function openGameHub(gameName) {
             document.getElementById('sectionGames').classList.add('hidden');
             document.getElementById('sectionGameStore').classList.remove('hidden');
             document.getElementById('gameStoreTitle').innerText = `أوردرات لعبة: ${gameName}`;
         }
 
-        function toggleAdminPanel() { document.getElementById('adminSidebar').classList.toggle('translatestranslate-x-full'); }
-        // Correction for class toggle
+        function buyProduct(seller, title, price) {
+            fetch('http://localhost:5000/api/tickets/create', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ buyerId: 'User1', sellerId: seller, itemTitle: title, price: price })
+            })
+            .then(res => res.json())
+            .then(data => {
+                alert(`تم إنشاء التيكيت بنجاح رقم: ${data.ticket.id}`);
+                openTicketsModal();
+            })
+            .catch(() => openTicketsModal());
+        }
+
         function toggleAdminPanel() { document.getElementById('adminSidebar').classList.toggle('translate-x-full'); }
         function openTicketsModal() { document.getElementById('ticketsModal').classList.remove('hidden'); }
         function closeTicketsModal() { document.getElementById('ticketsModal').classList.add('hidden'); }
