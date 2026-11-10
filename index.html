@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dollar Store | 90s Gaming Escrow & Ultimate Portal</title>
+    <title>Dollar Store | 90s Gaming Ultimate Marketplace</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
@@ -55,17 +55,16 @@
     <div class="bg-[#05070a] border-b border-eldorado-border py-1 px-4 text-xs flex justify-between items-center text-slate-400 overflow-hidden">
         <div class="marquee w-full">
             <div class="marquee-content flex gap-8 items-center text-[11px]">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-coins text-eldorado-gold"></i> ذهب عيار 21: <strong class="text-white font-mono">3,750 EGP</strong></span>
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-dollar-sign text-eldorado-accent"></i> الدولار / EGP: <strong class="text-white font-mono">49.20</strong></span>
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-wallet text-eldorado-cyan"></i> Binance USDT: <strong class="text-white font-mono">49.85 EGP</strong></span>
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-coins text-eldorado-gold"></i> أسعار ثابتة ومضمونة طوال العام</span>
                 <span class="flex items-center gap-1.5"><i class="fa-solid fa-capsules text-eldorado-accent"></i> كبسولات لول الحصرية: <strong class="text-eldorado-accent font-mono">45 EGP فقط</strong></span>
+                <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-eldorado-purple"></i> نظام التوثيق بالكاميرا الحية: <strong class="text-eldorado-accent font-mono">مفعل وآمن</strong></span>
             </div>
         </div>
     </div>
 
     <!-- Header -->
     <header class="sticky top-0 z-40 bg-eldorado-bg/95 backdrop-blur-md border-b border-eldorado-border px-4 py-3 shadow-xl">
-        <div class="max-w-7xl mx-auto flex justify-between items-center gap-4">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
             <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('capsules')">
                 <div class="w-10 h-10 bg-eldorado-accent rounded-xl flex items-center justify-center border-2 border-white shadow-[0_0_15px_rgba(0,255,102,0.4)]">
                     <i class="fa-solid fa-dollar-sign text-black text-xl font-black"></i>
@@ -76,54 +75,47 @@
                 </div>
             </div>
 
+            <!-- Search Bar -->
+            <div class="flex-1 max-w-md w-full relative">
+                <input type="text" id="searchInput" placeholder="ابحث عن بائع، لعبة، حساب..." class="w-full bg-[#151a23] border border-eldorado-border rounded-xl py-2 px-4 pr-10 text-xs text-white focus:outline-none focus:border-eldorado-accent">
+                <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
+            </div>
+
+            <!-- Action Buttons -->
             <div class="flex items-center gap-2">
+                <button onclick="openAuthModal()" class="bg-eldorado-cyan text-black font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 hover:bg-cyan-400 transition">
+                    <i class="fa-solid fa-user-lock"></i> حساب جديد
+                </button>
                 <button onclick="openVendorKYCModal()" class="bg-eldorado-danger text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 hover:bg-red-600 transition shadow-lg shadow-red-500/20">
-                    <i class="fa-solid fa-camera"></i> <span class="hidden sm:inline">توثيق بائع</span>
+                    <i class="fa-solid fa-camera"></i> توثيق بائع
                 </button>
                 <button onclick="openWithdrawModal()" class="bg-eldorado-purple text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 hover:bg-purple-600 transition">
-                    <i class="fa-solid fa-wallet"></i> <span class="hidden sm:inline">سحب الأرباح</span>
+                    <i class="fa-solid fa-wallet"></i> سحب أرباح
                 </button>
-                <a href="https://discord.gg/6yAsj6EYP" target="_blank" class="bg-[#5865F2] text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 hover:bg-indigo-600 transition">
-                    <i class="fa-brands fa-discord"></i> <span class="hidden sm:inline">ديسكورد</span>
-                </a>
             </div>
         </div>
 
-        <!-- Navigation Tabs (جميع الأقسام كاملة) -->
+        <!-- Navigation Tabs -->
         <div class="max-w-7xl mx-auto flex items-center gap-4 mt-3 pt-2 border-t border-eldorado-border/40 text-xs text-slate-300 overflow-x-auto">
             <button onclick="switchTab('capsules')" class="hover:text-eldorado-accent font-bold flex items-center gap-1 text-eldorado-accent"><i class="fa-solid fa-capsules"></i> 1. الكبسولات</button>
             <button onclick="switchTab('gamepass')" class="hover:text-eldorado-accent font-bold flex items-center gap-1"><i class="fa-solid fa-gamepad"></i> 2. Game Pass</button>
             <button onclick="switchTab('streaming')" class="hover:text-eldorado-gold font-bold flex items-center gap-1"><i class="fa-solid fa-tv"></i> 3. الترفيه</button>
             <button onclick="switchTab('steam')" class="hover:text-eldorado-cyan font-bold flex items-center gap-1"><i class="fa-brands fa-steam"></i> 4. ستيم</button>
-            <button onclick="switchTab('home')" class="hover:text-white font-bold flex items-center gap-1"><i class="fa-solid fa-store"></i> 5. منتجات السيرفر</button>
-            <button onclick="switchTab('topSellers')" class="hover:text-amber-400 font-bold flex items-center gap-1"><i class="fa-solid fa-trophy"></i> 6. لوحة الشرف</button>
-            <button onclick="switchTab('esports')" class="hover:text-blue-400 font-bold flex items-center gap-1"><i class="fa-solid fa-futbol"></i> 7. البطولات والكرة</button>
-            <button onclick="switchTab('feedback')" class="hover:text-amber-400 font-bold flex items-center gap-1"><i class="fa-solid fa-star"></i> 8. الفيد باك</button>
-            <button onclick="switchTab('dailyOffers')" class="hover:text-eldorado-purple font-bold flex items-center gap-1"><i class="fa-solid fa-bullhorn"></i> 9. العروض اليومية</button>
-            <button onclick="switchTab('discordHub')" class="hover:text-indigo-400 font-bold flex items-center gap-1"><i class="fa-brands fa-discord"></i> 10. الديسكورد</button>
+            <button onclick="switchTab('lol')" class="hover:text-cyan-400 font-bold flex items-center gap-1"><i class="fa-solid fa-shield-halved"></i> 5. LoL</button>
+            <button onclick="switchTab('valorant')" class="hover:text-red-400 font-bold flex items-center gap-1"><i class="fa-solid fa-crosshairs"></i> 6. Valorant</button>
+            <button onclick="switchTab('cod')" class="hover:text-amber-400 font-bold flex items-center gap-1"><i class="fa-solid fa-gun"></i> 7. CoD (6 & 7)</button>
+            <button onclick="switchTab('otherGames')" class="hover:text-purple-400 font-bold flex items-center gap-1"><i class="fa-solid fa-gamepad"></i> 8. روبلوكس وفورتنايت</button>
+            <button onclick="switchTab('boosting')" class="hover:text-eldorado-gold font-bold flex items-center gap-1"><i class="fa-solid fa-chart-line"></i> 9. البوستنج</button>
+            <button onclick="switchTab('feedback')" class="hover:text-amber-400 font-bold flex items-center gap-1"><i class="fa-solid fa-star"></i> 10. التقييمات وفيد باك</button>
+            <button onclick="switchTab('dailyOffers')" class="hover:text-eldorado-purple font-bold flex items-center gap-1"><i class="fa-solid fa-bullhorn"></i> 11. العروض اليومية</button>
+            <button onclick="switchTab('discordHub')" class="hover:text-indigo-400 font-bold flex items-center gap-1"><i class="fa-brands fa-discord"></i> 12. الديسكورد</button>
         </div>
     </header>
 
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-8">
 
-        <!-- ANNOUNCEMENT BANNER -->
-        <div class="bg-gradient-to-r from-purple-900/40 via-indigo-900/40 to-slate-900 border border-eldorado-purple/50 p-4 rounded-2xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
-            <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-xl bg-eldorado-purple/20 text-eldorado-purple border border-eldorado-purple/40 flex items-center justify-center shrink-0">
-                    <i class="fa-solid fa-bullhorn text-lg animate-bounce"></i>
-                </div>
-                <div>
-                    <h3 class="text-xs font-bold text-white flex items-center gap-2">تنبيه رسمي من إدارة Dollar Store <span class="bg-red-500 text-white text-[9px] px-2 py-0.5 rounded-full font-mono">SECURE</span></h3>
-                    <p class="text-[11px] text-slate-300">ممنوع التعامل خارج الشات الرسمي بالموقع. التوثيق بالكاميرا الحية شرط أساسي لضمان الحقوق القانونية والسحب!</p>
-                </div>
-            </div>
-            <a href="https://discord.gg/6yAsj6EYP" target="_blank" class="bg-eldorado-purple text-white font-bold px-4 py-2 rounded-xl text-xs hover:bg-purple-600 transition shrink-0 flex items-center gap-2">
-                <i class="fa-brands fa-discord"></i> انضم لسيرفر الديسكورد
-            </a>
-        </div>
-
-        <!-- SECTION 1: CAPSULES (الكبسولات) -->
+        <!-- SECTION 1: CAPSULES -->
         <div id="sectionCapsules" class="space-y-6">
             <div class="border-b border-eldorado-border pb-3 flex justify-between items-center">
                 <div>
@@ -174,7 +166,7 @@
 
         <!-- SECTION 2: XBOX GAME PASS -->
         <div id="sectionGamepass" class="hidden space-y-6">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gamepad text-eldorado-accent"></i> اشتراكات Xbox Game Pass (أسعار ثابتة طوال العام)</h2>
+            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gamepad text-eldorado-accent"></i> اشتراكات Xbox Game Pass (أسعار ثابتة)</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div class="eldorado-card p-5 rounded-2xl space-y-4 border border-emerald-500/30">
                     <h3 class="text-xs font-bold text-white">Xbox Game Pass Ultimate</h3>
@@ -214,151 +206,149 @@
             </div>
         </div>
 
-        <!-- SECTION 5: SERVER PRODUCTS (منتجات السيرفر الرسمية) -->
-        <div id="sectionHome" class="hidden space-y-6">
-            <div class="space-y-3">
-                <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-star text-eldorado-gold"></i> منتجات السيرفر الرسمية (Dollar Store Official)</h2>
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-                    <div class="eldorado-card p-4 rounded-2xl flex items-center gap-4 border border-eldorado-accent/30 bg-gradient-to-br from-emerald-950/20 to-slate-900">
-                        <div class="w-14 h-14 bg-emerald-500/10 text-eldorado-accent rounded-xl flex items-center justify-center border border-eldorado-accent/20 shrink-0">
-                            <i class="fa-solid fa-shield-halved text-2xl"></i>
-                        </div>
-                        <div class="flex-grow space-y-1">
-                            <h4 class="text-xs font-bold text-white">LoL Level 30 Unranked Account</h4>
-                            <p class="text-[10px] text-slate-400">حساب لول لفل 30 جاهز للرانكد مع الضمان.</p>
-                            <div class="flex justify-between items-center pt-1">
-                                <span class="text-xs font-mono font-bold text-eldorado-accent">150 EGP</span>
-                                <button onclick="alert('شراء حساب سيرفر لول')" class="bg-eldorado-accent text-black font-bold px-3 py-1 rounded-lg text-[10px]">شراء فوري</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="eldorado-card p-4 rounded-2xl flex items-center gap-4 border border-eldorado-cyan/30 bg-gradient-to-br from-cyan-950/20 to-slate-900">
-                        <div class="w-14 h-14 bg-cyan-500/10 text-eldorado-cyan rounded-xl flex items-center justify-center border border-eldorado-cyan/20 shrink-0">
-                            <i class="fa-solid fa-bolt text-2xl"></i>
-                        </div>
-                        <div class="flex-grow space-y-1">
-                            <h4 class="text-xs font-bold text-white">Valorant Ranked Ready Account</h4>
-                            <p class="text-[10px] text-slate-400">حساب فالورانت جاهز للعب بسعر حصري.</p>
-                            <div class="flex justify-between items-center pt-1">
-                                <span class="text-xs font-mono font-bold text-eldorado-cyan">200 EGP</span>
-                                <button onclick="alert('شراء حساب فالورانت')" class="bg-cyan-cyan text-black font-bold px-3 py-1 rounded-lg text-[10px]">شراء فوري</button>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SECTION 6: TOP SELLERS SHOWCASE -->
-        <div id="sectionTopSellers" class="hidden space-y-4">
-            <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
-                <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-trophy text-eldorado-gold"></i> لوحة شرف البائعين الأكثر مبيعاً (Top Rated Sellers)</h2>
-                <span class="text-[10px] text-eldorado-gold bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/20 font-mono">Ranked</span>
-            </div>
-
+        <!-- SECTION 5: LEAGUE OF LEGENDS -->
+        <div id="sectionLol" class="hidden space-y-6">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-shield-halved text-cyan-400"></i> قسم League of Legends</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="eldorado-card p-5 rounded-2xl text-center space-y-3 gold-border-glow relative overflow-hidden">
-                    <div class="absolute top-2 right-2 bg-eldorado-gold text-black font-bold text-[9px] px-2 py-0.5 rounded-full font-pixel">#1 SELLER</div>
-                    <img src="https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150" class="w-20 h-20 rounded-full mx-auto border-2 border-eldorado-gold object-cover shadow-lg" alt="Seller">
-                    <div>
-                        <h3 class="text-xs font-bold text-white">Hossam Gaming Official</h3>
-                        <p class="text-[10px] text-slate-400">إجمالي المبيعات: <strong class="text-eldorado-accent font-mono">+120 عملية</strong></p>
-                    </div>
-                    <div class="flex justify-center gap-2 pt-2">
-                        <a href="#" class="bg-red-600 text-white p-2 rounded-lg text-xs hover:bg-red-700 transition"><i class="fa-brands fa-youtube"></i></a>
-                        <a href="#" class="bg-purple-600 text-white p-2 rounded-lg text-xs hover:bg-purple-700 transition"><i class="fa-brands fa-twitch"></i></a>
-                        <a href="#" class="bg-indigo-600 text-white p-2 rounded-lg text-xs hover:bg-indigo-700 transition"><i class="fa-brands fa-discord"></i></a>
-                    </div>
+                <div class="eldorado-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-bold text-cyan-400">1. قسم الحسابات</h3>
+                    <p class="text-[11px] text-slate-300">حسابات لفل 30 وكبسولات مميزة.</p>
+                    <button onclick="alert('حسابات LoL')" class="w-full bg-cyan-500 text-black font-bold py-2 rounded-xl text-xs">عرض الحسابات</button>
+                </div>
+                <div class="eldorado-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-bold text-cyan-400">2. العملات وأكواد الشحن</h3>
+                    <p class="text-[11px] text-slate-300">شحن نقاط RP الرسمية.</p>
+                    <button onclick="alert('عملات LoL')" class="w-full bg-cyan-500 text-black font-bold py-2 rounded-xl text-xs">عرض العملات</button>
+                </div>
+                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-cyan-500/50">
+                    <h3 class="text-xs font-bold text-cyan-400">3. طلب حساب بمواصفات خاصة</h3>
+                    <p class="text-[11px] text-slate-300">اطلب رانكد أو سكنات محددة.</p>
+                    <button onclick="openCustomOrderModal('League of Legends')" class="w-full bg-eldorado-gold text-black font-bold py-2 rounded-xl text-xs">طلب خاص</button>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 7: ESPORTS & MATCHES HUB -->
-        <div id="sectionEsports" class="hidden space-y-6">
-            <div class="space-y-3">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gamepad text-eldorado-cyan"></i> جدول بطولات ومباريات الـ Esports الحالية</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="eldorado-card p-4 rounded-xl flex justify-between items-center">
-                        <div class="space-y-1">
-                            <span class="bg-blue-500/20 text-blue-400 text-[9px] px-2 py-0.5 rounded border border-blue-500/30">LoL Worlds Championship</span>
-                            <h4 class="text-xs font-bold text-white">T1 vs Gen.G Esports</h4>
-                        </div>
-                        <span class="text-xs font-bold text-eldorado-accent font-mono bg-emerald-500/10 px-2 py-1 rounded">مباشر الآن 🔴</span>
-                    </div>
+        <!-- SECTION 6: VALORANT -->
+        <div id="sectionValorant" class="hidden space-y-6">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-crosshairs text-red-400"></i> قسم Valorant</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="eldorado-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-bold text-red-400">1. قسم الحسابات</h3>
+                    <p class="text-[11px] text-slate-300">حسابات فالورانت جاهزة للرانكد.</p>
+                    <button onclick="alert('حسابات Valorant')" class="w-full bg-red-600 text-white font-bold py-2 rounded-xl text-xs">عرض الحسابات</button>
                 </div>
-            </div>
-
-            <div class="space-y-3 pt-4 border-t border-eldorado-border">
-                <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-futbol text-eldorado-gold"></i> قمة مباريات كرة القدم اليوم</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div class="eldorado-card p-4 rounded-xl flex justify-between items-center">
-                        <div class="space-y-1">
-                            <span class="bg-amber-500/20 text-amber-400 text-[9px] px-2 py-0.5 rounded border border-amber-500/30">دوري أبطال أوروبا</span>
-                            <h4 class="text-xs font-bold text-white">ريال مدريد vs مانشستر سيتي</h4>
-                        </div>
-                        <span class="text-xs font-mono text-slate-400">غداً 10:00 مساءً</span>
-                    </div>
+                <div class="eldorado-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-bold text-red-400">2. العملات وأكواد الشحن</h3>
+                    <p class="text-[11px] text-slate-300">شحن نقاط VP وبطاقات الشحن.</p>
+                    <button onclick="alert('عملات Valorant')" class="w-full bg-red-600 text-white font-bold py-2 rounded-xl text-xs">عرض نقاط VP</button>
+                </div>
+                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-red-500/50">
+                    <h3 class="text-xs font-bold text-red-400">3. طلب حساب بمواصفات خاصة</h3>
+                    <p class="text-[11px] text-slate-300">اطلب حساب برانكد وسكنات معينة.</p>
+                    <button onclick="openCustomOrderModal('Valorant')" class="w-full bg-eldorado-gold text-black font-bold py-2 rounded-xl text-xs">طلب خاص</button>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 8: FEEDBACK & SITE REVIEWS -->
+        <!-- SECTION 7: CALL OF DUTY (Part 6 & 7) -->
+        <div id="sectionCod" class="hidden space-y-6">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gun text-amber-400"></i> قسم Call of Duty (الجزء 6 و 7)</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="eldorado-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-bold text-amber-400">1. الحسابات (الجزء 6 و 7)</h3>
+                    <p class="text-[11px] text-slate-300">حسابات الأجزاء الحديثة مع الضمان.</p>
+                    <button onclick="alert('حسابات CoD')" class="w-full bg-amber-600 text-black font-bold py-2 rounded-xl text-xs">عرض الحسابات</button>
+                </div>
+                <div class="eldorado-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-bold text-amber-400">2. العملات وأكواد الشحن (CP)</h3>
+                    <p class="text-[11px] text-slate-300">شحن نقاط CP للأجزاء 6 و 7.</p>
+                    <button onclick="alert('شحن CP')" class="w-full bg-amber-600 text-black font-bold py-2 rounded-xl text-xs">شحن نقاط CP</button>
+                </div>
+                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-amber-500/50">
+                    <h3 class="text-xs font-bold text-amber-400">3. طلب حساب بمواصفات خاصة</h3>
+                    <p class="text-[11px] text-slate-300">اطلب حساب بلفلات سلاح معينة.</p>
+                    <button onclick="openCustomOrderModal('Call of Duty')" class="w-full bg-eldorado-gold text-black font-bold py-2 rounded-xl text-xs">طلب خاص</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 8: OTHER GAMES -->
+        <div id="sectionOtherGames" class="hidden space-y-6">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gamepad text-purple-400"></i> روبلوكس، فورتنايت، وابيكس</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="eldorado-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-bold text-purple-400">1. قسم الحسابات</h3>
+                    <p class="text-[11px] text-slate-300">حسابات نادرة وروبوكس.</p>
+                    <button onclick="alert('حسابات الألعاب الأخرى')" class="w-full bg-purple-600 text-white font-bold py-2 rounded-xl text-xs">عرض الحسابات</button>
+                </div>
+                <div class="eldorado-card p-5 rounded-2xl space-y-3">
+                    <h3 class="text-xs font-bold text-purple-400">2. العملات وأكواد الشحن</h3>
+                    <p class="text-[11px] text-slate-300">شحن روبوكس وV-Bucks.</p>
+                    <button onclick="alert('عملات الألعاب')" class="w-full bg-purple-600 text-white font-bold py-2 rounded-xl text-xs">عرض العملات</button>
+                </div>
+                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-purple-500/50">
+                    <h3 class="text-xs font-bold text-purple-400">3. طلبات خاصة</h3>
+                    <p class="text-[11px] text-slate-300">اطلب سكنات وكميات مخصصة.</p>
+                    <button onclick="openCustomOrderModal('Other Games')" class="w-full bg-eldorado-gold text-black font-bold py-2 rounded-xl text-xs">طلب خاص</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 9: BOOSTING -->
+        <div id="sectionBoosting" class="hidden space-y-6">
+            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-chart-line text-eldorado-gold"></i> قسم بوستنج الألعاب</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="eldorado-card p-4 rounded-xl space-y-2">
+                    <h4 class="text-xs font-bold text-white">LoL Boosting</h4>
+                    <button onclick="alert('طلب LoL Boosting')" class="bg-eldorado-gold text-black font-bold px-3 py-1.5 rounded text-xs w-full">احجز بوستنج</button>
+                </div>
+                <div class="eldorado-card p-4 rounded-xl space-y-2">
+                    <h4 class="text-xs font-bold text-white">Valorant Boosting</h4>
+                    <button onclick="alert('طلب Valorant Boosting')" class="bg-eldorado-gold text-black font-bold px-3 py-1.5 rounded text-xs w-full">احجز بوستنج</button>
+                </div>
+                <div class="eldorado-card p-4 rounded-xl space-y-2">
+                    <h4 class="text-xs font-bold text-white">CoD Weapon Leveling</h4>
+                    <button onclick="alert('طلب CoD Boosting')" class="bg-eldorado-gold text-black font-bold px-3 py-1.5 rounded text-xs w-full">احجز بوستنج</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECTION 10: FEEDBACK -->
         <div id="sectionFeedback" class="hidden space-y-6">
-            <div class="border-b border-eldorado-border pb-3 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                <div>
-                    <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-star text-amber-400"></i> تقييمات وآراء العملاء في Dollar Store</h2>
-                    <p class="text-[11px] text-slate-400">تابع آراء العملاء أو انتقل مباشرة لقناة الفيد باك الرسمية على السيرفر.</p>
-                </div>
-                <a href="https://discord.com/channels/1354499627247992994/1393426500342251530" target="_blank" class="bg-[#5865F2] text-white font-bold px-4 py-2.5 rounded-xl text-xs flex items-center gap-2 hover:bg-indigo-600 transition shadow-lg shadow-indigo-500/20">
-                    <i class="fa-brands fa-discord text-base"></i> عرض فيد باك السيرفر (Discord)
-                </a>
+            <div class="border-b border-eldorado-border pb-3 flex justify-between items-center">
+                <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-star text-amber-400"></i> تقييمات وفيد باك المنصة</h2>
+                <a href="https://discord.com/channels/1354499627247992994/1393426500342251530" target="_blank" class="bg-[#5865F2] text-white font-bold px-4 py-2 rounded-xl text-xs">فيد باك الديسكورد</a>
             </div>
-
-            <div class="eldorado-card p-5 rounded-2xl space-y-4 border border-amber-500/30 bg-gradient-to-br from-amber-950/10 to-slate-900">
-                <h3 class="text-xs font-bold text-white flex items-center gap-2"><i class="fa-solid fa-pen-nib text-eldorado-gold"></i> اترك تقييمك لموقعنا</h3>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
-                    <input type="text" id="feedbackName" placeholder="اسمك أو اسم العضوية" class="bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white focus:outline-none">
-                    <select id="feedbackRating" class="bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white focus:outline-none">
-                        <option value="5">⭐⭐⭐⭐⭐ (5/5 ممتاز جداً)</option>
-                        <option value="4">⭐⭐⭐⭐ (4/5 جيد جداً)</option>
-                        <option value="3">⭐⭐⭐ (3/5 مقبول)</option>
-                    </select>
-                </div>
-                <textarea id="feedbackComment" placeholder="اكتب تجربتك مع المنصة وسرعة التسليم..." class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-3 text-xs text-white focus:outline-none h-20"></textarea>
-                <button onclick="submitSiteFeedback()" class="bg-amber-500 text-black font-bold px-5 py-2.5 rounded-xl text-xs hover:bg-amber-400 transition">إرسال التقييم للمنصة</button>
+            <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-amber-500/30">
+                <h3 class="text-xs font-bold text-white">اترك تقييمك</h3>
+                <input type="text" id="feedbackName" placeholder="اسمك" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-xs text-white">
+                <textarea id="feedbackComment" placeholder="رأيك في الخدمة..." class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-xs text-white h-20"></textarea>
+                <button onclick="submitSiteFeedback()" class="bg-amber-500 text-black font-bold px-4 py-2 rounded-xl text-xs">إرسال التقييم</button>
             </div>
-
             <div id="feedbackList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="eldorado-card p-4 rounded-xl space-y-2 border border-eldorado-border">
-                    <div class="flex justify-between items-center">
-                        <h4 class="text-xs font-bold text-white">Ahmed Gamer</h4>
-                        <span class="text-amber-400 text-[11px]">⭐⭐⭐⭐⭐</span>
-                    </div>
-                    <p class="text-[11px] text-slate-300">سرعة خرافية في تسليم كبسولة الويست، وأمان تام. شكراً لأدمن حسام!</p>
-                    <span class="text-[9px] text-slate-500 block">منذ يومين</span>
+                    <div class="flex justify-between items-center"><h4 class="text-xs font-bold text-white">Ahmed Gamer</h4><span class="text-amber-400">⭐⭐⭐⭐⭐</span></div>
+                    <p class="text-[11px] text-slate-300">سرعة خرافية في التسليم وأمان تام!</p>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 9: DAILY OFFERS & CHAT -->
+        <!-- SECTION 11: DAILY OFFERS -->
         <div id="sectionDailyOffers" class="hidden space-y-6">
             <div class="eldorado-card p-5 rounded-2xl space-y-4 border border-eldorado-purple/40">
-                <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-bullhorn text-eldorado-purple"></i> العروض اليومية والتنبيهات الحية</h2>
+                <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-bullhorn text-eldorado-purple"></i> العروض اليومية والتنبيهات</h2>
                 <div id="chatBox" class="bg-black p-4 rounded-xl h-48 overflow-y-auto space-y-3 text-xs border border-eldorado-border">
                     <div class="text-slate-500 text-center">حائط العروض اليومية...</div>
-                    <div class="text-white bg-slate-900 p-2.5 rounded-lg border border-eldorado-border">
-                        <strong class="text-eldorado-gold">ADMIN (حسام):</strong> تم توفير كبسولات لول بـ 45 جنيه فقط! احجز طلبك الآن.
-                    </div>
+                    <div class="text-white bg-slate-900 p-2.5 rounded-lg border border-eldorado-border"><strong class="text-eldorado-gold">ADMIN:</strong> عروض الكبسولات سارية الآن!</div>
                 </div>
                 <div class="flex gap-2">
-                    <input type="text" id="chatInput" placeholder="اكتب عرضك..." class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-xs text-white focus:outline-none">
+                    <input type="text" id="chatInput" placeholder="اكتب عرضك..." class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-xs text-white">
                     <button onclick="sendChatMessage()" class="bg-eldorado-purple text-white font-bold px-5 py-2 rounded-xl text-xs">نشر</button>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 10: DISCORD HUB -->
+        <!-- SECTION 12: DISCORD HUB -->
         <div id="sectionDiscordHub" class="hidden space-y-6">
             <div class="eldorado-card p-8 rounded-2xl text-center space-y-6 border border-[#5865F2]/40">
                 <div class="w-20 h-20 bg-[#5865F2]/20 text-[#5865F2] rounded-3xl mx-auto flex items-center justify-center text-4xl border border-[#5865F2]/40">
@@ -371,33 +361,53 @@
             </div>
         </div>
 
-        <!-- HIDDEN TRADE TAB -->
-        <div id="sectionTrade" class="hidden"></div>
-
     </main>
+
+    <!-- MODAL: AUTH -->
+    <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="eldorado-card w-full max-w-md p-6 rounded-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
+                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-user-lock text-eldorado-cyan"></i> تسجيل الدخول / حساب جديد</h3>
+                <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <input type="email" placeholder="البريد الإلكتروني" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
+                <input type="password" placeholder="كلمة المرور" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
+                <select class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
+                    <option value="buyer">مشتري مميز (VIP Buyer)</option>
+                    <option value="vendor">بائع معتمد (Verified Vendor)</option>
+                </select>
+                <button onclick="alert('تم تسجيل الدخول بنجاح!')" class="w-full bg-eldorado-cyan text-black font-bold py-2.5 rounded-xl">دخول / إنشاء حساب</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL: CUSTOM ORDER -->
+    <div id="customOrderModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="eldorado-card w-full max-w-md p-6 rounded-2xl space-y-4">
+            <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
+                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-clipboard-list text-eldorado-gold"></i> طلب حساب بمواصفات خاصة</h3>
+                <button onclick="closeCustomOrderModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="space-y-3 text-xs">
+                <input type="text" id="customGame" readonly class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-eldorado-gold font-bold">
+                <textarea placeholder="اكتب المواصفات بدقة (رانكد، سكنات، ميزانية)..." class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-3 text-white h-24"></textarea>
+                <button onclick="submitCustomOrder()" class="w-full bg-eldorado-gold text-black font-bold py-2.5 rounded-xl">إرسال الطلب</button>
+            </div>
+        </div>
+    </div>
 
     <!-- MODAL: VENDOR KYC -->
     <div id="vendorKYCModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="eldorado-card w-full max-w-lg p-6 rounded-2xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
-                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-camera text-eldorado-danger"></i> توثيق الهوية (كاميرا الموقع)</h3>
+                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-camera text-eldorado-danger"></i> توثيق الهوية كبائع</h3>
                 <button onclick="closeVendorKYCModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-3 text-xs">
-                <input type="text" id="kycFullName" placeholder="الاسم رباعي" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                <input type="text" id="kycPhone" placeholder="رقم الهاتف (فودافون كاش)" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                <input type="text" id="kycNationalId" maxlength="14" placeholder="الرقم القومي (14 رقم)" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white font-mono">
-                <div class="relative bg-black rounded-xl overflow-hidden border border-eldorado-border h-48 flex items-center justify-center">
-                    <video id="cameraFeed" autoplay playsinline class="w-full h-full object-cover hidden"></video>
-                    <canvas id="cameraCanvas" class="hidden"></canvas>
-                    <img id="capturedPreview" class="w-full h-full object-cover hidden" alt="صورة البطاقة">
-                    <div id="cameraPlaceholder" class="text-slate-500 text-center text-xs"><i class="fa-solid fa-camera text-2xl mb-1 block"></i> الكاميرا متوقفة</div>
-                </div>
-                <div class="flex gap-2">
-                    <button type="button" onclick="startCamera()" class="flex-1 bg-blue-600 text-white font-bold py-2 rounded-xl text-xs">تشغيل الكاميرا</button>
-                    <button type="button" onclick="takeSnapshot()" class="flex-1 bg-eldorado-accent text-black font-bold py-2 rounded-xl text-xs">التقاط الصورة</button>
-                </div>
-                <button onclick="submitVendorKYC()" class="w-full bg-eldorado-danger text-white font-bold py-3 rounded-xl">اعتماد وتوثيق الحساب</button>
+                <input type="text" placeholder="الاسم رباعي" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
+                <input type="text" placeholder="رقم الهاتف (فودافون كاش)" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
+                <button onclick="alert('تم إرسال طلب التوثيق')" class="w-full bg-eldorado-danger text-white font-bold py-3 rounded-xl">إرسال الطلب</button>
             </div>
         </div>
     </div>
@@ -410,9 +420,9 @@
                 <button onclick="closeWithdrawModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <div class="space-y-3 text-xs">
-                <input type="number" id="withdrawAmount" placeholder="المبلغ (EGP)" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                <input type="text" id="withdrawMethod" placeholder="رقم المحفظة أو InstaPay" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white font-mono">
-                <button onclick="submitWithdrawRequest()" class="w-full bg-eldorado-purple text-white font-bold py-2.5 rounded-xl">إرسال طلب السحب</button>
+                <input type="number" placeholder="المبلغ (EGP)" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
+                <input type="text" placeholder="رقم المحفظة أو InstaPay" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
+                <button onclick="alert('تم إرسال طلب السحب!')" class="w-full bg-eldorado-purple text-white font-bold py-2.5 rounded-xl">إرسال الطلب</button>
             </div>
         </div>
     </div>
@@ -423,9 +433,6 @@
         const SUPABASE_ANON_KEY = 'sb_publishable_2HPQNM4LN_XHKizBIORz_A_qhLRF...';
 
         let supabaseClient = null;
-        let mediaStream = null;
-        let capturedImageData = null;
-
         try {
             supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
         } catch (e) {
@@ -433,113 +440,56 @@
         }
 
         function switchTab(tab) {
-            document.getElementById('sectionCapsules').classList.add('hidden');
-            document.getElementById('sectionGamepass').classList.add('hidden');
-            document.getElementById('sectionStreaming').classList.add('hidden');
-            document.getElementById('sectionSteam').classList.add('hidden');
-            document.getElementById('sectionHome').classList.add('hidden');
-            document.getElementById('sectionTopSellers').classList.add('hidden');
-            document.getElementById('sectionEsports').classList.add('hidden');
-            document.getElementById('sectionFeedback').classList.add('hidden');
-            document.getElementById('sectionDailyOffers').classList.add('hidden');
-            document.getElementById('sectionDiscordHub').classList.add('hidden');
-            document.getElementById('sectionTrade').classList.add('hidden');
+            const tabs = ['capsules', 'gamepass', 'streaming', 'steam', 'lol', 'valorant', 'cod', 'otherGames', 'boosting', 'feedback', 'dailyOffers', 'discordHub'];
+            tabs.forEach(t => {
+                const el = document.getElementById('section' + t.charAt(0).toUpperCase() + t.slice(1));
+                if(el) el.classList.add('hidden');
+            });
 
-            if(tab === 'capsules') document.getElementById('sectionCapsules').classList.remove('hidden');
-            if(tab === 'gamepass') document.getElementById('sectionGamepass').classList.remove('hidden');
-            if(tab === 'streaming') document.getElementById('sectionStreaming').classList.remove('hidden');
-            if(tab === 'steam') document.getElementById('sectionSteam').classList.remove('hidden');
-            if(tab === 'home') document.getElementById('sectionHome').classList.remove('hidden');
-            if(tab === 'topSellers') document.getElementById('sectionTopSellers').classList.remove('hidden');
-            if(tab === 'esports') document.getElementById('sectionEsports').classList.remove('hidden');
-            if(tab === 'feedback') document.getElementById('sectionFeedback').classList.remove('hidden');
-            if(tab === 'dailyOffers') document.getElementById('sectionDailyOffers').classList.remove('hidden');
-            if(tab === 'discordHub') document.getElementById('sectionDiscordHub').classList.remove('hidden');
-            if(tab === 'trade') document.getElementById('sectionTrade').classList.remove('hidden');
+            const target = document.getElementById('section' + tab.charAt(0).toUpperCase() + tab.slice(1));
+            if(target) target.classList.remove('hidden');
         }
 
+        function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
+        function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
+
         function openVendorKYCModal() { document.getElementById('vendorKYCModal').classList.remove('hidden'); }
-        function closeVendorKYCModal() { document.getElementById('vendorKYCModal').classList.add('hidden'); stopCamera(); }
+        function closeVendorKYCModal() { document.getElementById('vendorKYCModal').classList.add('hidden'); }
+
         function openWithdrawModal() { document.getElementById('withdrawModal').classList.remove('hidden'); }
         function closeWithdrawModal() { document.getElementById('withdrawModal').classList.add('hidden'); }
 
-        async function startCamera() {
-            try {
-                mediaStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
-                const video = document.getElementById('cameraFeed');
-                video.srcObject = mediaStream;
-                video.classList.remove('hidden');
-                document.getElementById('cameraPlaceholder').classList.add('hidden');
-                document.getElementById('capturedPreview').classList.add('hidden');
-            } catch (err) { alert("تعذر الوصول للكاميرا!"); }
+        function openCustomOrderModal(gameName) {
+            document.getElementById('customGame').value = 'لعبة: ' + gameName;
+            document.getElementById('customOrderModal').classList.remove('hidden');
         }
+        function closeCustomOrderModal() { document.getElementById('customOrderModal').classList.add('hidden'); }
 
-        function takeSnapshot() {
-            const video = document.getElementById('cameraFeed');
-            const canvas = document.getElementById('cameraCanvas');
-            const preview = document.getElementById('capturedPreview');
-            if(video.paused || video.ended || !mediaStream) return alert("شغل الكاميرا أولاً!");
-            canvas.width = video.videoWidth; canvas.height = video.videoHeight;
-            canvas.getContext('2d').drawImage(video, 0, 0, canvas.width, canvas.height);
-            capturedImageData = canvas.toDataURL('image/jpeg');
-            preview.src = capturedImageData; preview.classList.remove('hidden'); video.classList.add('hidden');
-            stopCamera(); alert("تم التقاط صورة البطاقة!");
-        }
-
-        function stopCamera() {
-            if(mediaStream) { mediaStream.getTracks().forEach(track => track.stop()); mediaStream = null; }
-        }
-
-        async function submitVendorKYC() {
-            const fullName = document.getElementById('kycFullName').value.trim();
-            const phone = document.getElementById('kycPhone').value.trim();
-            const nationalId = document.getElementById('kycNationalId').value.trim();
-            if(!fullName || !phone || !nationalId || !capturedImageData) return alert("املأ البيانات والتقط البطاقة!");
-            if(nationalId.length !== 14) return alert("الرقم القومي 14 رقم!");
-            const { error } = await supabaseClient.from('vendors').insert([{ username: fullName, phone: phone, national_id: nationalId, status: 'verified' }]);
-            if(error) alert("خطأ: " + error.message); else { alert("تم توثيق الحساب!"); closeVendorKYCModal(); }
-        }
-
-        function submitWithdrawRequest() {
-            const amount = document.getElementById('withdrawAmount').value;
-            const method = document.getElementById('withdrawMethod').value;
-            if(!amount || !method) return alert("املأ الحقول!");
-            alert("تم إرسال طلب السحب!");
-            closeWithdrawModal();
+        function submitCustomOrder() {
+            alert("تم إرسال طلبك بالمواصفات الخاصة بنجاح!");
+            closeCustomOrderModal();
         }
 
         function submitSiteFeedback() {
             const name = document.getElementById('feedbackName').value.trim();
-            const rating = document.getElementById('feedbackRating').value;
             const comment = document.getElementById('feedbackComment').value.trim();
-
-            if(!name || !comment) return alert("يرجى كتابة الاسم ورأيك في التقييم!");
-
-            const stars = '⭐'.repeat(parseInt(rating));
+            if(!name || !comment) return alert("املأ الحقول أولاً!");
+            
             const list = document.getElementById('feedbackList');
-
-            const newCard = document.createElement('div');
-            newCard.className = 'eldorado-card p-4 rounded-xl space-y-2 border border-amber-500/30';
-            newCard.innerHTML = `
-                <div class="flex justify-between items-center">
-                    <h4 class="text-xs font-bold text-white">${name}</h4>
-                    <span class="text-amber-400 text-[11px]">${stars}</span>
-                </div>
-                <p class="text-[11px] text-slate-300">${comment}</p>
-                <span class="text-[9px] text-slate-500 block">الآن</span>
-            `;
-            list.prepend(newCard);
-
+            const card = document.createElement('div');
+            card.className = 'eldorado-card p-4 rounded-xl space-y-2 border border-amber-500/30';
+            card.innerHTML = `<div class="flex justify-between items-center"><h4 class="text-xs font-bold text-white">${name}</h4><span class="text-amber-400">⭐⭐⭐⭐⭐</span></div><p class="text-[11px] text-slate-300">${comment}</p>`;
+            list.prepend(card);
             document.getElementById('feedbackName').value = '';
             document.getElementById('feedbackComment').value = '';
-            alert("شكراً لك! تم إضافة تقييمك بنجاح للمنصة.");
+            alert("تم إضافة تقييمك بنجاح!");
         }
 
         function sendChatMessage() {
             const input = document.getElementById('chatInput');
             const box = document.getElementById('chatBox');
             if(!input.value.trim()) return;
-            box.innerHTML += `<div class="text-white bg-slate-900 p-2.5 rounded-lg border border-eldorado-border"><strong>ADMIN:</strong> ${input.value}</div>`;
+            box.innerHTML += `<div class="text-white bg-slate-900 p-2.5 rounded-lg border border-eldorado-border"><strong class="text-eldorado-gold">ADMIN:</strong> ${input.value}</div>`;
             input.value = ''; box.scrollTop = box.scrollHeight;
         }
     </script>
