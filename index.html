@@ -8,8 +8,10 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts (Pixel / Retro & Cairo) -->
+    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <script>
         tailwind.config = {
@@ -48,11 +50,11 @@
     <div class="bg-[#07090d] border-b border-eldorado-border py-1.5 px-4 text-xs flex justify-between items-center text-slate-400">
         <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-eldorado-accent animate-pulse"></span>
-            <span class="text-white font-bold text-[11px]">Dollar Store Escrow Engine Active</span>
+            <span class="text-white font-bold text-[11px]">Dollar Store Escrow & Referral Engine Active</span>
         </div>
         <div class="flex items-center gap-4 text-[11px]">
             <span>أونلاين الآن: <strong class="text-eldorado-accent font-mono">184</strong></span>
-            <span>إجمالي البحث: <strong class="text-eldorado-gold font-mono">45,210</strong></span>
+            <span>نظام الإحالة: <strong class="text-eldorado-gold font-mono">2.5% للمزكي + 2.5% للمنصة</strong></span>
         </div>
     </div>
 
@@ -70,13 +72,13 @@
             </div>
 
             <div class="hidden md:flex flex-1 max-w-md relative">
-                <input type="text" placeholder="ابحث عن ألعاب، كلمات مفتاحية، بائعين..." class="w-full bg-[#151a23] border border-eldorado-border rounded-xl py-2 px-4 pr-10 text-xs text-white focus:outline-none focus:border-eldorado-accent">
+                <input type="text" placeholder="ابحث عن ألعاب، حسابات، بائعين..." class="w-full bg-[#151a23] border border-eldorado-border rounded-xl py-2 px-4 pr-10 text-xs text-white focus:outline-none focus:border-eldorado-accent">
                 <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
             </div>
 
             <div class="flex items-center gap-2">
                 <button onclick="toggleAdminPanel()" class="bg-eldorado-card hover:bg-eldorado-border text-eldorado-gold border border-eldorado-gold/40 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
-                    <i class="fa-solid fa-user-shield"></i> <span class="hidden sm:inline">الإدارة والفلوس</span>
+                    <i class="fa-solid fa-user-shield"></i> <span class="hidden sm:inline">الإدارة والأرباح</span>
                 </button>
                 <button onclick="openTicketsModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5">
                     <i class="fa-solid fa-ticket"></i> التيكيتات
@@ -88,8 +90,8 @@
         <div class="max-w-7xl mx-auto flex items-center gap-6 mt-3 pt-2 border-t border-eldorado-border/40 text-xs text-slate-300 overflow-x-auto">
             <button onclick="switchTab('home')" class="hover:text-eldorado-accent font-bold flex items-center gap-1 text-eldorado-accent"><i class="fa-solid fa-fire"></i> الشائع (Popular)</button>
             <button onclick="switchTab('games')" class="hover:text-eldorado-accent font-bold flex items-center gap-1"><i class="fa-solid fa-user-gear"></i> الحسابات (Accounts)</button>
-            <button onclick="switchTab('games')" class="hover:text-eldorado-accent font-bold flex items-center gap-1"><i class="fa-solid fa-bolt"></i> الشحن (Top ups)</button>
-            <button onclick="switchTab('trade')" class="hover:text-eldorado-gold font-bold flex items-center gap-1 text-eldorado-gold"><i class="fa-solid fa-handshake"></i> شات الـ Trade</button>
+            <button onclick="switchTab('referral')" class="hover:text-eldorado-gold font-bold flex items-center gap-1 text-eldorado-gold"><i class="fa-solid fa-users"></i> برنامج الشركاء والإحالة</button>
+            <button onclick="switchTab('trade')" class="hover:text-eldorado-gold font-bold flex items-center gap-1"><i class="fa-solid fa-handshake"></i> شات الـ Trade</button>
         </div>
     </header>
 
@@ -102,72 +104,69 @@
                 <div class="w-10 h-10 rounded-lg bg-eldorado-accent/20 text-eldorado-accent flex items-center justify-center"><i class="fa-solid fa-store"></i></div>
                 <div><h3 class="font-bold text-xs text-white">السوق العام المباشر</h3><p class="text-[10px] text-slate-400">تصفح كافة العروض</p></div>
             </div>
-            <div onclick="switchTab('games')" class="eldorado-card p-4 rounded-2xl cursor-pointer flex items-center gap-3">
-                <div class="w-10 h-10 rounded-lg bg-eldorado-cyan/20 text-eldorado-cyan flex items-center justify-center"><i class="fa-solid fa-gamepad"></i></div>
-                <div><h3 class="font-bold text-xs text-white">سوق الألعاب المخصص</h3><p class="text-[10px] text-slate-400">واجهات لكل لعبة</p></div>
+            <div onclick="switchTab('referral')" class="eldorado-card p-4 rounded-2xl cursor-pointer flex items-center gap-3 border-eldorado-gold/40">
+                <div class="w-10 h-10 rounded-lg bg-eldorado-gold/20 text-eldorado-gold flex items-center justify-center"><i class="fa-solid fa-users-rectangle"></i></div>
+                <div><h3 class="font-bold text-xs text-white">برنامج إحالة البائعين (2.5%)</h3><p class="text-[10px] text-slate-400">ادعُ بائعين واكسب من مبيعاتهم</p></div>
             </div>
-            <div onclick="switchTab('trade')" class="eldorado-card p-4 rounded-2xl cursor-pointer flex items-center gap-3 border-eldorado-gold/40">
-                <div class="w-10 h-10 rounded-lg bg-eldorado-gold/20 text-eldorado-gold flex items-center justify-center"><i class="fa-solid fa-handshake"></i></div>
+            <div onclick="switchTab('trade')" class="eldorado-card p-4 rounded-2xl cursor-pointer flex items-center gap-3">
+                <div class="w-10 h-10 rounded-lg bg-eldorado-purple/20 text-eldorado-purple flex items-center justify-center"><i class="fa-solid fa-handshake"></i></div>
                 <div><h3 class="font-bold text-xs text-white">شات المقايضة (Trade Hub)</h3><p class="text-[10px] text-slate-400">بحضور الأدمن الإجباري</p></div>
             </div>
         </div>
 
-        <!-- SECTION 1: HOME MARKET (Popular Items Grid) -->
+        <!-- SECTION 1: HOME MARKET -->
         <div id="sectionHome" class="space-y-4">
             <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-fire text-eldorado-gold"></i> العروض الشائعة (Popular Offers)</h2>
             
             <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-                <!-- Card 1 -->
                 <div class="eldorado-card p-3 rounded-xl space-y-2">
                     <div class="h-32 bg-slate-900 rounded-lg flex items-center justify-center relative overflow-hidden">
                         <i class="fa-solid fa-shield-halved text-4xl text-blue-400"></i>
                         <span class="absolute top-2 right-2 bg-blue-500/80 text-white text-[9px] px-1.5 py-0.5 rounded">League of Legends</span>
                     </div>
                     <h4 class="text-xs font-bold text-white truncate">LoL Unranked Level 30 Account</h4>
-                    <p class="text-[10px] text-slate-400">سيرفر EUW | ضمان كامل</p>
+                    <p class="text-[10px] text-slate-400">أول 30 بيعة بدون أي عمولة للبائع!</p>
                     <div class="flex justify-between items-center pt-2 border-t border-eldorado-border">
                         <span class="text-xs font-bold text-eldorado-accent font-mono">150 EGP</span>
                         <button onclick="openTicketsModal()" class="bg-eldorado-accent text-black font-bold px-2.5 py-1 rounded-lg text-[10px]">شراء</button>
                     </div>
                 </div>
-
-                <!-- Card 2 -->
-                <div class="eldorado-card p-3 rounded-xl space-y-2">
-                    <div class="h-32 bg-slate-900 rounded-lg flex items-center justify-center relative overflow-hidden">
-                        <i class="fa-solid fa-crosshairs text-4xl text-red-500"></i>
-                        <span class="absolute top-2 right-2 bg-red-500/80 text-white text-[9px] px-1.5 py-0.5 rounded">Valorant</span>
-                    </div>
-                    <h4 class="text-xs font-bold text-white truncate">Valorant Ascendant Rank Account</h4>
-                    <p class="text-[10px] text-slate-400">سيرفر الشرق الأوسط + سكنات</p>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldorado-border">
-                        <span class="text-xs font-bold text-eldorado-cyan font-mono">650 EGP</span>
-                        <button onclick="openTicketsModal()" class="bg-eldorado-cyan text-black font-bold px-2.5 py-1 rounded-lg text-[10px]">شراء</button>
-                    </div>
-                </div>
-
-                <!-- Card 3 -->
-                <div class="eldorado-card p-3 rounded-xl space-y-2">
-                    <div class="h-32 bg-slate-900 rounded-lg flex items-center justify-center relative overflow-hidden">
-                        <i class="fa-solid fa-cube text-4xl text-rose-400"></i>
-                        <span class="absolute top-2 right-2 bg-rose-500/80 text-white text-[9px] px-1.5 py-0.5 rounded">Roblox</span>
-                    </div>
-                    <h4 class="text-xs font-bold text-white truncate">1000 Robux Fast Delivery</h4>
-                    <p class="text-[10px] text-slate-400">شحن آمن وفوري</p>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldorado-border">
-                        <span class="text-xs font-bold text-eldorado-gold font-mono">300 EGP</span>
-                        <button onclick="openTicketsModal()" class="bg-eldorado-gold text-black font-bold px-2.5 py-1 rounded-lg text-[10px]">شراء</button>
-                    </div>
-                </div>
             </div>
         </div>
 
-        <!-- Trust Banner -->
-        <div class="bg-[#121620] border border-eldorado-border p-5 rounded-2xl space-y-3">
-            <h3 class="text-xs font-bold text-slate-300">كيف يعمل الشراء والوساطة على Dollar Store؟</h3>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
-                <div class="flex items-center gap-3"><i class="fa-solid fa-cart-shopping text-eldorado-accent text-lg"></i><div><strong class="block text-white">1. اختيار وتأكيد الأوردر</strong><span>المبلغ يُحجز تلقائياً في خزينة الوساطة.</span></div></div>
-                <div class="flex items-center gap-3"><i class="fa-solid fa-lock text-eldorado-cyan text-lg"></i><div><strong class="block text-white">2. التسليم بالشات الآمن</strong><span>البائع يسلم البيانات داخل التيكيت.</span></div></div>
-                <div class="flex items-center gap-3"><i class="fa-solid fa-star text-eldorado-gold text-lg"></i><div><strong class="block text-white">3. التقييم والإفراج</strong><span>بعد تقييمك يُحول المبلغ لحساب البائع.</span></div></div>
+        <!-- SECTION: VENDOR REFERRAL DASHBOARD -->
+        <div id="sectionReferral" class="hidden space-y-4">
+            <div class="eldorado-card p-6 rounded-2xl space-y-4 border border-eldorado-gold/40">
+                <h3 class="text-sm font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-users text-eldorado-gold"></i> نظام إحالة البائعين (اكسب 2.5% مدى الحياة)
+                </h3>
+                <p class="text-xs text-slate-300">
+                    شارك رابط الإحالة الخاص بك مع أصدقائك البائعين. عندما يسجلون عبر رابطك ويتخطوا أول 30 بيعة، سيتم خصم 5% عمولة من مبيعاتهم: 
+                    <strong class="text-eldorado-accent">2.5% تضاف لمحفظتك أنت مباشرة</strong>، و2.5% للمنصة!
+                </p>
+
+                <div class="bg-black/60 p-4 rounded-xl border border-eldorado-border space-y-3">
+                    <label class="text-xs text-slate-400 block">رابط الإحالة الخاص بك:</label>
+                    <div class="flex gap-2">
+                        <input type="text" id="referralLink" readonly value="https://asdhossamhassan11-lgtm.github.io/Dollar-Store-/?ref=hossam_admin" class="w-full bg-[#151a23] border border-eldorado-border rounded-xl p-2.5 text-xs text-eldorado-accent font-mono focus:outline-none">
+                        <button onclick="copyReferralLink()" class="bg-eldorado-gold text-black font-bold px-4 py-2 rounded-xl text-xs hover:bg-amber-400 transition">نسخ الرابط</button>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 text-center text-xs">
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-eldorado-border">
+                        <span class="text-slate-400 block mb-1">عدد البائعين المدعوين</span>
+                        <strong class="text-white text-base font-mono">0 بائع</strong>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-eldorado-border">
+                        <span class="text-slate-400 block mb-1">نسبة أرباحك من الإحالة</span>
+                        <strong class="text-eldorado-accent text-base font-mono">2.5%</strong>
+                    </div>
+                    <div class="bg-slate-900/60 p-3 rounded-xl border border-eldorado-border">
+                        <span class="text-slate-400 block mb-1">إجمالي أرباح الإحالة</span>
+                        <strong class="text-eldorado-gold text-base font-mono">0.00 EGP</strong>
+                    </div>
+                </div>
             </div>
         </div>
 
@@ -204,10 +203,10 @@
     <!-- ADMIN SIDEBAR -->
     <div id="adminSidebar" class="fixed top-0 right-0 h-full w-80 bg-[#151a23] border-l border-eldorado-border z-50 transform translate-x-full transition-transform duration-200 flex flex-col p-4 space-y-4 shadow-2xl">
         <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
-            <h3 class="text-xs font-bold text-eldorado-gold"><i class="fa-solid fa-user-shield"></i> لوحة الأدمن</h3>
+            <h3 class="text-xs font-bold text-eldorado-gold"><i class="fa-solid fa-user-shield"></i> لوحة الأدمن والعمولات</h3>
             <button onclick="toggleAdminPanel()" class="text-slate-400"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <p class="text-xs text-slate-300">مراقبة التيكيتات وتحويلات فودافون كاش / إنستاباي.</p>
+        <p class="text-xs text-slate-300">مراقبة الـ 30 بيعة المجانية، وتوزيع الـ 2.5% للبائعين المُحيلين تلقائياً.</p>
     </div>
 
     <!-- TICKETS MODAL -->
@@ -219,15 +218,29 @@
         </div>
     </div>
 
+    <!-- SCRIPT LOGIC -->
     <script>
+        // ضع هنا رابط ومفتاح Supabase الخاص بك لاحقاً
+        const SUPABASE_URL = 'https://afzyerpeoirbcxwymsqg.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'ضع_مفتاح_الـ_anon_هنا';
+
+        let supabaseClient = null;
+        try {
+            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        } catch (e) {
+            console.error("DB Init Error:", e);
+        }
+
         function switchTab(tab) {
             document.getElementById('sectionHome').classList.add('hidden');
             document.getElementById('sectionGames').classList.add('hidden');
+            document.getElementById('sectionReferral').classList.add('hidden');
             document.getElementById('sectionTrade').classList.add('hidden');
             document.getElementById('sectionGameStore').classList.add('hidden');
 
             if(tab === 'home') document.getElementById('sectionHome').classList.remove('hidden');
             if(tab === 'games') document.getElementById('sectionGames').classList.remove('hidden');
+            if(tab === 'referral') document.getElementById('sectionReferral').classList.remove('hidden');
             if(tab === 'trade') document.getElementById('sectionTrade').classList.remove('hidden');
         }
 
@@ -240,6 +253,13 @@
         function toggleAdminPanel() { document.getElementById('adminSidebar').classList.toggle('translate-x-full'); }
         function openTicketsModal() { document.getElementById('ticketsModal').classList.remove('hidden'); }
         function closeTicketsModal() { document.getElementById('ticketsModal').classList.add('hidden'); }
+
+        function copyReferralLink() {
+            const copyText = document.getElementById("referralLink");
+            copyText.select();
+            navigator.clipboard.writeText(copyText.value);
+            alert("تم نسخ رابط الإحالة بنجاح! شاركه مع أصدقائك البائعين.");
+        }
     </script>
 </body>
 </html>
