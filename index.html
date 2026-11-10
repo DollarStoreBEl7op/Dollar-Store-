@@ -3,37 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dollar Store | متجر وبورصة المنتجات الرقمية للألعاب (Escrow System)</title>
+    <title>DOLLAR STORE | 90s Arcade Retro Gaming Marketplace</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;800;900&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Google Fonts (Retro / Gaming vibes) -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        dollar: {
-                            bg: '#050f13',
-                            card: '#0b1d22',
-                            cardBorder: '#143840',
-                            primary: '#10b981',
-                            primaryHover: '#059669',
-                            cyan: '#06b6d4',
-                            teal: '#14b8a6',
-                            gold: '#f59e0b',
-                            goldHover: '#d97706',
-                            discord: '#5865F2'
+                        retro: {
+                            bg: '#080612',
+                            card: '#120d26',
+                            border: '#2a1b4e',
+                            green: '#00ff66',
+                            cyan: '#00ffff',
+                            gold: '#ffcc00',
+                            purple: '#8b00ff'
                         }
                     },
                     fontFamily: {
-                        cairo: ['Cairo', 'sans-serif'],
-                        gaming: ['Rajdhani', 'Cairo', 'sans-serif']
+                        pixel: ['"Press Start 2P"', 'monospace'],
+                        cairo: ['Cairo', 'sans-serif']
                     }
                 }
             }
@@ -43,512 +38,223 @@
     <style>
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: #050f13;
+            background-color: #080612;
             color: #e2e8f0;
-            overflow-x: hidden;
+            background-image: 
+                radial-gradient(circle at 50% 50%, rgba(43, 20, 90, 0.2) 0%, transparent 80%),
+                linear-gradient(rgba(18, 13, 38, 0.4) 1px, transparent 1px);
+            background-size: 100% 4px; /* تأثير الشاشات القديمة CRT Scanlines */
         }
-        #wavesCanvas {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: -1; pointer-events: none;
-        }
-        ::-webkit-scrollbar { width: 8px; height: 6px; }
-        ::-webkit-scrollbar-track { background: #050f13; }
-        ::-webkit-scrollbar-thumb { background: #143840; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #10b981; }
 
-        .glass-panel {
-            background: rgba(11, 29, 34, 0.92);
-            backdrop-filter: blur(14px);
-            border: 1px solid rgba(20, 56, 64, 0.7);
+        .retro-box {
+            background: #120d26;
+            border: 3px solid #2a1b4e;
+            box-shadow: 4px 4px 0px #00ff66;
+            transition: all 0.2s ease;
         }
-        .hero-banner-btn {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        .retro-box:hover {
+            transform: translate(-2px, -2px);
+            box-shadow: 6px 6px 0px #00ffff;
         }
-        .hero-banner-btn:hover {
-            transform: translateY(-3px) scale(1.02);
-            box-shadow: 0 10px 25px -5px rgba(16, 185, 129, 0.3);
+
+        .retro-btn {
+            border: 2px solid #00ff66;
+            background: #080612;
+            color: #00ff66;
+            font-family: 'Press Start 2P', monospace;
+            font-size: 10px;
+            padding: 10px 15px;
+            box-shadow: 3px 3px 0px #00ff66;
+            cursor: pointer;
+            transition: 0.1s;
+        }
+        .retro-btn:active {
+            transform: translate(2px, 2px);
+            box-shadow: 1px 1px 0px #00ff66;
+        }
+
+        .pixel-title {
+            font-family: 'Press Start 2P', monospace;
+            text-shadow: 2px 2px #8b00ff;
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-dollar-primary selection:text-black">
+<body class="min-h-screen flex flex-col justify-between">
 
-    <canvas id="wavesCanvas"></canvas>
-
-    <!-- Top Live Trackers Bar (أداة كشف الأونلاين والحسابات والزيارات) -->
-    <div class="bg-gradient-to-r from-dollar-card via-dollar-cardBorder to-dollar-card text-xs text-slate-300 py-2 px-4 border-b border-dollar-cardBorder flex flex-wrap justify-between items-center gap-2">
-        <div class="flex items-center gap-3">
-            <span class="bg-dollar-primary/20 text-dollar-primary text-[10px] font-bold px-2.5 py-0.5 rounded-full border border-dollar-primary/30 flex items-center gap-1.5">
-                <i class="fa-solid fa-shield-halved"></i> نظام حماية الوساطة النشط (Dollar Store Escrow)
-            </span>
-        </div>
-        <div class="flex items-center gap-4 text-[11px]">
-            <span class="bg-dollar-bg/80 px-2.5 py-1 rounded-lg border border-dollar-cardBorder flex items-center gap-1.5">
-                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
-                أونلاين الآن: <strong id="onlineUsersCount" class="text-dollar-primary font-gaming">142</strong>
-            </span>
-            <span class="bg-dollar-bg/80 px-2.5 py-1 rounded-lg border border-dollar-cardBorder flex items-center gap-1.5">
-                <i class="fa-solid fa-users text-dollar-cyan"></i>
-                الحسابات المسجلة: <strong id="registeredAccountsCount" class="text-dollar-cyan font-gaming">3,890</strong>
-            </span>
-            <span class="bg-dollar-bg/80 px-2.5 py-1 rounded-lg border border-dollar-cardBorder flex items-center gap-1.5">
-                <i class="fa-solid fa-chart-line text-dollar-gold"></i>
-                إجمالي زوار البحث: <strong id="totalSearchesCount" class="text-dollar-gold font-gaming">45,210</strong>
-            </span>
-        </div>
+    <!-- Top Arcade Info Bar -->
+    <div class="bg-retro-card border-b-2 border-retro-border py-2 px-4 text-xs flex justify-between items-center text-retro-cyan font-pixel">
+        <span>INSERT COIN TO START 🕹️</span>
+        <span class="text-retro-green">ONLINE PLAYERS: 184</span>
     </div>
 
     <!-- Header -->
-    <header class="sticky top-0 z-40 glass-panel border-b border-dollar-cardBorder shadow-2xl">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex items-center justify-between h-20 gap-4">
-                <div class="flex items-center gap-3 cursor-pointer select-none" onclick="switchMainTab('home')">
-                    <div class="w-12 h-12 rounded-xl bg-gradient-to-br from-dollar-primary via-dollar-cyan to-emerald-950 flex items-center justify-center shadow-lg border border-dollar-primary/50">
-                        <i class="fa-solid fa-dollar-sign text-2xl text-black font-black"></i>
-                    </div>
-                    <div>
-                        <h1 class="text-2xl font-black tracking-wider text-white font-gaming">DOLLAR <span class="text-dollar-primary text-[10px] font-bold border border-dollar-primary/40 bg-dollar-primary/10 px-1.5 py-0.5 rounded">STORE</span></h1>
-                        <p class="text-[10px] text-slate-400">Gaming Accounts & Services Marketplace</p>
-                    </div>
+    <header class="sticky top-0 z-40 bg-retro-bg/95 border-b-4 border-retro-border px-4 py-4 shadow-xl">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
+                <div class="w-10 h-10 bg-retro-green flex items-center justify-center border-2 border-white shadow-[3px_3px_0px_#ffcc00]">
+                    <i class="fa-solid fa-gamepad text-black text-xl"></i>
                 </div>
+                <div>
+                    <h1 class="pixel-title text-sm md:text-lg text-retro-green tracking-widest">DOLLAR STORE</h1>
+                    <p class="text-[9px] text-retro-gold font-pixel">RETRO 90S ESCROW MARKET</p>
+                </div>
+            </div>
 
-                <div class="hidden md:flex flex-1 max-w-md relative">
-                    <input type="text" id="searchInput" placeholder="ابحث عن أكونتات (LoL, Valorant, Roblox, COD)..." class="w-full bg-dollar-bg/95 border border-dollar-cardBorder rounded-xl py-2.5 px-4 pr-10 text-xs text-white placeholder-slate-400 focus:outline-none focus:border-dollar-primary">
-                    <i class="fa-solid fa-magnifying-glass absolute right-3.5 top-3.5 text-slate-400"></i>
-                </div>
-
-                <div class="flex items-center gap-3">
-                    <button onclick="toggleAdminPanel()" class="bg-dollar-card hover:bg-dollar-cardBorder text-dollar-gold border border-dollar-gold/40 px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 font-bold shadow-lg transition" title="لوحة تحكم الأدمن والتحويلات">
-                        <i class="fa-solid fa-user-shield"></i> <span class="hidden sm:inline">الإدارة والفلوس</span>
-                    </button>
-                    <button onclick="openTicketsModal()" class="bg-dollar-discord hover:bg-indigo-600 text-white font-bold px-3.5 py-2 rounded-xl text-xs flex items-center gap-2 shadow-lg transition">
-                        <i class="fa-solid fa-ticket"></i> التيكيتات
-                    </button>
-                    <button onclick="openUserProfileModal()" class="w-10 h-10 rounded-full bg-dollar-card border border-dollar-primary text-dollar-primary flex items-center justify-center hover:scale-105 transition shadow-lg" title="البروفايل والريفيوهات">
-                        <i class="fa-solid fa-user text-sm"></i>
-                    </button>
-                </div>
+            <div class="flex items-center gap-3">
+                <button onclick="toggleAdminPanel()" class="retro-btn !border-retro-gold !text-retro-gold !shadow-[3px_3px_0px_#ffcc00]">
+                    <i class="fa-solid fa-shield-halved"></i> الإدارة
+                </button>
+                <button onclick="openTicketsModal()" class="retro-btn">
+                    <i class="fa-solid fa-ticket"></i> التيكيت
+                </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Content Hub -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 flex-grow w-full space-y-8">
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
 
-        <!-- ⭐ 3 Prominent Main Selections (الخيارات الثلاثة البارزة في الواجهة) -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
-            <!-- Option 1: General Store Market -->
-            <div onclick="switchMainTab('home')" id="btnTabHome" class="hero-banner-btn cursor-pointer glass-panel p-5 rounded-2xl border-2 border-dollar-primary bg-gradient-to-br from-dollar-card to-dollar-bg flex items-center gap-4">
-                <div class="w-14 h-14 rounded-xl bg-dollar-primary/20 text-dollar-primary border border-dollar-primary/40 flex items-center justify-center text-2xl">
+        <!-- 🕹️ الخيارات الثلاثة البارزة (ستايل أركيد التسعينات) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <!-- 1. General Market -->
+            <div onclick="switchTab('home')" class="retro-box p-6 cursor-pointer text-center space-y-3">
+                <div class="w-12 h-12 mx-auto bg-retro-green/20 text-retro-green border border-retro-green flex items-center justify-center text-xl">
                     <i class="fa-solid fa-store"></i>
                 </div>
-                <div>
-                    <h3 class="text-base font-black text-white">الواجهة العامة للسوق</h3>
-                    <p class="text-xs text-slate-400 mt-1">تصفح كافة الحسابات والاشتراكات المباشرة</p>
-                </div>
+                <h3 class="font-pixel text-xs text-white">الواجهة العامة للسوق</h3>
+                <p class="text-xs text-slate-400">تصفح كافة حسابات وألعاب المنصة المباشرة.</p>
             </div>
 
-            <!-- Option 2: Game Market Hub (League, Valorant, Roblox, COD, Apex) -->
-            <div onclick="switchMainTab('games')" id="btnTabGames" class="hero-banner-btn cursor-pointer glass-panel p-5 rounded-2xl border border-dollar-cardBorder hover:border-dollar-cyan bg-gradient-to-br from-dollar-card to-dollar-bg flex items-center gap-4">
-                <div class="w-14 h-14 rounded-xl bg-dollar-cyan/20 text-dollar-cyan border border-dollar-cyan/40 flex items-center justify-center text-2xl">
+            <!-- 2. Game Market Hub -->
+            <div onclick="switchTab('games')" class="retro-box p-6 cursor-pointer text-center space-y-3 !border-retro-cyan !shadow-[4px_4px_0px_#00ffff]">
+                <div class="w-12 h-12 mx-auto bg-retro-cyan/20 text-retro-cyan border border-retro-cyan flex items-center justify-center text-xl">
                     <i class="fa-solid fa-gamepad"></i>
                 </div>
-                <div>
-                    <h3 class="text-base font-black text-white">سوق الألعاب المخصص</h3>
-                    <p class="text-xs text-slate-400 mt-1">League, Valorant, Roblox, COD, Apex</p>
-                </div>
+                <h3 class="font-pixel text-xs text-white">سوق الألعاب المخصص</h3>
+                <p class="text-xs text-slate-400">واجهة مستقلة لكل لعبة بأوردراتها الكاملة.</p>
             </div>
 
-            <!-- Option 3: Boosting & Seller Channels Board -->
-            <div onclick="switchMainTab('boosting')" id="btnTabBoosting" class="hero-banner-btn cursor-pointer glass-panel p-5 rounded-2xl border border-dollar-cardBorder hover:border-dollar-gold bg-gradient-to-br from-dollar-card to-dollar-bg flex items-center gap-4">
-                <div class="w-14 h-14 rounded-xl bg-dollar-gold/20 text-dollar-gold border border-dollar-gold/40 flex items-center justify-center text-2xl">
-                    <i class="fa-solid fa-trophy"></i>
+            <!-- 3. Trade Hub (شات التريد بحضور الأدمن الإجباري) -->
+            <div onclick="switchTab('trade')" class="retro-box p-6 cursor-pointer text-center space-y-3 !border-retro-gold !shadow-[4px_4px_0px_#ffcc00]">
+                <div class="w-12 h-12 mx-auto bg-retro-gold/20 text-retro-gold border border-retro-gold flex items-center justify-center text-xl">
+                    <i class="fa-solid fa-handshake"></i>
                 </div>
-                <div>
-                    <h3 class="text-base font-black text-white">البوستينج وقنوات البائعين</h3>
-                    <p class="text-xs text-slate-400 mt-1">قناة خاصة لكل بائع وعروض الأوردرات</p>
-                </div>
+                <h3 class="font-pixel text-xs text-white">شات التريد والمقايضة</h3>
+                <p class="text-xs text-slate-400">تبادل الحسابات بحضور الأدمن (حسام) حصرياً.</p>
             </div>
         </div>
 
-        <!-- SECTION 1: HOME MARKETPLACE -->
-        <div id="sectionHome" class="space-y-6">
-            <div class="glass-panel p-4 rounded-xl border border-dollar-cardBorder flex justify-between items-center">
-                <h2 class="text-lg font-bold text-white"><i class="fa-solid fa-fire text-dollar-gold ml-2"></i>أحدث الحسابات والمنتجات المعروضة</h2>
-                <span class="text-xs text-slate-400">تحديث فوري آمن</span>
+        <!-- SECTION 1: HOME -->
+        <div id="sectionHome" class="space-y-4">
+            <div class="retro-box p-4 flex justify-between items-center">
+                <h2 class="font-pixel text-xs text-retro-green">P1: المنتجات المعروضة حالياً</h2>
             </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <!-- Product 1: Dollar Store Official -->
-                <div class="glass-panel p-5 rounded-2xl border border-dollar-cardBorder space-y-4 hover:border-dollar-primary transition">
-                    <div class="h-40 bg-slate-900 rounded-xl flex items-center justify-center border border-dollar-cardBorder relative overflow-hidden">
-                        <i class="fa-solid fa-shield-cat text-5xl text-dollar-primary"></i>
-                        <span class="absolute top-2 right-2 bg-dollar-primary text-black font-black text-[10px] px-2 py-0.5 rounded">متجر Dollar Store الرسمي</span>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="retro-box p-4 space-y-3">
+                    <div class="h-32 bg-black border-2 border-retro-border flex items-center justify-center">
+                        <i class="fa-solid fa-shield-cat text-4xl text-retro-green"></i>
                     </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-white">حساب League of Legends - Level 30 Fresh Unranked</h4>
-                        <p class="text-xs text-slate-400 mt-1">سيرفر EUW | ضمان كامل مع الإيميل الأول والتسليم الفوري</p>
-                    </div>
-                    <div class="flex items-center justify-between pt-2 border-t border-dollar-cardBorder">
-                        <span class="text-lg font-black text-dollar-primary font-gaming">150 EGP</span>
-                        <button onclick="triggerPurchase('متجر Dollar Store الرسمي', 'League of Legends Level 30')" class="bg-dollar-primary hover:bg-dollar-primaryHover text-black font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5">
-                            <i class="fa-solid fa-cart-shopping"></i> شراء عبر تيكيت المنصة
-                        </button>
-                    </div>
-                </div>
-
-                <!-- Product 2: Independent Seller -->
-                <div class="glass-panel p-5 rounded-2xl border border-dollar-cardBorder space-y-4 hover:border-dollar-cyan transition">
-                    <div class="h-40 bg-slate-900 rounded-xl flex items-center justify-center border border-dollar-cardBorder relative overflow-hidden">
-                        <i class="fa-solid fa-crosshairs text-5xl text-dollar-cyan"></i>
-                        <span class="absolute top-2 right-2 bg-dollar-cyan text-black font-black text-[10px] px-2 py-0.5 rounded">البائع: Ahmed_LoL</span>
-                    </div>
-                    <div>
-                        <h4 class="text-sm font-bold text-white">أكونت فالورانت Valorant - Rank Ascendant + سكنات</h4>
-                        <p class="text-xs text-slate-400 mt-1">سيرفر الشرق الأوسط | سكنات Vandal و Knife مميزة</p>
-                    </div>
-                    <div class="flex items-center justify-between pt-2 border-t border-dollar-cardBorder">
-                        <span class="text-lg font-black text-dollar-cyan font-gaming">650 EGP</span>
-                        <button onclick="triggerPurchase('Ahmed_LoL', 'Valorant Ascendant Account')" class="bg-dollar-cyan hover:bg-cyan-600 text-black font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5">
-                            <i class="fa-solid fa-cart-shopping"></i> شراء من البائع (تيكيت خاصة)
-                        </button>
+                    <h4 class="font-bold text-sm text-white">حساب League of Legends - Level 30</h4>
+                    <div class="flex justify-between items-center pt-2 border-t border-retro-border">
+                        <span class="font-pixel text-xs text-retro-gold">150 EGP</span>
+                        <button onclick="openTicketsModal()" class="retro-btn !text-xs !py-1.5">شراء عبر التيكيت</button>
                     </div>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 2: GAME MARKET HUB -->
-        <div id="sectionGames" class="hidden space-y-6">
-            <h2 class="text-xl font-black text-white flex items-center gap-2">
-                <i class="fa-solid fa-gamepad text-dollar-cyan"></i>
-                سوق الألعاب المخصص - اختر لعبتك المفضلة
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                <!-- LoL -->
-                <div class="glass-panel p-5 rounded-2xl border border-dollar-cardBorder hover:border-dollar-primary cursor-pointer transition text-center space-y-3">
-                    <div class="w-16 h-16 mx-auto rounded-full bg-blue-500/20 text-blue-400 flex items-center justify-center text-3xl"><i class="fa-solid fa-shield-halved"></i></div>
-                    <h3 class="text-base font-bold text-white">League of Legends</h3>
-                    <p class="text-xs text-slate-400">أكونتات لفل 30، رانكات، كبسولات RP</p>
+        <!-- SECTION 2: GAMES MARKET HUB -->
+        <div id="sectionGames" class="hidden space-y-4">
+            <h2 class="font-pixel text-xs text-retro-cyan">SELECT GAME TO VIEW ORDERS:</h2>
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                <div onclick="openGameStore('League of Legends')" class="retro-box p-4 text-center cursor-pointer space-y-2">
+                    <i class="fa-solid fa-shield-halved text-3xl text-retro-cyan"></i>
+                    <p class="font-pixel text-[10px] text-white">League of Legends</p>
                 </div>
-                <!-- Valorant -->
-                <div class="glass-panel p-5 rounded-2xl border border-dollar-cardBorder hover:border-red-500 cursor-pointer transition text-center space-y-3">
-                    <div class="w-16 h-16 mx-auto rounded-full bg-red-500/20 text-red-400 flex items-center justify-center text-3xl"><i class="fa-solid fa-crosshairs"></i></div>
-                    <h3 class="text-base font-bold text-white">Valorant</h3>
-                    <p class="text-xs text-slate-400">حسابات سكنات، نقاط VP، بوستينج رانك</p>
+                <div onclick="openGameStore('Valorant')" class="retro-box p-4 text-center cursor-pointer space-y-2">
+                    <i class="fa-solid fa-crosshairs text-3xl text-red-400"></i>
+                    <p class="font-pixel text-[10px] text-white">Valorant</p>
                 </div>
-                <!-- Roblox -->
-                <div class="glass-panel p-5 rounded-2xl border border-dollar-cardBorder hover:border-rose-400 cursor-pointer transition text-center space-y-3">
-                    <div class="w-16 h-16 mx-auto rounded-full bg-rose-500/20 text-rose-400 flex items-center justify-center text-3xl"><i class="fa-solid fa-cube"></i></div>
-                    <h3 class="text-base font-bold text-white">Roblox</h3>
-                    <p class="text-xs text-slate-400">روبوكس Robux، حسابات نادرة، أدوات</p>
-                </div>
-                <!-- COD -->
-                <div class="glass-panel p-5 rounded-2xl border border-dollar-cardBorder hover:border-amber-500 cursor-pointer transition text-center space-y-3">
-                    <div class="w-16 h-16 mx-auto rounded-full bg-amber-500/20 text-amber-400 flex items-center justify-center text-3xl"><i class="fa-solid fa-person-rifle"></i></div>
-                    <h3 class="text-base font-bold text-white">Call of Duty</h3>
-                    <p class="text-xs text-slate-400">كود بوينت، حسابات وارزون، كاموهات</p>
-                </div>
-                <!-- Apex -->
-                <div class="glass-panel p-5 rounded-2xl border border-dollar-cardBorder hover:border-orange-500 cursor-pointer transition text-center space-y-3">
-                    <div class="w-16 h-16 mx-auto rounded-full bg-orange-500/20 text-orange-400 flex items-center justify-center text-3xl"><i class="fa-solid fa-jet-fighter"></i></div>
-                    <h3 class="text-base font-bold text-white">Apex Legends</h3>
-                    <p class="text-xs text-slate-400">قطع Heirloom، رانكات، كوينز Apex</p>
+                <div onclick="openGameStore('Roblox')" class="retro-box p-4 text-center cursor-pointer space-y-2">
+                    <i class="fa-solid fa-cube text-3xl text-retro-gold"></i>
+                    <p class="font-pixel text-[10px] text-white">Roblox</p>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 3: BOOSTING & SELLER CHANNELS -->
-        <div id="sectionBoosting" class="hidden space-y-6">
-            <div class="glass-panel p-6 rounded-2xl border border-dollar-gold space-y-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-bullhorn text-dollar-gold"></i>
-                    قنوات البائعين وأوردرات البوستينج (Seller Channels & Custom Orders)
-                </h3>
-                <p class="text-xs text-slate-300">لكل بائع قناة مخصصة باسمه يعرض فيها بضاعته وأوردرات البوستينج المعروضة للزبائن.</p>
+        <!-- SECTION 3: TRADE HUB (شات التريد بحضور الأدمن) -->
+        <div id="sectionTrade" class="hidden space-y-4">
+            <div class="retro-box p-6 space-y-4">
+                <h3 class="font-pixel text-xs text-retro-gold"><i class="fa-solid fa-handshake"></i> شات المقايضة والـ TRADE (بإشراف الأدمن)</h3>
+                <p class="text-xs text-slate-300">هنا تتم مبادلة الحسابات. الأدمن (حسام حسن) متواجد في الغرفة إجبارياً للوساطة ومنع النصب.</p>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                    <div class="bg-dollar-bg p-4 rounded-xl border border-dollar-cardBorder flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-dollar-primary/20 text-dollar-primary flex items-center justify-center font-bold">S1</div>
-                            <div>
-                                <h4 class="text-xs font-bold text-white">قناة البائع: MegaStore_EG</h4>
-                                <p class="text-[10px] text-slate-400">متخصص في أكونتات LoL و Game Pass</p>
-                            </div>
-                        </div>
-                        <button onclick="triggerPurchase('MegaStore_EG', 'خدمة خاصة من المتجر')" class="bg-dollar-card hover:bg-dollar-cardBorder text-dollar-primary border border-dollar-primary/40 text-xs px-3 py-1.5 rounded-lg">دخول القناة</button>
-                    </div>
-
-                    <div class="bg-dollar-bg p-4 rounded-xl border border-dollar-cardBorder flex items-center justify-between">
-                        <div class="flex items-center gap-3">
-                            <div class="w-10 h-10 rounded-full bg-dollar-cyan/20 text-dollar-cyan flex items-center justify-center font-bold">S2</div>
-                            <div>
-                                <h4 class="text-xs font-bold text-white">قناة البائع: ProBooster_Pro</h4>
-                                <p class="text-[10px] text-slate-400">خدمات ترفيع رانكات فالورانت وكود</p>
-                            </div>
-                        </div>
-                        <button onclick="triggerPurchase('ProBooster_Pro', 'بوستينج رانك')" class="bg-dollar-card hover:bg-dollar-cardBorder text-dollar-cyan border border-dollar-cyan/40 text-xs px-3 py-1.5 rounded-lg">دخول القناة</button>
+                <div class="bg-black border-2 border-retro-border p-4 rounded h-64 overflow-y-auto space-y-2 text-xs">
+                    <div class="bg-retro-card p-2 border border-retro-border">
+                        <span class="text-retro-gold font-pixel text-[10px]">ADMIN [حسام]:</span> أهلاً بكم في غرفة التريد. تم تجميد الحسابين، ابدأوا بعرض الشروط.
                     </div>
                 </div>
+                <div class="flex gap-2">
+                    <input type="text" placeholder="اكتب رسالة في شات التريد..." class="flex-grow bg-black border-2 border-retro-border p-2 text-xs text-white font-pixel focus:outline-none">
+                    <button onclick="alert('تم إرسال الرسالة بحضور الأدمن.')" class="retro-btn">إرسال</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- GAME SPECIFIC STORE VIEW -->
+        <div id="sectionGameStore" class="hidden space-y-4">
+            <div class="retro-box p-4 flex justify-between items-center">
+                <div>
+                    <button onclick="switchTab('games')" class="text-xs text-retro-cyan font-pixel mb-1 block"><i class="fa-solid fa-arrow-right"></i> عودة للألعاب</button>
+                    <h2 id="gameStoreTitle" class="font-pixel text-xs text-retro-green">أوردرات اللعبة</h2>
+                </div>
+            </div>
+            <div class="retro-box p-4 space-y-3">
+                <p class="text-xs text-slate-300">جميع الحسابات والأوردرات المضافة لهذه اللعبة من طرفك أو من البائعين.</p>
+                <button onclick="openTicketsModal()" class="retro-btn">شراء هذا الأوردر</button>
             </div>
         </div>
 
     </main>
 
-    <!-- 👑 ADMIN SIDEBAR PANEL (لوحة تحكم الأدمن الجانبية على يمين الشاشة) -->
-    <div id="adminSidebar" class="fixed top-0 right-0 h-full w-96 glass-panel border-l border-dollar-cardBorder z-50 transform translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
-        <div class="p-4 bg-dollar-card border-b border-dollar-cardBorder flex justify-between items-center">
-            <h3 class="text-xs font-black text-dollar-gold flex items-center gap-2">
-                <i class="fa-solid fa-user-shield text-base"></i> لوحة تحكم الأدمن (الشات والفلوس)
-            </h3>
-            <button onclick="toggleAdminPanel()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+    <!-- ADMIN PANEL SIDEBAR -->
+    <div id="adminSidebar" class="fixed top-0 right-0 h-full w-80 bg-retro-card border-l-4 border-retro-border z-50 transform translate-x-full transition-transform duration-200 flex flex-col p-4 space-y-4">
+        <div class="flex justify-between items-center border-b-2 border-retro-border pb-2">
+            <h3 class="font-pixel text-[10px] text-retro-gold">لوحة تحكم الأدمن</h3>
+            <button onclick="toggleAdminPanel()" class="text-white font-pixel">X</button>
         </div>
-
-        <div class="flex-grow overflow-y-auto p-4 space-y-4 text-xs">
-            <div class="flex bg-dollar-bg p-1 rounded-xl border border-dollar-cardBorder">
-                <button onclick="switchAdminTab('tickets')" id="admTab1" class="flex-1 py-1.5 rounded-lg font-bold text-dollar-primary bg-dollar-card">التيكيتات النشطة</button>
-                <button onclick="switchAdminTab('payouts')" id="admTab2" class="flex-1 py-1.5 rounded-lg text-slate-400">حسابات والفلوس</button>
-            </div>
-
-            <!-- Tickets Live Monitor Tab -->
-            <div id="admSectionTickets" class="space-y-3">
-                <p class="text-[11px] text-slate-400">مراقبة الشاتات ومنع التجاوزات:</p>
-                <div id="adminTicketsList" class="space-y-2">
-                    <div class="bg-dollar-bg p-3 rounded-xl border border-dollar-cardBorder space-y-2">
-                        <div class="flex justify-between font-bold text-white">
-                            <span>تيكيت #102: أحمد (مشتري) & محمد (بائع)</span>
-                            <span class="text-emerald-400">نشط</span>
-                        </div>
-                        <p class="text-[10px] text-slate-400">المنتج: أكونت ليج أوف ليجندز (150 ج.م)</p>
-                        <div class="flex gap-2 pt-1">
-                            <button onclick="openTicketsModal()" class="flex-1 bg-dollar-primary text-black font-bold py-1.5 rounded-lg">مراقبة الشات</button>
-                            <button onclick="interveneTicket()" class="bg-red-600/20 text-red-400 border border-red-500/40 px-3 py-1.5 rounded-lg" title="تدخل الوسيط وتجميد الشات">تدخل</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Financials & Payouts Tab -->
-            <div id="admSectionPayouts" class="hidden space-y-3">
-                <p class="text-[11px] text-slate-400">محافظ البائعين وطلبات السحب (فودافون كاش / إنستاباي):</p>
-                <div class="bg-dollar-bg p-3 rounded-xl border border-dollar-cardBorder space-y-2">
-                    <div class="flex justify-between font-bold text-white">
-                        <span>البائع: Ahmed_LoL</span>
-                        <span class="text-dollar-gold">450 EGP</span>
-                    </div>
-                    <p class="text-[10px] text-slate-400">فودافون كاش: 01012345678</p>
-                    <button onclick="processPayout('Ahmed_LoL', 450)" class="w-full bg-dollar-gold text-black font-black py-1.5 rounded-lg">تم تحويل الفلوس يدوياً (تسوية)</button>
-                </div>
-            </div>
-        </div>
+        <p class="text-xs text-slate-300">مراقبة تيكيتات الشات والتحويلات المالية.</p>
     </div>
 
-    <!-- 🎟️ TICKET & CHAT MODAL (Eldorado Style + Voice Feature + Anti-Abuse Filter) -->
-    <div id="ticketsModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-3xl rounded-2xl border border-dollar-cardBorder overflow-hidden flex flex-col h-[580px]">
-            <div class="p-4 bg-dollar-card border-b border-dollar-cardBorder flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <i class="fa-solid fa-headset text-dollar-primary text-xl"></i>
-                    <div>
-                        <h3 id="modalTicketTitle" class="text-sm font-bold text-white">تيكيت الوساطة والشات المباشر</h3>
-                        <p class="text-[10px] text-slate-400">Dollar Store Escrow & Voice Protection</p>
-                    </div>
-                </div>
-                <button onclick="closeTicketsModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
-            </div>
-
-            <!-- Chat Box -->
-            <div id="chatBox" class="flex-grow p-4 overflow-y-auto space-y-3 bg-dollar-bg/90 text-xs">
-                <div class="bg-dollar-card p-3 rounded-xl border border-dollar-cardBorder max-w-md">
-                    <p class="text-dollar-primary font-bold mb-1">نظام الحماية الآلي:</p>
-                    <p class="text-slate-200">أهلاً بك. تم فتح التيكيت بنجاح. ممنوع مشاركة الروابط الخارجية أو أرقام الهواتف لحماية حقوقك.</p>
-                </div>
-            </div>
-
-            <!-- Controls & Voice Call Button -->
-            <div class="p-3 bg-dollar-card border-t border-dollar-cardBorder flex flex-col gap-2">
-                <div class="flex items-center gap-2">
-                    <input type="text" id="chatInput" placeholder="اكتب رسالتك للبائع أو الوسيط..." class="flex-grow bg-dollar-bg border border-dollar-cardBorder rounded-xl p-2.5 text-xs text-white focus:outline-none focus:border-dollar-primary">
-                    
-                    <!-- Voice Call WebRTC Button -->
-                    <button onclick="toggleVoiceCall()" id="voiceCallBtn" class="bg-red-600/20 text-red-400 border border-red-500/40 p-2.5 rounded-xl hover:bg-red-600 hover:text-white transition" title="محادثة صوتية حية WebRTC">
-                        <i class="fa-solid fa-microphone"></i>
-                    </button>
-
-                    <button onclick="sendChatMessage()" class="bg-dollar-primary text-black font-bold px-4 py-2.5 rounded-xl text-xs"><i class="fa-solid fa-paper-plane"></i></button>
-                </div>
-
-                <button onclick="finishOrderAndReview()" class="w-full bg-dollar-gold hover:bg-dollar-goldHover text-black font-black py-2.5 rounded-xl text-xs flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-star"></i> تأكيد استلام الحساب وإنهاء التيكيت (التقييم الإجباري)
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- ⭐ MANDATORY REVIEW MODAL (التقييم الإجباري للعميل) -->
-    <div id="mandatoryReviewModal" class="fixed inset-0 bg-black/95 backdrop-blur-xl z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-md p-6 rounded-2xl border-2 border-dollar-gold text-center space-y-4">
-            <div class="w-16 h-16 mx-auto rounded-full bg-dollar-gold/20 text-dollar-gold flex items-center justify-center text-3xl">
-                <i class="fa-solid fa-star"></i>
-            </div>
-            
-            <h3 class="text-lg font-black text-white">تقييم الخدمة والبائع (إجباري للمتابعة)</h3>
-            <p class="text-xs text-slate-300">لضمان حقوق الجميع واستمرار التصفح، يرجى كتابة تقييمك بوضوح وتحديد النجوم.</p>
-
-            <div class="flex justify-center gap-2 text-2xl text-dollar-gold cursor-pointer py-2">
-                <i class="fa-solid fa-star" onclick="setStar(1)"></i>
-                <i class="fa-solid fa-star" onclick="setStar(2)"></i>
-                <i class="fa-solid fa-star" onclick="setStar(3)"></i>
-                <i class="fa-solid fa-star" onclick="setStar(4)"></i>
-                <i class="fa-solid fa-star" onclick="setStar(5)"></i>
-            </div>
-
-            <textarea id="writtenReviewText" rows="3" placeholder="اكتب تقييمك اللغوي هنا (سواء جيد أو سيء ليعرض في بروفايل البائع)..." class="w-full bg-dollar-bg border border-dollar-cardBorder rounded-xl p-3 text-xs text-white focus:border-dollar-gold focus:outline-none"></textarea>
-
-            <button onclick="submitMandatoryReview()" class="w-full bg-dollar-gold hover:bg-dollar-goldHover text-black font-black py-3 rounded-xl text-xs shadow-lg">
-                إرسال التقييم وحفظ البروفايل وفك حظر التصفح
-            </button>
-        </div>
-    </div>
-
-    <!-- User Profile & Reviews View Modal -->
-    <div id="userProfileModal" class="fixed inset-0 bg-black/80 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="glass-panel w-full max-w-2xl p-6 rounded-2xl border border-dollar-cardBorder space-y-4">
-            <div class="flex justify-between items-center border-b border-dollar-cardBorder pb-3">
-                <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="fa-solid fa-user-gear text-dollar-primary"></i> بروفايل الحساب والريفيوهات (النجوم والتقييم اللغوي)
-                </h3>
-                <button onclick="closeUserProfileModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-
-            <div class="space-y-3">
-                <h4 class="text-xs font-bold text-slate-300">الريفيوهات المسجلة في البروفايل:</h4>
-                <div id="profileReviewsList" class="space-y-2 max-h-60 overflow-y-auto">
-                    <div class="bg-dollar-bg p-3 rounded-xl border border-dollar-cardBorder text-xs space-y-1">
-                        <div class="flex justify-between text-dollar-gold">
-                            <span>★★★★★ (5/5)</span>
-                            <span class="text-slate-500 text-[10px]">منذ يومين</span>
-                        </div>
-                        <p class="text-slate-300">"متجر محترم جداً، استلام أكونت ليج أوف ليجندز فورياً وبدون أي مشاكل!"</p>
-                    </div>
-                </div>
-            </div>
+    <!-- TICKETS MODAL -->
+    <div id="ticketsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="retro-box w-full max-w-lg p-6 space-y-4 text-center">
+            <h3 class="font-pixel text-xs text-retro-green">تيكيت الوساطة والشات الفوري</h3>
+            <p class="text-xs text-slate-300">تواصل آمن لحين استلام الحساب وتأكيد التقييم الإجباري.</p>
+            <button onclick="closeTicketsModal()" class="retro-btn">إغلاق التيكيت</button>
         </div>
     </div>
 
     <script>
-        // Tab Switcher
-        function switchMainTab(tab) {
+        function switchTab(tab) {
             document.getElementById('sectionHome').classList.add('hidden');
             document.getElementById('sectionGames').classList.add('hidden');
-            document.getElementById('sectionBoosting').classList.add('hidden');
+            document.getElementById('sectionTrade').classList.add('hidden');
+            document.getElementById('sectionGameStore').classList.add('hidden');
+
             if(tab === 'home') document.getElementById('sectionHome').classList.remove('hidden');
             if(tab === 'games') document.getElementById('sectionGames').classList.remove('hidden');
-            if(tab === 'boosting') document.getElementById('sectionBoosting').classList.remove('hidden');
+            if(tab === 'trade') document.getElementById('sectionTrade').classList.remove('hidden');
         }
 
-        // Admin Sidebar Toggle
-        function toggleAdminPanel() {
-            document.getElementById('adminSidebar').classList.toggle('translate-x-full');
+        function openGameStore(gameName) {
+            document.getElementById('sectionGames').classList.add('hidden');
+            document.getElementById('sectionGameStore').classList.remove('hidden');
+            document.getElementById('gameStoreTitle').innerText = `أوردرات لعبة: ${gameName}`;
         }
 
-        function switchAdminTab(tab) {
-            if(tab === 'tickets') {
-                document.getElementById('admSectionTickets').classList.remove('hidden');
-                document.getElementById('admSectionPayouts').classList.add('hidden');
-                document.getElementById('admTab1').className = "flex-1 py-1.5 rounded-lg font-bold text-dollar-primary bg-dollar-card";
-                document.getElementById('admTab2').className = "flex-1 py-1.5 rounded-lg text-slate-400";
-            } else {
-                document.getElementById('admSectionTickets').classList.add('hidden');
-                document.getElementById('admSectionPayouts').classList.remove('hidden');
-                document.getElementById('admTab2').className = "flex-1 py-1.5 rounded-lg font-bold text-dollar-gold bg-dollar-card";
-                document.getElementById('admTab1').className = "flex-1 py-1.5 rounded-lg text-slate-400";
-            }
-        }
-
-        // Purchase trigger & Ticket opening
-        function triggerPurchase(seller, title) {
-            document.getElementById('modalTicketTitle').innerText = `تيكيت عملية شراء: ${title} - البائع: ${seller}`;
-            openTicketsModal();
-        }
-
+        function toggleAdminPanel() { document.getElementById('adminSidebar').classList.toggle('translate-x-full'); }
         function openTicketsModal() { document.getElementById('ticketsModal').classList.remove('hidden'); }
         function closeTicketsModal() { document.getElementById('ticketsModal').classList.add('hidden'); }
-
-        // Voice Call Toggle (WebRTC Simulation)
-        let isCalling = false;
-        function toggleVoiceCall() {
-            isCalling = !isCalling;
-            const btn = document.getElementById('voiceCallBtn');
-            if(isCalling) {
-                btn.className = "bg-emerald-600 text-white p-2.5 rounded-xl animate-pulse";
-                alert("🎙️ جاري تفعيل المحادثة الصوتية الحية داخل التيكيت...");
-            } else {
-                btn.className = "bg-red-600/20 text-red-400 border border-red-500/40 p-2.5 rounded-xl";
-                alert("📞 تم إنهاء المكالمة الصوتية.");
-            }
-        }
-
-        // Chat Message with Anti-Abuse (فلترة الروابط الخارجية)
-        function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            let text = input.value.trim();
-            if(!text) return;
-
-            if(text.includes('http') || text.includes('www') || text.includes('wa.me') || text.includes('01')) {
-                alert("⚠️ تحذير نظام الحماية: ممنوع مشاركة الروابط الخارجية أو أرقام الهواتف داخل الشات لضمان حقوقك!");
-                return;
-            }
-
-            const chatBox = document.getElementById('chatBox');
-            chatBox.innerHTML += `
-                <div class="bg-dollar-primary/20 p-3 rounded-xl border border-dollar-primary/40 max-w-md ml-auto text-left">
-                    <p class="text-dollar-primary font-bold mb-1">أنت:</p>
-                    <p class="text-white">${text}</p>
-                </div>
-            `;
-            input.value = '';
-            chatBox.scrollTop = chatBox.scrollHeight;
-        }
-
-        // Finish order and trigger mandatory review modal
-        function finishOrderAndReview() {
-            closeTicketsModal();
-            document.getElementById('mandatoryReviewModal').classList.remove('hidden');
-        }
-
-        let selectedStars = 5;
-        function setStar(count) { selectedStars = count; }
-
-        function submitMandatoryReview() {
-            const text = document.getElementById('writtenReviewText').value.trim();
-            if(!text) {
-                alert("⚠️ التقييم اللغوي والنجوم إجباري لضمان حقوق البائعين ومتابعة التصفح!");
-                return;
-            }
-
-            const profileList = document.getElementById('profileReviewsList');
-            profileList.innerHTML += `
-                <div class="bg-dollar-bg p-3 rounded-xl border border-dollar-cardBorder text-xs space-y-1">
-                    <div class="flex justify-between text-dollar-gold">
-                        <span>${'★'.repeat(selectedStars)} (${selectedStars}/5)</span>
-                        <span class="text-slate-500 text-[10px]">الآن</span>
-                    </div>
-                    <p class="text-slate-300">"${text}"</p>
-                </div>
-            `;
-
-            document.getElementById('mandatoryReviewModal').classList.add('hidden');
-            alert("✅ تم حفظ التقييم بنجاح في بروفايل البائع وفتح الموقع!");
-        }
-
-        function openUserProfileModal() { document.getElementById('userProfileModal').classList.remove('hidden'); }
-        function closeUserProfileModal() { document.getElementById('userProfileModal').classList.add('hidden'); }
-
-        function interveneTicket() {
-            alert("🔒 تم تجميد التيكيت والتدخل كأدمن. تم قفل الشات على الطرفين لحين الفصل في النزاع.");
-        }
-
-        function processPayout(sellerName, amount) {
-            alert(`✅ تم تأكيد إرسال مبلغ ${amount} ج.م للبائع (${sellerName}) وتحديث رصيد محفظته بنجاح.`);
-        }
     </script>
 </body>
 </html>
