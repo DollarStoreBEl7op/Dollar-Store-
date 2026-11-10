@@ -3,11 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DOLLAR STORE | 90s Arcade Retro Gaming Marketplace</title>
-    <!-- Tailwind CSS & FontAwesome -->
+    <title>Dollar Store | متجر وبورصة المنتجات الرقمية للألعاب</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Pixel & Arabic Fonts -->
+    <!-- Retro 90s Pixel Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cairo:wght@400;700;900&display=swap" rel="stylesheet">
 
     <script>
@@ -15,15 +16,14 @@
             theme: {
                 extend: {
                     colors: {
-                        arcade: {
-                            bg: '#05030a',
-                            panel: '#100c1f',
-                            border: '#3c236b',
-                            green: '#00ff66',
-                            cyan: '#00f0ff',
+                        eldorado: {
+                            bg: '#0b0e14',
+                            card: '#151a23',
+                            border: '#222b3b',
+                            accent: '#00ff66',
                             gold: '#ffb700',
-                            purple: '#9d00ff',
-                            red: '#ff0055'
+                            cyan: '#00f0ff',
+                            purple: '#8b5cf6'
                         }
                     },
                     fontFamily: {
@@ -38,126 +38,126 @@
     <style>
         body {
             font-family: 'Cairo', sans-serif;
-            background-color: #05030a;
+            background-color: #0b0e14;
             color: #e2e8f0;
-            background-image: 
-                radial-gradient(circle at 50% 50%, rgba(61, 35, 107, 0.25) 0%, transparent 85%),
-                linear-gradient(rgba(16, 12, 31, 0.5) 2px, transparent 2px);
-            background-size: 100% 4px;
         }
-
-        .arcade-box {
-            background: #100c1f;
-            border: 3px solid #3c236b;
-            box-shadow: 4px 4px 0px #00ff66;
-            transition: all 0.15s ease;
-        }
-        .arcade-box:hover {
-            transform: translate(-2px, -2px);
-            box-shadow: 6px 6px 0px #00f0ff;
-        }
-
-        .arcade-btn {
-            border: 2px solid #00ff66;
-            background: #05030a;
-            color: #00ff66;
+        .pixel-logo {
             font-family: 'Press Start 2P', monospace;
-            font-size: 9px;
-            padding: 10px 14px;
-            box-shadow: 3px 3px 0px #00ff66;
-            cursor: pointer;
+            text-shadow: 2px 2px #8b5cf6;
         }
-        .arcade-btn:active {
-            transform: translate(2px, 2px);
-            box-shadow: 1px 1px 0px #00ff66;
+        .eldorado-card {
+            background: #151a23;
+            border: 1px solid #222b3b;
+            transition: all 0.2s ease;
         }
-
-        .pixel-title {
-            font-family: 'Press Start 2P', monospace;
-            text-shadow: 3px 3px #9d00ff;
+        .eldorado-card:hover {
+            border-color: #00ff66;
+            transform: translateY(-2px);
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body class="min-h-screen flex flex-col justify-between selection:bg-eldorado-accent selection:text-black">
 
-    <!-- Top Live Tracker Bar -->
-    <div class="bg-arcade-panel border-b-2 border-arcade-border py-2 px-4 text-[10px] flex justify-between items-center text-arcade-cyan font-pixel">
-        <span>INSERT COIN 🕹️ | DOLLAR STORE RETRO ENGINE</span>
-        <div class="flex items-center gap-4">
-            <span class="text-arcade-green animate-pulse">PLAYERS ONLINE: <strong id="valOnline">142</strong></span>
-            <span class="text-arcade-gold">TOTAL SEARCHES: <strong id="valSearches">45,210</strong></span>
+    <!-- Top Stats Bar -->
+    <div class="bg-[#07090d] border-b border-eldorado-border py-2 px-4 text-xs flex justify-between items-center text-slate-400">
+        <div class="flex items-center gap-2">
+            <span class="w-2 h-2 rounded-full bg-eldorado-accent animate-pulse"></span>
+            <span class="text-white font-bold">Dollar Store Protection Engine</span>
+        </div>
+        <div class="flex items-center gap-4 text-[11px]">
+            <span>أونلاين الآن: <strong class="text-eldorado-accent font-mono">142</strong></span>
+            <span>إجمالي البحث: <strong class="text-eldorado-gold font-mono">45,210</strong></span>
         </div>
     </div>
 
-    <!-- Header -->
-    <header class="sticky top-0 z-40 bg-arcade-bg/95 border-b-4 border-arcade-border px-4 py-4 shadow-2xl">
-        <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('home')">
-                <div class="w-10 h-10 bg-arcade-green flex items-center justify-center border-2 border-white shadow-[3px_3px_0px_#ffb700]">
+    <!-- Header (Eldorado Layout + Dollar Store 90s Brand) -->
+    <header class="sticky top-0 z-40 bg-eldorado-bg/95 backdrop-blur-md border-b border-eldorado-border px-4 py-3 shadow-xl">
+        <div class="max-w-7xl mx-auto flex justify-between items-center gap-4">
+            <!-- Brand Logo -->
+            <div class="flex items-center gap-3 cursor-pointer" onclick="switchMainTab('home')">
+                <div class="w-11 h-11 bg-eldorado-accent rounded-xl flex items-center justify-center border-2 border-white shadow-[0_0_15px_rgba(0,255,102,0.4)]">
                     <i class="fa-solid fa-dollar-sign text-black text-2xl font-black"></i>
                 </div>
                 <div>
-                    <h1 class="pixel-title text-sm md:text-base text-arcade-green tracking-wider">DOLLAR STORE</h1>
-                    <p class="text-[8px] text-arcade-gold font-pixel">RETRO 90S ESCROW MARKETPLACE</p>
+                    <h1 class="pixel-logo text-sm md:text-base text-eldorado-accent tracking-wider">DOLLAR STORE</h1>
+                    <p class="text-[9px] text-eldorado-gold font-pixel">90S GAMING ESCROW</p>
                 </div>
             </div>
 
+            <!-- Search Bar -->
+            <div class="hidden md:flex flex-1 max-w-md relative">
+                <input type="text" placeholder="ابحث عن أكونتات (LoL, Valorant, Roblox, COD)..." class="w-full bg-[#151a23] border border-eldorado-border rounded-xl py-2 px-4 pr-10 text-xs text-white focus:outline-none focus:border-eldorado-accent">
+                <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
+            </div>
+
+            <!-- Action Buttons -->
             <div class="flex items-center gap-2">
-                <button onclick="toggleAdminPanel()" class="arcade-btn !border-arcade-gold !text-arcade-gold !shadow-[3px_3px_0px_#ffb700]">
-                    <i class="fa-solid fa-user-shield"></i> لوحة الأدمن والفلوس
+                <button onclick="toggleAdminPanel()" class="bg-eldorado-card hover:bg-eldorado-border text-eldorado-gold border border-eldorado-gold/40 px-3 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-user-shield"></i> <span class="hidden sm:inline">الإدارة والفلوس</span>
                 </button>
-                <button onclick="openTicketsModal()" class="arcade-btn !border-arcade-cyan !text-arcade-cyan !shadow-[3px_3px_0px_#00f0ff]">
-                    <i class="fa-solid fa-ticket"></i> التيكيتات المباشرة
+                <button onclick="openTicketsModal()" class="bg-indigo-600 hover:bg-indigo-500 text-white px-3.5 py-2 rounded-xl text-xs font-bold flex items-center gap-1.5 transition">
+                    <i class="fa-solid fa-ticket"></i> التيكيتات
                 </button>
             </div>
         </div>
     </header>
 
-    <!-- Main Arcade Container -->
+    <!-- Main Marketplace Core -->
     <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-6">
 
-        <!-- ⭐ 3 Prominent Selections -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div onclick="switchTab('home')" class="arcade-box p-5 cursor-pointer text-center space-y-2">
-                <div class="w-12 h-12 mx-auto bg-arcade-green/20 text-arcade-green border border-arcade-green flex items-center justify-center text-xl">
+        <!-- 3 Main Options (الخيارات الأساسية البارزة) -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <!-- 1. Home Market -->
+            <div onclick="switchMainTab('home')" class="eldorado-card p-5 rounded-2xl cursor-pointer flex items-center gap-4 bg-gradient-to-r from-eldorado-card to-[#1a212d]">
+                <div class="w-12 h-12 rounded-xl bg-eldorado-accent/20 text-eldorado-accent flex items-center justify-center text-xl border border-eldorado-accent/30">
                     <i class="fa-solid fa-store"></i>
                 </div>
-                <h3 class="font-pixel text-[11px] text-white">الواجهة العامة للسوق</h3>
-                <p class="text-xs text-slate-400">تصفح كافة الحسابات والمنتجات المعروضة.</p>
+                <div>
+                    <h3 class="font-bold text-sm text-white">الواجهة العامة للسوق</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">تصفح كافة الحسابات والمنتجات</p>
+                </div>
             </div>
 
-            <div onclick="switchTab('games')" class="arcade-box p-5 cursor-pointer text-center space-y-2 !border-arcade-cyan !shadow-[4px_4px_0px_#00f0ff]">
-                <div class="w-12 h-12 mx-auto bg-arcade-cyan/20 text-arcade-cyan border border-arcade-cyan flex items-center justify-center text-xl">
+            <!-- 2. Game Hub (صفحة مخصصة لكل لعبة) -->
+            <div onclick="switchMainTab('games')" class="eldorado-card p-5 rounded-2xl cursor-pointer flex items-center gap-4 bg-gradient-to-r from-eldorado-card to-[#1a212d]">
+                <div class="w-12 h-12 rounded-xl bg-eldorado-cyan/20 text-eldorado-cyan flex items-center justify-center text-xl border border-eldorado-cyan/30">
                     <i class="fa-solid fa-gamepad"></i>
                 </div>
-                <h3 class="font-pixel text-[11px] text-white">سوق الألعاب المخصص</h3>
-                <p class="text-xs text-slate-400">واجهات مستقلة لأوردرات وحسابات كل لعبة.</p>
+                <div>
+                    <h3 class="font-bold text-sm text-white">سوق الألعاب المخصص</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">واجهة مستقلة لكل لعبة وأوردراتها</p>
+                </div>
             </div>
 
-            <div onclick="switchTab('trade')" class="arcade-box p-5 cursor-pointer text-center space-y-2 !border-arcade-gold !shadow-[4px_4px_0px_#ffb700]">
-                <div class="w-12 h-12 mx-auto bg-arcade-gold/20 text-arcade-gold border border-arcade-gold flex items-center justify-center text-xl">
+            <!-- 3. Trade Hub (شات المقايضة بوجود الأدمن الإجباري) -->
+            <div onclick="switchMainTab('trade')" class="eldorado-card p-5 rounded-2xl cursor-pointer flex items-center gap-4 bg-gradient-to-r from-eldorado-card to-[#1a212d]">
+                <div class="w-12 h-12 rounded-xl bg-eldorado-gold/20 text-eldorado-gold flex items-center justify-center text-xl border border-eldorado-gold/30">
                     <i class="fa-solid fa-handshake"></i>
                 </div>
-                <h3 class="font-pixel text-[11px] text-white">شات المقايضة والـ TRADE</h3>
-                <p class="text-xs text-slate-400">تبادل الحسابات بحضور الأدمن (حسام) حصرياً.</p>
+                <div>
+                    <h3 class="font-bold text-sm text-white">شات المقايضة (TRADE)</h3>
+                    <p class="text-xs text-slate-400 mt-0.5">تبادل الحسابات بحضور الأدمن (حسام)</p>
+                </div>
             </div>
         </div>
 
         <!-- SECTION 1: HOME MARKET -->
         <div id="sectionHome" class="space-y-4">
-            <div class="arcade-box p-4 flex justify-between items-center">
-                <h2 class="font-pixel text-xs text-arcade-green">STAGE 1: أحدث الحسابات والمنتجات</h2>
+            <div class="flex justify-between items-center">
+                <h2 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-fire text-eldorado-gold"></i> أحدث الحسابات المعروضة
+                </h2>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="arcade-box p-4 space-y-3">
-                    <div class="h-32 bg-black border-2 border-arcade-border flex items-center justify-center relative">
-                        <i class="fa-solid fa-shield-cat text-4xl text-arcade-green"></i>
-                        <span class="absolute top-2 right-2 bg-arcade-green text-black text-[9px] font-pixel px-2 py-0.5">Dollar Store Official</span>
+                <div class="eldorado-card p-4 rounded-2xl space-y-3">
+                    <div class="h-36 bg-[#0e1219] rounded-xl flex items-center justify-center border border-eldorado-border relative">
+                        <i class="fa-solid fa-shield-cat text-4xl text-eldorado-accent"></i>
+                        <span class="absolute top-2 right-2 bg-eldorado-accent text-black text-[10px] font-bold px-2 py-0.5 rounded">Dollar Store Official</span>
                     </div>
-                    <h4 class="font-bold text-sm text-white">حساب League of Legends - Level 30 Unranked</h4>
-                    <div class="flex justify-between items-center pt-2 border-t border-arcade-border">
-                        <span class="font-pixel text-xs text-arcade-gold">150 EGP</span>
-                        <button onclick="openTicketsModal()" class="arcade-btn !text-[9px] !py-1.5">شراء عبر الوساطة</button>
+                    <h4 class="text-xs font-bold text-white">حساب League of Legends - Level 30 Unranked</h4>
+                    <div class="flex justify-between items-center pt-2 border-t border-eldorado-border">
+                        <span class="text-base font-bold text-eldorado-gold font-mono">150 EGP</span>
+                        <button onclick="openTicketsModal()" class="bg-eldorado-accent hover:bg-emerald-500 text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء عبر الوساطة</button>
                     </div>
                 </div>
             </div>
@@ -165,36 +165,38 @@
 
         <!-- SECTION 2: GAME HUB -->
         <div id="sectionGames" class="hidden space-y-4">
-            <h2 class="font-pixel text-xs text-arcade-cyan">SELECT GAME HUB:</h2>
+            <h2 class="text-base font-bold text-white">اختر اللعبة لعرض أوردراتها المخصصة:</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div onclick="openGameHub('League of Legends')" class="arcade-box p-4 text-center cursor-pointer space-y-2">
-                    <i class="fa-solid fa-shield-halved text-3xl text-arcade-cyan"></i>
-                    <p class="font-pixel text-[10px] text-white">League of Legends</p>
+                <div onclick="openGameHub('League of Legends')" class="eldorado-card p-4 rounded-2xl text-center cursor-pointer space-y-2 hover:border-eldorado-cyan">
+                    <i class="fa-solid fa-shield-halved text-3xl text-blue-400"></i>
+                    <p class="text-xs font-bold text-white">League of Legends</p>
                 </div>
-                <div onclick="openGameHub('Valorant')" class="arcade-box p-4 text-center cursor-pointer space-y-2">
-                    <i class="fa-solid fa-crosshairs text-3xl text-arcade-red"></i>
-                    <p class="font-pixel text-[10px] text-white">Valorant</p>
+                <div onclick="openGameHub('Valorant')" class="eldorado-card p-4 rounded-2xl text-center cursor-pointer space-y-2 hover:border-red-500">
+                    <i class="fa-solid fa-crosshairs text-3xl text-red-400"></i>
+                    <p class="text-xs font-bold text-white">Valorant</p>
                 </div>
-                <div onclick="openGameHub('Roblox')" class="arcade-box p-4 text-center cursor-pointer space-y-2">
-                    <i class="fa-solid fa-cube text-3xl text-arcade-gold"></i>
-                    <p class="font-pixel text-[10px] text-white">Roblox</p>
+                <div onclick="openGameHub('Roblox')" class="eldorado-card p-4 rounded-2xl text-center cursor-pointer space-y-2 hover:border-rose-400">
+                    <i class="fa-solid fa-cube text-3xl text-rose-400"></i>
+                    <p class="text-xs font-bold text-white">Roblox</p>
                 </div>
-                <div onclick="openGameHub('Call of Duty')" class="arcade-box p-4 text-center cursor-pointer space-y-2">
-                    <i class="fa-solid fa-person-rifle text-3xl text-arcade-green"></i>
-                    <p class="font-pixel text-[10px] text-white">Call of Duty</p>
+                <div onclick="openGameHub('Call of Duty')" class="eldorado-card p-4 rounded-2xl text-center cursor-pointer space-y-2 hover:border-amber-400">
+                    <i class="fa-solid fa-person-rifle text-3xl text-amber-400"></i>
+                    <p class="text-xs font-bold text-white">Call of Duty</p>
                 </div>
             </div>
         </div>
 
-        <!-- SECTION 3: TRADE HUB -->
+        <!-- SECTION 3: TRADE HUB (حضور الأدمن الإجباري) -->
         <div id="sectionTrade" class="hidden space-y-4">
-            <div class="arcade-box p-6 space-y-4">
-                <h3 class="font-pixel text-xs text-arcade-gold"><i class="fa-solid fa-handshake"></i> غرفة المقايضة والـ TRADE (شرط حضور الأدمن)</h3>
-                <p class="text-xs text-slate-300">لا يتم تنفيذ أي عملية مقايضة إلا بحضور الأدمن (حسام حسن) للوساطة والتأكيد.</p>
+            <div class="eldorado-card p-6 rounded-2xl space-y-4 border border-eldorado-gold/40">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="fa-solid fa-handshake text-eldorado-gold"></i> غرفة شات المقايضة والـ TRADE (بإشراف الأدمن)
+                </h3>
+                <p class="text-xs text-slate-300">هنا يتم تبادل الحسابات بين الطرفين. لا يتم تأكيد أي عملية إلا بوجود الأدمن (حسام حسن) داخل الغرفة.</p>
                 
-                <div id="tradeChatBox" class="bg-black border-2 border-arcade-border p-4 rounded h-64 overflow-y-auto space-y-2 text-xs">
-                    <div class="bg-arcade-panel p-2 border border-arcade-border text-arcade-gold font-pixel text-[9px]">
-                        [SYSTEM]: غرف الشات مع الأدمن جاهزة للبدء...
+                <div class="bg-[#0e1219] border border-eldorado-border p-4 rounded-xl h-60 overflow-y-auto space-y-2 text-xs">
+                    <div class="bg-eldorado-card p-2 rounded-lg border border-eldorado-border text-eldorado-gold">
+                        <strong>ADMIN (حسام حسن):</strong> أهلاً بكم في غرفة التريد. تم تجميد العملية لحين مراجعة الحسابين والتأكيد.
                     </div>
                 </div>
             </div>
@@ -202,40 +204,40 @@
 
         <!-- GAME SPECIFIC HUB VIEW -->
         <div id="sectionGameStore" class="hidden space-y-4">
-            <div class="arcade-box p-4 flex justify-between items-center">
+            <div class="eldorado-card p-4 rounded-2xl flex justify-between items-center">
                 <div>
-                    <button onclick="switchTab('games')" class="text-xs text-arcade-cyan font-pixel mb-1 block"><i class="fa-solid fa-arrow-right"></i> عودة لسوق الألعاب</button>
-                    <h2 id="gameStoreTitle" class="font-pixel text-xs text-arcade-green">أوردرات اللعبة</h2>
+                    <button onclick="switchMainTab('games')" class="text-xs text-eldorado-cyan hover:underline mb-1 block"><i class="fa-solid fa-arrow-right"></i> عودة للألعاب</button>
+                    <h2 id="gameStoreTitle" class="text-base font-bold text-white">أوردرات اللعبة</h2>
                 </div>
             </div>
-            <div class="arcade-box p-4 space-y-3">
-                <p class="text-xs text-slate-300">كافة المنتجات والحسابات المتاحة لهذه اللعبة.</p>
-                <button onclick="openTicketsModal()" class="arcade-btn">فتح تيكيت شراء</button>
+            <div class="eldorado-card p-4 rounded-2xl space-y-3">
+                <p class="text-xs text-slate-300">جميع الحسابات والأوردرات المتاحة لهذه اللعبة.</p>
+                <button onclick="openTicketsModal()" class="bg-eldorado-accent text-black font-bold px-4 py-2 rounded-xl text-xs">فتح تيكيت شراء</button>
             </div>
         </div>
 
     </main>
 
     <!-- ADMIN SIDEBAR PANEL -->
-    <div id="adminSidebar" class="fixed top-0 right-0 h-full w-80 bg-arcade-panel border-l-4 border-arcade-border z-50 transform translate-x-full transition-transform duration-200 flex flex-col p-4 space-y-4">
-        <div class="flex justify-between items-center border-b-2 border-arcade-border pb-2">
-            <h3 class="font-pixel text-[10px] text-arcade-gold">لوحة تحكم الأدمن والفلوس</h3>
-            <button onclick="toggleAdminPanel()" class="text-white font-pixel">X</button>
+    <div id="adminSidebar" class="fixed top-0 right-0 h-full w-80 bg-[#151a23] border-l border-eldorado-border z-50 transform translate-x-full transition-transform duration-200 flex flex-col p-4 space-y-4 shadow-2xl">
+        <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
+            <h3 class="text-xs font-bold text-eldorado-gold flex items-center gap-1.5"><i class="fa-solid fa-user-shield"></i> لوحة الأدمن والتحويلات</h3>
+            <button onclick="toggleAdminPanel()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
         </div>
-        <p class="text-xs text-slate-300">مراقبة التيكيتات، تجميد الشات، وإدارة تحويلات البائعين.</p>
+        <p class="text-xs text-slate-300">مراقبة التيكيتات ومتابعة أرصدة البائعين (فودافون كاش / إنستاباي).</p>
     </div>
 
     <!-- TICKETS MODAL -->
     <div id="ticketsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="arcade-box w-full max-w-lg p-6 space-y-4 text-center">
-            <h3 class="font-pixel text-xs text-arcade-green">تيكيت الوساطة والشات الفوري</h3>
-            <p class="text-xs text-slate-300">تواصل آمن لحين استلام الحساب وتأكيد التقييم الإجباري.</p>
-            <button onclick="closeTicketsModal()" class="arcade-btn">إغلاق التيكيت</button>
+        <div class="eldorado-card w-full max-w-lg p-6 rounded-2xl space-y-4 text-center">
+            <h3 class="text-sm font-bold text-white">تيكيت الوساطة والشات المباشر</h3>
+            <p class="text-xs text-slate-300">تواصل آمن بين المشتري والبائع بحضور الوسيط لحين تأكيد التقييم الإجباري.</p>
+            <button onclick="closeTicketsModal()" class="bg-eldorado-accent text-black font-bold px-4 py-2 rounded-xl text-xs">إغلاق التيكيت</button>
         </div>
     </div>
 
     <script>
-        function switchTab(tab) {
+        function switchMainTab(tab) {
             document.getElementById('sectionHome').classList.add('hidden');
             document.getElementById('sectionGames').classList.add('hidden');
             document.getElementById('sectionTrade').classList.add('hidden');
