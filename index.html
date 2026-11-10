@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Fonts -->
+    <!-- Google Fonts (Pixel / Retro & Cairo) -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
 
     <script>
@@ -48,7 +48,7 @@
     <div class="bg-[#07090d] border-b border-eldorado-border py-1.5 px-4 text-xs flex justify-between items-center text-slate-400">
         <div class="flex items-center gap-2">
             <span class="w-2 h-2 rounded-full bg-eldorado-accent animate-pulse"></span>
-            <span class="text-white font-bold text-[11px]">Dollar Store Escrow Protection Active</span>
+            <span class="text-white font-bold text-[11px]">Dollar Store Escrow Engine Active</span>
         </div>
         <div class="flex items-center gap-4 text-[11px]">
             <span>أونلاين الآن: <strong class="text-eldorado-accent font-mono">184</strong></span>
@@ -70,7 +70,7 @@
             </div>
 
             <div class="hidden md:flex flex-1 max-w-md relative">
-                <input type="text" placeholder="Search games, keywords, sellers..." class="w-full bg-[#151a23] border border-eldorado-border rounded-xl py-2 px-4 pr-10 text-xs text-white focus:outline-none focus:border-eldorado-accent">
+                <input type="text" placeholder="ابحث عن ألعاب، كلمات مفتاحية، بائعين..." class="w-full bg-[#151a23] border border-eldorado-border rounded-xl py-2 px-4 pr-10 text-xs text-white focus:outline-none focus:border-eldorado-accent">
                 <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
             </div>
 
@@ -84,11 +84,11 @@
             </div>
         </div>
 
-        <!-- Sub Navigation Categories (Like Eldorado) -->
+        <!-- Sub Navigation Categories -->
         <div class="max-w-7xl mx-auto flex items-center gap-6 mt-3 pt-2 border-t border-eldorado-border/40 text-xs text-slate-300 overflow-x-auto">
             <button onclick="switchTab('home')" class="hover:text-eldorado-accent font-bold flex items-center gap-1 text-eldorado-accent"><i class="fa-solid fa-fire"></i> الشائع (Popular)</button>
             <button onclick="switchTab('games')" class="hover:text-eldorado-accent font-bold flex items-center gap-1"><i class="fa-solid fa-user-gear"></i> الحسابات (Accounts)</button>
-            <button onclick="switchTab('games')" class="hover:text-eldorado-accent font-bold flex items-center gap-1"><i class="fa-solid fa-[#00f0ff] fa-bolt"></i> الشحن (Top ups)</button>
+            <button onclick="switchTab('games')" class="hover:text-eldorado-accent font-bold flex items-center gap-1"><i class="fa-solid fa-bolt"></i> الشحن (Top ups)</button>
             <button onclick="switchTab('trade')" class="hover:text-eldorado-gold font-bold flex items-center gap-1 text-eldorado-gold"><i class="fa-solid fa-handshake"></i> شات الـ Trade</button>
         </div>
     </header>
@@ -112,7 +112,7 @@
             </div>
         </div>
 
-        <!-- SECTION 1: HOME MARKET (Popular Items Eldorado Style Grid) -->
+        <!-- SECTION 1: HOME MARKET (Popular Items Grid) -->
         <div id="sectionHome" class="space-y-4">
             <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-fire text-eldorado-gold"></i> العروض الشائعة (Popular Offers)</h2>
             
@@ -161,7 +161,7 @@
             </div>
         </div>
 
-        <!-- How Buying Works (Eldorado Style Trust Banner) -->
+        <!-- Trust Banner -->
         <div class="bg-[#121620] border border-eldorado-border p-5 rounded-2xl space-y-3">
             <h3 class="text-xs font-bold text-slate-300">كيف يعمل الشراء والوساطة على Dollar Store؟</h3>
             <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
