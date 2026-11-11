@@ -4,44 +4,22 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dollar Store | 90s Gaming Ultimate Marketplace</title>
-
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
-    <!-- Google Fonts: Retro 90s (Press Start 2P for EN/Numbers & Reem Kufi for AR) -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Reem+Kufi:wght@400;600;700;800&display=swap" rel="stylesheet">
-    
-    <!-- Supabase JS Client -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        nes: {
-                            bg: '#0f0f1b',
-                            card: '#1a1a2e',
-                            border: '#2a2a4a',
-                            green: '#00e676',
-                            gold: '#ffc107',
-                            cyan: '#00e5ff',
-                            red: '#ff1744',
-                            purple: '#d500f9'
-                        }
+                        nes: { bg: '#0f0f1b', card: '#1a1a2e', border: '#2a2a4a', green: '#00e676', gold: '#ffc107', cyan: '#00e5ff', red: '#ff1744', purple: '#d500f9' }
                     },
-                    fontFamily: {
-                        pixel: ['"Press Start 2P"', 'monospace'],
-                        arabic: ['"Reem Kufi"', 'sans-serif']
-                    }
+                    fontFamily: { pixel: ['"Press Start 2P"', 'monospace'], arabic: ['"Reem Kufi"', 'sans-serif'] }
                 }
             }
         }
     </script>
-
     <style>
         body { font-family: 'Reem Kufi', sans-serif; background-color: #0f0f1b; color: #f1f5f9; }
         .pixel-text { font-family: 'Press Start 2P', monospace; }
@@ -51,13 +29,9 @@
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-nes-green selection:text-black">
-
-    <!-- Top Announcement Bar -->
-    <div id="announcement-bar" class="bg-black border-b-2 border-nes-border py-2 px-4 text-xs text-center text-nes-gold font-bold">
+    <div class="bg-black border-b-2 border-nes-border py-2 px-4 text-xs text-center text-nes-gold font-bold">
         <i class="fa-solid fa-bullhorn"></i> مرحباً بك في Dollar Store - سوق ألعاب التسعينات الرائد!
     </div>
-
-    <!-- Header Navigation -->
     <header class="sticky top-0 z-40 bg-nes-bg/95 backdrop-blur-md border-b-4 border-nes-border px-4 py-3">
         <div class="max-w-7xl mx-auto flex justify-between items-center gap-4">
             <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.reload()">
@@ -69,8 +43,6 @@
                     <p class="text-[10px] text-nes-gold">90S GAMING MARKETPLACE</p>
                 </div>
             </div>
-
-            <!-- Auth / User Controls -->
             <div id="auth-controls" class="flex items-center gap-3">
                 <button onclick="openAuthModal()" id="btn-login-modal" class="tab-btn bg-nes-cyan text-black px-4 py-2 font-bold text-xs rounded">
                     <i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول
@@ -83,15 +55,10 @@
             </div>
         </div>
     </header>
-
-    <!-- Main Container -->
     <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-8">
-        
-        <!-- Products Grid Placeholder -->
         <div id="products-section">
             <h2 class="text-lg font-bold text-white mb-4 border-r-4 border-nes-green pr-3">المنتجات والخدمات المتاحة</h2>
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="products-grid">
-                <!-- Example Product Card -->
                 <div class="nes-card p-5 rounded space-y-3">
                     <div class="flex justify-between items-center">
                         <h3 class="font-bold text-white text-sm">كبسولة League of Legends</h3>
@@ -104,10 +71,7 @@
                 </div>
             </div>
         </div>
-
     </main>
-
-    <!-- MODAL 1: Auth Modal -->
     <div id="modal-auth" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="nes-card w-full max-w-md p-6 rounded space-y-4">
             <div class="flex justify-between items-center border-b-2 border-nes-border pb-2">
@@ -127,41 +91,33 @@
             </form>
         </div>
     </div>
-
-    <!-- MODAL 2: Terms & Order Confirmation Modal -->
     <div id="modal-terms" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="nes-card w-full max-w-lg p-6 rounded space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b-2 border-nes-border pb-2">
                 <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-file-contract text-nes-gold"></i> الشروط وأحكام الضمان</h3>
                 <button onclick="closeModal('modal-terms')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
             <div class="bg-black/60 p-4 rounded border border-nes-border text-xs leading-relaxed space-y-2 text-slate-300">
                 <h4 class="font-bold text-nes-gold">شروط الشراء والضمان:</h4>
                 <p>1. مدة الضمان محددة بالمنتج وتبدأ فور استلام بيانات السلعة.</p>
                 <p>2. يُشترط الدخول للتأكد من المنتج فور التسليم وبدون لعب أي مباريات أو تغيير بيانات لمنع إلغاء الضمان.</p>
                 <p>3. في حالة التحويل الخطأ أو الإلغاء بدون سبب من المشتري لا يتم الاسترجاع.</p>
             </div>
-
             <div class="flex items-center gap-2 pt-2">
                 <input type="checkbox" id="chk-accept-terms" class="w-4 h-4 accent-nes-green cursor-pointer">
                 <label for="chk-accept-terms" class="text-xs font-bold text-white cursor-pointer">أوافق صراحة على كافة الشروط والأحكام الخاصة بالطلب</label>
             </div>
-
             <button onclick="confirmOrderTerms()" class="w-full tab-btn bg-nes-green text-black font-bold py-2.5 rounded text-xs">
                 موافقة وإنشاء الطلب
             </button>
         </div>
     </div>
-
-    <!-- MODAL 3: Payment Instructions & Proof Upload -->
     <div id="modal-payment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="nes-card w-full max-w-md p-6 rounded space-y-4">
             <div class="flex justify-between items-center border-b-2 border-nes-border pb-2">
                 <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-wallet text-nes-green"></i> تعليمات الدفع اليدوي</h3>
                 <button onclick="closeModal('modal-payment')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            
             <div class="bg-black p-4 rounded border border-nes-border space-y-2 text-xs">
                 <div class="flex justify-between">
                     <span class="text-slate-400">رقم الطلب:</span>
@@ -176,7 +132,6 @@
                     <span class="font-bold text-white font-mono">01000000000</span>
                 </div>
             </div>
-
             <form onsubmit="handlePaymentUpload(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block mb-1 text-slate-300">رقم محفظتك المحول منها (اختياري):</label>
@@ -190,10 +145,7 @@
             </form>
         </div>
     </div>
-
-    <!-- MAIN JAVASCRIPT LOGIC -->
     <script>
-        // Initialize Supabase Client
         const SUPABASE_URL = 'https://afzyerpeoirbcxwymsqg.supabase.co';
         const SUPABASE_KEY = 'PASTE_YOUR_PUBLISHABLE_KEY_HERE'; 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
@@ -203,13 +155,9 @@
         let activeOrderId = null;
         let activeOrderCode = null;
 
-        // Init Auth Check
         document.addEventListener('DOMContentLoaded', async () => {
             const { data: { session } } = await supabase.auth.getSession();
-            if (session) {
-                currentUser = session.user;
-                updateAuthUI();
-            }
+            if (session) { currentUser = session.user; updateAuthUI(); }
         });
 
         function updateAuthUI() {
@@ -230,22 +178,15 @@
             e.preventDefault();
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
-
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) {
                 const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({ email, password });
                 if (signUpErr) return alert('خطأ في الدخول/التسجيل: ' + signUpErr.message);
                 currentUser = signUpData.user;
-            } else {
-                currentUser = data.user;
-            }
-
+            } else { currentUser = data.user; }
             updateAuthUI();
             closeModal('modal-auth');
-            
-            if (activeProductToBuy) {
-                showTermsModal();
-            }
+            if (activeProductToBuy) showTermsModal();
         }
 
         async function handleLogout() {
@@ -256,11 +197,7 @@
 
         function startPurchaseFlow(productId, name, price) {
             activeProductToBuy = { id: productId, name, price };
-            if (!currentUser) {
-                alert('يرجى تسجيل الدخول أولاً لإتمام الشراء.');
-                openAuthModal();
-                return;
-            }
+            if (!currentUser) { alert('يرجى تسجيل الدخول أولاً لإتمام الشراء.'); openAuthModal(); return; }
             showTermsModal();
         }
 
@@ -272,26 +209,18 @@
         async function confirmOrderTerms() {
             const accepted = document.getElementById('chk-accept-terms').checked;
             if (!accepted) return alert('يجب الموافقة على الشروط أولاً للمتابعة.');
-
             closeModal('modal-terms');
-
             try {
-                // استدعاء دالة create_order المتوافقة مع قاعدة البيانات
                 const { data, error } = await supabase.rpc('create_order', {
                     p_product_id: activeProductToBuy.id,
                     p_terms_version: 'v1'
                 });
-
                 if (error) throw error;
-
-                // الـ RPC ترجع جدول الطلب بالكامل (Object)
                 activeOrderId = data.id;
                 activeOrderCode = data.code;
-                
                 document.getElementById('pay-order-code').textContent = activeOrderCode;
                 document.getElementById('pay-amount').textContent = activeProductToBuy.price + ' EGP';
                 document.getElementById('modal-payment').classList.remove('hidden');
-
             } catch (err) {
                 alert('حدث خطأ أثناء إنشاء الطلب: ' + err.message);
             }
@@ -306,16 +235,9 @@
                     img.src = event.target.result;
                     img.onload = () => {
                         const canvas = document.createElement('canvas');
-                        let width = img.width;
-                        let height = img.height;
-
-                        if (width > maxWidth) {
-                            height = Math.round((height * maxWidth) / width);
-                            width = maxWidth;
-                        }
-
-                        canvas.width = width;
-                        canvas.height = height;
+                        let width = img.width, height = img.height;
+                        if (width > maxWidth) { height = Math.round((height * maxWidth) / width); width = maxWidth; }
+                        canvas.width = width; canvas.height = height;
                         const ctx = canvas.getContext('2d');
                         ctx.drawImage(img, 0, 0, width, height);
                         canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
@@ -329,42 +251,27 @@
             const fileInput = document.getElementById('pay-proof-file');
             const senderPhone = document.getElementById('pay-sender-phone').value;
             if (!fileInput.files.length) return alert('اختر صورة التحويل أولاً.');
-
             const btn = document.getElementById('btn-submit-payment');
-            btn.disabled = true;
-            btn.textContent = 'جاري الضغط والرفع...';
-
+            btn.disabled = true; btn.textContent = 'جاري الضغط والرفع...';
             try {
                 const rawFile = fileInput.files[0];
                 const compressedBlob = await compressImage(rawFile);
-                
-                // المسار مطابق لسياسة التخزين (Bucket storage policies)
                 const filePath = `${currentUser.id}/${activeOrderId}_${Date.now()}.jpg`;
-
-                const { error: uploadErr } = await supabase.storage
-                    .from('payment-proofs')
-                    .upload(filePath, compressedBlob, { contentType: 'image/jpeg' });
-
+                const { error: uploadErr } = await supabase.storage.from('payment-proofs').upload(filePath, compressedBlob, { contentType: 'image/jpeg' });
                 if (uploadErr) throw uploadErr;
-
-                // استدعاء دالة submit_payment_proof الصحيحة
                 const { error: rpcErr } = await supabase.rpc('submit_payment_proof', {
                     p_order_id: activeOrderId,
                     p_file_path: filePath,
                     p_sender: senderPhone || 'غير محدد',
                     p_reference: ''
                 });
-
                 if (rpcErr) throw rpcErr;
-
                 alert('تم رفع إثبات التحويل بنجاح! الطلب الآن قيد المراجعة لدى الأدمن.');
                 closeModal('modal-payment');
-
             } catch (err) {
                 alert('خطأ في إرسال الإثبات: ' + err.message);
             } finally {
-                btn.disabled = false;
-                btn.textContent = 'تأكيد وإرسال الإثبات';
+                btn.disabled = false; btn.textContent = 'تأكيد وإرسال الإثبات';
             }
         }
     </script>
