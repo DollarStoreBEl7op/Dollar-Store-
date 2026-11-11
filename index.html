@@ -1,497 +1,444 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dollar Store | 90s Gaming Ultimate Marketplace</title>
-    <!-- Tailwind CSS -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-    <!-- Supabase JS Client -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+-- =====================================================================
+-- Dollar Store - المرحلة 3: نظام الاحتجاز (Escrow) + محفظة البائع + سحب أسبوعي (الجمعة)
+-- شغّله بعد schema.sql ثم schema_phase2.sql.
+-- آمن لإعادة التشغيل أكتر من مرة.
+--
+-- الفكرة:
+--   بيع -> بعد التسليم الفلوس "معلّقة" عند البائع (pending)
+--   بعد فترة الاحتجاز (72 ساعة، أو لحد نهاية الضمان لو أطول) وبدون مشكلة -> "متاحة" (available)
+--   البائع يطلب سحب -> يدخل دفعة الجمعة القادمة -> الأدمن يحوّل يدويًا ويضغط "تم الدفع"
+-- الفلوس الفعلية بتفضل في محفظتك أنت، والجداول دي بتسجّل حقوق كل بائع بس.
+-- =====================================================================
 
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        eldorado: {
-                            bg: '#0b0e14',
-                            card: '#151a23',
-                            border: '#222b3b',
-                            accent: '#00ff66',
-                            gold: '#ffb700',
-                            cyan: '#00f0ff',
-                            purple: '#8b5cf6',
-                            danger: '#ef4444'
-                        }
-                    },
-                    fontFamily: {
-                        pixel: ['"Press Start 2P"', 'monospace'],
-                        cairo: ['Cairo', 'sans-serif']
-                    }
-                }
-            }
-        }
-    </script>
+-- ---------------------------------------------------------------------
+-- 0) إعدادات (أرقام مبدئية، عدّلها بأمر update في آخر الملف)
+-- ---------------------------------------------------------------------
+insert into public.app_settings (key, value) values
+  ('hold_hours',         '72'),   -- مدة الاحتجاز بعد التسليم
+  ('commission_percent', '10'),   -- عمولة المنصة على منتجات البائعين (رقم مبدئي)
+  ('min_payout_egp',     '100'),  -- أقل مبلغ سحب (رقم مبدئي)
+  ('payout_weekday',     '5'),    -- يوم الدفع: 5 = الجمعة (1 = الاثنين ... 7 = الأحد)
+  ('seller_terms_text',
+   '1) فلوس كل عملية بتتعلّق عند المنصة لحد انتهاء فترة الاحتجاز (72 ساعة من التسليم، أو لحد نهاية الضمان لو أطول).' || E'\n' ||
+   '2) لو المشتري بلّغ عن مشكلة، بيتجمّد المبلغ لحد ما الإدارة تفصل فيها.' || E'\n' ||
+   '3) بعد انتهاء الفترة بدون مشاكل، المبلغ بيتحول لرصيد متاح تقدر تطلب سحبه.' || E'\n' ||
+   '4) طلبات السحب بتتحوّل مرة كل أسبوع يوم الجمعة، وبحد أدنى للسحب بيحدده الموقع.' || E'\n' ||
+   '5) عمولة المنصة بتتخصم من كل عملية بيع.' || E'\n' ||
+   '6) أي مبلغ اتسلّم للمشتري كاسترجاع بيتخصم من رصيدك المعلّق.' || E'\n' ||
+   '7) التوثيق بالهوية شرط قبل أول عملية سحب.')
+on conflict (key) do nothing;
 
-    <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #0b0e14; color: #e2e8f0; }
-        .pixel-title { font-family: 'Press Start 2P', monospace; text-shadow: 2px 2px #8b5cf6; }
-        .eldorado-card { background: #151a23; border: 1px solid #222b3b; transition: all 0.2s ease; }
-        .eldorado-card:hover { border-color: #00ff66; transform: translateY(-3px); }
-        .gold-border-glow { border-color: #ffb700; box-shadow: 0 0 10px rgba(255, 183, 0, 0.2); }
-        .marquee { white-space: nowrap; overflow: hidden; box-sizing: border-box; }
-        .marquee-content { display: inline-block; padding-right: 100%; animation: marquee 25s linear infinite; }
-        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(100%, 0); } }
-    </style>
-</head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-eldorado-accent selection:text-black">
+-- الشروط تتقرا للكل (نسخة المشتري ونسخة البائع)
+drop policy if exists settings_read on public.app_settings;
+create policy settings_read on public.app_settings
+  for select using (key in ('terms_version', 'terms_text', 'seller_terms_text'));
 
-    <!-- Financial & Market Ticker Bar -->
-    <div class="bg-[#05070a] border-b border-eldorado-border py-1 px-4 text-xs flex justify-between items-center text-slate-400 overflow-hidden">
-        <div class="marquee w-full">
-            <div class="marquee-content flex gap-8 items-center text-[11px]">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-coins text-eldorado-gold"></i> أسعار ثابتة ومضمونة طوال العام</span>
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-capsules text-eldorado-accent"></i> كبسولات لول الحصرية: <strong class="text-eldorado-accent font-mono">45 EGP فقط</strong></span>
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-shield-halved text-eldorado-purple"></i> نظام التوثيق بالكاميرا الحية: <strong class="text-eldorado-accent font-mono">مفعل وآمن</strong></span>
-            </div>
-        </div>
-    </div>
+create or replace function public._setting(p_key text, p_default text) returns text
+language sql stable security definer set search_path = public as $$
+  select coalesce((select value from public.app_settings where key = p_key), p_default);
+$$;
+revoke all on function public._setting(text, text) from public, anon, authenticated;
 
-    <!-- Header -->
-    <header class="sticky top-0 z-40 bg-eldorado-bg/95 backdrop-blur-md border-b border-eldorado-border px-4 py-3 shadow-xl">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('capsules')">
-                <div class="w-10 h-10 bg-eldorado-accent rounded-xl flex items-center justify-center border-2 border-white shadow-[0_0_15px_rgba(0,255,102,0.4)]">
-                    <i class="fa-solid fa-dollar-sign text-black text-xl font-black"></i>
-                </div>
-                <div>
-                    <h1 class="pixel-title text-sm text-eldorado-accent tracking-wider">DOLLAR STORE</h1>
-                    <p class="text-[8px] text-eldorado-gold font-pixel">90S ARCADE GAMING HUB</p>
-                </div>
-            </div>
+-- ---------------------------------------------------------------------
+-- 1) ربط المنتجات والطلبات بالبائع
+--    seller_id = null  ->  منتج المتجر نفسه (مفيش محفظة بائع)
+-- ---------------------------------------------------------------------
+alter table public.products add column if not exists seller_id uuid references public.profiles(id);
 
-            <!-- Search Bar -->
-            <div class="flex-1 max-w-md w-full relative">
-                <input type="text" id="searchInput" placeholder="ابحث عن بائع، لعبة، حساب..." class="w-full bg-[#151a23] border border-eldorado-border rounded-xl py-2 px-4 pr-10 text-xs text-white focus:outline-none focus:border-eldorado-accent">
-                <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
-            </div>
+alter table public.orders
+  add column if not exists seller_id      uuid references public.profiles(id),
+  add column if not exists commission_pct numeric(5,2) not null default 0,
+  add column if not exists seller_net     numeric(10,2),
+  add column if not exists release_at     timestamptz,
+  add column if not exists released_at    timestamptz;
 
-            <!-- Action Buttons -->
-            <div class="flex items-center gap-2">
-                <button onclick="openAuthModal()" class="bg-eldorado-cyan text-black font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 hover:bg-cyan-400 transition">
-                    <i class="fa-solid fa-user-lock"></i> حساب جديد
-                </button>
-                <button onclick="openVendorKYCModal()" class="bg-eldorado-danger text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 hover:bg-red-600 transition shadow-lg shadow-red-500/20">
-                    <i class="fa-solid fa-camera"></i> توثيق بائع
-                </button>
-                <button onclick="openWithdrawModal()" class="bg-eldorado-purple text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 hover:bg-purple-600 transition">
-                    <i class="fa-solid fa-wallet"></i> سحب أرباح
-                </button>
-            </div>
-        </div>
+-- البائع يشوف مبيعاته (من غير بيانات التسليم)
+drop policy if exists orders_read on public.orders;
+create policy orders_read on public.orders for select to authenticated
+  using (buyer_id = auth.uid() or seller_id = auth.uid() or public.is_admin());
 
-        <!-- Navigation Tabs -->
-        <div class="max-w-7xl mx-auto flex items-center gap-4 mt-3 pt-2 border-t border-eldorado-border/40 text-xs text-slate-300 overflow-x-auto">
-            <button onclick="switchTab('capsules')" class="hover:text-eldorado-accent font-bold flex items-center gap-1 text-eldorado-accent"><i class="fa-solid fa-capsules"></i> 1. الكبسولات</button>
-            <button onclick="switchTab('gamepass')" class="hover:text-eldorado-accent font-bold flex items-center gap-1"><i class="fa-solid fa-gamepad"></i> 2. Game Pass</button>
-            <button onclick="switchTab('streaming')" class="hover:text-eldorado-gold font-bold flex items-center gap-1"><i class="fa-solid fa-tv"></i> 3. الترفيه</button>
-            <button onclick="switchTab('steam')" class="hover:text-eldorado-cyan font-bold flex items-center gap-1"><i class="fa-brands fa-steam"></i> 4. ستيم</button>
-            <button onclick="switchTab('lol')" class="hover:text-cyan-400 font-bold flex items-center gap-1"><i class="fa-solid fa-shield-halved"></i> 5. LoL</button>
-            <button onclick="switchTab('valorant')" class="hover:text-red-400 font-bold flex items-center gap-1"><i class="fa-solid fa-crosshairs"></i> 6. Valorant</button>
-            <button onclick="switchTab('cod')" class="hover:text-amber-400 font-bold flex items-center gap-1"><i class="fa-solid fa-gun"></i> 7. CoD (6 & 7)</button>
-            <button onclick="switchTab('otherGames')" class="hover:text-purple-400 font-bold flex items-center gap-1"><i class="fa-solid fa-gamepad"></i> 8. روبلوكس وفورتنايت</button>
-            <button onclick="switchTab('boosting')" class="hover:text-eldorado-gold font-bold flex items-center gap-1"><i class="fa-solid fa-chart-line"></i> 9. البوستنج</button>
-            <button onclick="switchTab('feedback')" class="hover:text-amber-400 font-bold flex items-center gap-1"><i class="fa-solid fa-star"></i> 10. التقييمات وفيد باك</button>
-            <button onclick="switchTab('dailyOffers')" class="hover:text-eldorado-purple font-bold flex items-center gap-1"><i class="fa-solid fa-bullhorn"></i> 11. العروض اليومية</button>
-            <button onclick="switchTab('discordHub')" class="hover:text-indigo-400 font-bold flex items-center gap-1"><i class="fa-brands fa-discord"></i> 12. الديسكورد</button>
-        </div>
-    </header>
+-- ---------------------------------------------------------------------
+-- 2) طلبات السحب + دفتر المحفظة (القراءة فقط للعميل)
+-- ---------------------------------------------------------------------
+create table if not exists public.payout_requests (
+  id           bigint generated always as identity primary key,
+  seller_id    uuid not null references public.profiles(id),
+  amount_egp   numeric(10,2) not null check (amount_egp > 0),
+  method       text not null check (method in ('vodafone_cash', 'instapay')),
+  account      text not null check (char_length(account) between 5 and 60),
+  status       text not null default 'requested' check (status in ('requested', 'paid', 'rejected')),
+  batch_date   date not null,
+  admin_note   text,
+  created_at   timestamptz not null default now(),
+  processed_at timestamptz
+);
+alter table public.payout_requests enable row level security;
+revoke all on public.payout_requests from anon, authenticated;
+grant select on public.payout_requests to authenticated;
+drop policy if exists payouts_read on public.payout_requests;
+create policy payouts_read on public.payout_requests for select to authenticated
+  using (seller_id = auth.uid() or public.is_admin());
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-8">
+create table if not exists public.wallet_entries (
+  id              bigint generated always as identity primary key,
+  seller_id       uuid not null references public.profiles(id),
+  order_id        bigint references public.orders(id),
+  payout_id       bigint references public.payout_requests(id),
+  kind            text not null check (kind in ('sale','release','refund_reversal','payout_request','payout_reversal','adjustment')),
+  pending_delta   numeric(10,2) not null default 0,
+  available_delta numeric(10,2) not null default 0,
+  note            text,
+  created_at      timestamptz not null default now()
+);
+create index if not exists wallet_seller_idx on public.wallet_entries (seller_id, created_at desc);
+alter table public.wallet_entries enable row level security;
+revoke all on public.wallet_entries from anon, authenticated;
+grant select on public.wallet_entries to authenticated;
+drop policy if exists wallet_read on public.wallet_entries;
+create policy wallet_read on public.wallet_entries for select to authenticated
+  using (seller_id = auth.uid() or public.is_admin());
 
-        <!-- SECTION 1: CAPSULES -->
-        <div id="sectionCapsules" class="space-y-6">
-            <div class="border-b border-eldorado-border pb-3 flex justify-between items-center">
-                <div>
-                    <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-capsules text-eldorado-accent"></i> قسم كبسولة لول الحصرية (350 RP + XP Boost)</h2>
-                    <p class="text-[11px] text-slate-400">سعر موحد: <strong class="text-eldorado-accent">45 جنيه فقط</strong> للحساب.</p>
-                </div>
-            </div>
+-- ---------------------------------------------------------------------
+-- 3) تاريخ دفعة الجمعة القادمة (بتوقيت القاهرة)
+--    طلب يوم الجمعة نفسه يدخل الجمعة اللي بعدها
+-- ---------------------------------------------------------------------
+create or replace function public.next_payout_date(p_ts timestamptz default now())
+returns date
+language plpgsql stable security definer set search_path = public as $$
+declare
+  v_day date := (p_ts at time zone 'Africa/Cairo')::date;
+  v_dow int  := extract(isodow from v_day)::int;
+  v_w   int  := public._setting('payout_weekday', '5')::int;
+begin
+  return v_day + case when v_dow < v_w then v_w - v_dow else v_w - v_dow + 7 end;
+end $$;
+revoke all on function public.next_payout_date(timestamptz) from public, anon;
+grant execute on function public.next_payout_date(timestamptz) to authenticated;
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-emerald-500/30">
-                    <h3 class="text-xs font-bold text-white">1. كبسولة ويست (EUW Capsule)</h3>
-                    <p class="text-[11px] text-slate-300">أكونت لفل 1 عليه كبسولة تدي 350 RP و 100% XP لمدة 30 يوم (إيميل وهمي).</p>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldorado-border">
-                        <span class="text-xs font-mono font-bold text-eldorado-accent">45 EGP</span>
-                        <button onclick="alert('طلب كبسولة ويست')" class="bg-eldorado-accent text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء فوري</button>
-                    </div>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-cyan-500/30">
-                    <h3 class="text-xs font-bold text-white">2. كبسولة نوردك (EUNE Capsule)</h3>
-                    <p class="text-[11px] text-slate-300">أكونت لفل 1 عليه كبسولة تدي 350 RP و 100% XP لمدة 30 يوم (إيميل وهمي).</p>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldorado-border">
-                        <span class="text-xs font-mono font-bold text-cyan-400">45 EGP</span>
-                        <button onclick="alert('طلب كبسولة نوردك')" class="bg-cyan-500 text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء فوري</button>
-                    </div>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-amber-500/30">
-                    <h3 class="text-xs font-bold text-white">3. كبسولة نورث (North Capsule)</h3>
-                    <p class="text-[11px] text-slate-300">أكونت لفل 1 عليه كبسولة تدي 350 RP و 100% XP لمدة 30 يوم (إيميل وهمي).</p>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldorado-border">
-                        <span class="text-xs font-mono font-bold text-amber-400">45 EGP</span>
-                        <button onclick="alert('طلب كبسولة نورث')" class="bg-amber-500 text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء فوري</button>
-                    </div>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-purple-500/30 col-span-1 sm:col-span-2">
-                    <h3 class="text-xs font-bold text-white">4. كبسولة نورث (إيميل حقيقي 100% Yopmail)</h3>
-                    <p class="text-[11px] text-slate-300">نفس المميزات بإيميل حقيقي تابع لمنصة Yopmail لضمان الأمان الكامل.</p>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldorado-border">
-                        <span class="text-xs font-mono font-bold text-purple-400">45 EGP</span>
-                        <button onclick="alert('طلب كبسولة نورث إيميل حقيقي')" class="bg-purple-600 text-white font-bold px-4 py-1.5 rounded-lg text-xs">شراء فوري</button>
-                    </div>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-eldorado-gold/30 flex flex-col justify-between">
-                    <h3 class="text-xs font-bold text-white">5. تيكيت طلبات الكبسولات المخصصة</h3>
-                    <button onclick="switchTab('dailyOffers')" class="w-full bg-eldorado-gold text-black font-bold py-2 rounded-xl text-xs">فتح تيكيت الطلب</button>
-                </div>
-            </div>
-        </div>
+-- ---------------------------------------------------------------------
+-- 4) إنشاء الطلب (نسخة محدّثة: بتسجل البائع والعمولة)
+-- ---------------------------------------------------------------------
+create or replace function public.create_order(p_product_id bigint, p_terms_version text)
+returns public.orders
+language plpgsql security definer set search_path = public as $$
+declare
+  v_uid   uuid := auth.uid();
+  v_prod  public.products;
+  v_cur   text;
+  v_terms text;
+  v_open  int;
+  v_pct   numeric(5,2) := 0;
+  v_net   numeric(10,2);
+  v_order public.orders;
+begin
+  if v_uid is null then raise exception 'login_required'; end if;
+  select value into v_cur from public.app_settings where key = 'terms_version';
+  if p_terms_version is distinct from v_cur then raise exception 'terms_not_accepted'; end if;
+  select * into v_prod from public.products where id = p_product_id and is_active;
+  if not found then raise exception 'product_not_found'; end if;
+  if v_prod.seller_id = v_uid then raise exception 'own_product'; end if;
+  if v_prod.delivery_mode = 'inventory'
+     and not exists (select 1 from public.inventory_items where product_id = v_prod.id and status = 'available') then
+    raise exception 'out_of_stock';
+  end if;
+  select count(*) into v_open from public.orders
+    where buyer_id = v_uid and status in ('awaiting_payment', 'under_review');
+  if v_open >= 3 then raise exception 'too_many_open_orders'; end if;
+  if v_prod.seller_id is not null then
+    v_pct := public._setting('commission_percent', '10')::numeric;
+    v_net := round(v_prod.price_egp * (1 - v_pct / 100), 2);
+  end if;
+  select value into v_terms from public.app_settings where key = 'terms_text';
+  insert into public.orders (buyer_id, product_id, price_egp, warranty_hours, terms_version, terms_snapshot,
+                             seller_id, commission_pct, seller_net)
+  values (v_uid, v_prod.id, v_prod.price_egp, v_prod.warranty_hours, v_cur,
+          coalesce(v_terms, '') || E'\n---\n' || coalesce(v_prod.warranty_terms, ''),
+          v_prod.seller_id, v_pct, v_net)
+  returning * into v_order;
+  return v_order;
+end $$;
 
-        <!-- SECTION 2: XBOX GAME PASS -->
-        <div id="sectionGamepass" class="hidden space-y-6">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gamepad text-eldorado-accent"></i> اشتراكات Xbox Game Pass (أسعار ثابتة)</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="eldorado-card p-5 rounded-2xl space-y-4 border border-emerald-500/30">
-                    <h3 class="text-xs font-bold text-white">Xbox Game Pass Ultimate</h3>
-                    <p class="text-[11px] text-slate-300">يضم +600 لعبة، يدعم Call of Duty 7 و FIFA 27 (يبدأ من 100 ج.م / شهر حتى 16 شهر).</p>
-                    <button onclick="alert('طلب Xbox Game Pass Ultimate')" class="w-full bg-eldorado-accent text-black font-bold py-2 rounded-xl text-xs">اطلب الآن</button>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-4 border border-eldorado-gold/30">
-                    <h3 class="text-xs font-bold text-white">Xbox Game Pass Ultimate (بدون كود 7)</h3>
-                    <p class="text-[11px] text-slate-300">نفس المميزات بدون كود 7 (يبدأ من 50 ج.م / شهر حتى 12 شهر).</p>
-                    <button onclick="alert('طلب Game Pass بدون كود 7')" class="w-full bg-eldorado-gold text-black font-bold py-2 rounded-xl text-xs">اطلب الآن</button>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-4 border border-eldorado-cyan/30">
-                    <h3 class="text-xs font-bold text-white">Xbox Game Pass Linked</h3>
-                    <p class="text-[11px] text-slate-300">لربط الحسابات أثناء لعب LoL, Valorant وغيرها (يبدأ من 100 ج.م لشهرين ولحد 4 شهور).</p>
-                    <button onclick="alert('طلب Linked Pass')" class="w-full bg-eldorado-cyan text-black font-bold py-2 rounded-xl text-xs">اطلب الآن</button>
-                </div>
-            </div>
-        </div>
+-- ---------------------------------------------------------------------
+-- 5) التسليم (نسخة محدّثة): بيبدأ الاحتجاز ويسجل مستحقات البائع "معلّقة"
+-- ---------------------------------------------------------------------
+create or replace function public.deliver_order(p_order_id bigint, p_secret text default null)
+returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  v_o public.orders; v_secret text; v_warranty timestamptz; v_hold timestamptz;
+begin
+  perform public._require_admin();
+  select * into v_o from public.orders where id = p_order_id for update;
+  if not found then raise exception 'order_not_found'; end if;
+  if v_o.status not in ('paid', 'problem') then raise exception 'bad_status'; end if;
+  if v_o.inventory_item_id is not null then
+    select secret into v_secret from public.inventory_items where id = v_o.inventory_item_id;
+    update public.inventory_items set status = 'sold' where id = v_o.inventory_item_id;
+  end if;
+  v_secret := coalesce(nullif(trim(p_secret), ''), v_secret);
+  if v_secret is null then raise exception 'secret_required'; end if;
+  insert into public.order_secrets (order_id, secret) values (v_o.id, v_secret)
+  on conflict (order_id) do update set secret = excluded.secret, created_at = now();
 
-        <!-- SECTION 3: STREAMING -->
-        <div id="sectionStreaming" class="hidden space-y-6">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-tv text-eldorado-gold"></i> اشتراكات الترفيه (80 EGP / الشهر)</h2>
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                <div class="eldorado-card p-4 rounded-xl text-center space-y-2"><h4 class="text-xs font-bold text-white">Spotify</h4><span class="text-[10px] text-emerald-400 font-mono">80 EGP</span></div>
-                <div class="eldorado-card p-4 rounded-xl text-center space-y-2"><h4 class="text-xs font-bold text-white">Shahid VIP</h4><span class="text-[10px] text-amber-400 font-mono">80 EGP</span></div>
-                <div class="eldorado-card p-4 rounded-xl text-center space-y-2"><h4 class="text-xs font-bold text-white">Crunchyroll</h4><span class="text-[10px] text-orange-400 font-mono">80 EGP</span></div>
-                <div class="eldorado-card p-4 rounded-xl text-center space-y-2"><h4 class="text-xs font-bold text-white">Netflix UHD</h4><span class="text-[10px] text-red-400 font-mono">80 EGP</span></div>
-            </div>
-        </div>
+  v_warranty := now() + make_interval(hours => v_o.warranty_hours);
+  v_hold     := now() + make_interval(hours => public._setting('hold_hours', '72')::int);
+  update public.orders
+     set status = 'delivered', delivered_at = now(), warranty_until = v_warranty,
+         release_at = greatest(v_warranty, v_hold), updated_at = now()
+   where id = v_o.id;
 
-        <!-- SECTION 4: STEAM -->
-        <div id="sectionSteam" class="hidden space-y-6">
-            <div class="eldorado-card p-6 rounded-2xl space-y-4 border border-cyan-500/30">
-                <h2 class="text-sm font-bold text-white">قسم ستيم المخصص (Steam Custom Orders)</h2>
-                <p class="text-xs text-slate-300">اكتب طلبك بدقة في التيكيت (اسم اللعبة، عدد الدولارات، أو شحن محفظة ستيم).</p>
-                <button onclick="switchTab('dailyOffers')" class="bg-cyan-500 text-black font-bold px-6 py-2.5 rounded-xl text-xs">فتح تيكيت طلب ستيم</button>
-            </div>
-        </div>
+  if v_o.seller_id is not null
+     and not exists (select 1 from public.wallet_entries where order_id = v_o.id and kind = 'sale') then
+    insert into public.wallet_entries (seller_id, order_id, kind, pending_delta, note)
+    values (v_o.seller_id, v_o.id, 'sale', v_o.seller_net, 'بيع ' || v_o.code);
+    insert into public.transactions (order_id, user_id, type, amount_egp, note)
+    values (v_o.id, v_o.seller_id, 'commission', v_o.price_egp - v_o.seller_net,
+            'عمولة المنصة ' || v_o.commission_pct::text || '%');
+  end if;
+end $$;
 
-        <!-- SECTION 5: LEAGUE OF LEGENDS -->
-        <div id="sectionLol" class="hidden space-y-6">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-shield-halved text-cyan-400"></i> قسم League of Legends</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="eldorado-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-cyan-400">1. قسم الحسابات</h3>
-                    <p class="text-[11px] text-slate-300">حسابات لفل 30 وكبسولات مميزة.</p>
-                    <button onclick="alert('حسابات LoL')" class="w-full bg-cyan-500 text-black font-bold py-2 rounded-xl text-xs">عرض الحسابات</button>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-cyan-400">2. العملات وأكواد الشحن</h3>
-                    <p class="text-[11px] text-slate-300">شحن نقاط RP الرسمية.</p>
-                    <button onclick="alert('عملات LoL')" class="w-full bg-cyan-500 text-black font-bold py-2 rounded-xl text-xs">عرض العملات</button>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-cyan-500/50">
-                    <h3 class="text-xs font-bold text-cyan-400">3. طلب حساب بمواصفات خاصة</h3>
-                    <p class="text-[11px] text-slate-300">اطلب رانكد أو سكنات محددة.</p>
-                    <button onclick="openCustomOrderModal('League of Legends')" class="w-full bg-eldorado-gold text-black font-bold py-2 rounded-xl text-xs">طلب خاص</button>
-                </div>
-            </div>
-        </div>
+-- ---------------------------------------------------------------------
+-- 6) حل المشاكل (نسخة محدّثة): الاسترجاع بيخصم من المعلّق عند البائع
+-- ---------------------------------------------------------------------
+create or replace function public.resolve_order(p_order_id bigint, p_action text, p_note text default null)
+returns void
+language plpgsql security definer set search_path = public as $$
+declare v_o public.orders;
+begin
+  perform public._require_admin();
+  select * into v_o from public.orders where id = p_order_id for update;
+  if not found then raise exception 'order_not_found'; end if;
+  if p_action = 'refund' then
+    if v_o.status not in ('paid', 'delivered', 'problem') then raise exception 'bad_status'; end if;
+    update public.orders set status = 'refunded', admin_note = left(p_note, 500), updated_at = now() where id = v_o.id;
+    insert into public.transactions (order_id, user_id, type, amount_egp, note)
+    values (v_o.id, v_o.buyer_id, 'refund', v_o.price_egp, left(p_note, 200));
+    update public.inventory_items set status = 'available', order_id = null
+     where id = v_o.inventory_item_id and status = 'reserved';
+    if v_o.seller_id is not null
+       and exists (select 1 from public.wallet_entries where order_id = v_o.id and kind = 'sale')
+       and not exists (select 1 from public.wallet_entries where order_id = v_o.id and kind in ('release', 'refund_reversal')) then
+      insert into public.wallet_entries (seller_id, order_id, kind, pending_delta, note)
+      values (v_o.seller_id, v_o.id, 'refund_reversal', -v_o.seller_net, 'استرجاع للمشتري ' || v_o.code);
+      insert into public.transactions (order_id, user_id, type, amount_egp, note)
+      values (v_o.id, v_o.seller_id, 'commission', -(v_o.price_egp - v_o.seller_net), 'عكس العمولة بسبب الاسترجاع');
+    end if;
+  elsif p_action = 'complete' then
+    if v_o.status not in ('delivered', 'problem') then raise exception 'bad_status'; end if;
+    update public.orders set status = 'completed', admin_note = left(p_note, 500), updated_at = now() where id = v_o.id;
+  elsif p_action = 'cancel' then
+    if v_o.status not in ('awaiting_payment', 'under_review') then raise exception 'bad_status'; end if;
+    update public.orders set status = 'cancelled', admin_note = left(p_note, 500), updated_at = now() where id = v_o.id;
+  else
+    raise exception 'bad_action';
+  end if;
+end $$;
 
-        <!-- SECTION 6: VALORANT -->
-        <div id="sectionValorant" class="hidden space-y-6">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-crosshairs text-red-400"></i> قسم Valorant</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="eldorado-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-red-400">1. قسم الحسابات</h3>
-                    <p class="text-[11px] text-slate-300">حسابات فالورانت جاهزة للرانكد.</p>
-                    <button onclick="alert('حسابات Valorant')" class="w-full bg-red-600 text-white font-bold py-2 rounded-xl text-xs">عرض الحسابات</button>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-red-400">2. العملات وأكواد الشحن</h3>
-                    <p class="text-[11px] text-slate-300">شحن نقاط VP وبطاقات الشحن.</p>
-                    <button onclick="alert('عملات Valorant')" class="w-full bg-red-600 text-white font-bold py-2 rounded-xl text-xs">عرض نقاط VP</button>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-red-500/50">
-                    <h3 class="text-xs font-bold text-red-400">3. طلب حساب بمواصفات خاصة</h3>
-                    <p class="text-[11px] text-slate-300">اطلب حساب برانكد وسكنات معينة.</p>
-                    <button onclick="openCustomOrderModal('Valorant')" class="w-full bg-eldorado-gold text-black font-bold py-2 rounded-xl text-xs">طلب خاص</button>
-                </div>
-            </div>
-        </div>
+-- ---------------------------------------------------------------------
+-- 7) تحرير المبالغ اللي خلصت فترة احتجازها (معلّق -> متاح)
+--    الطلبات في حالة "مشكلة" مش بتتحرر. بتتنادى تلقائي عند فتح المحفظة.
+-- ---------------------------------------------------------------------
+create or replace function public.release_matured_orders()
+returns int
+language plpgsql security definer set search_path = public as $$
+declare r record; n int := 0;
+begin
+  for r in
+    select id, seller_id, seller_net, status
+      from public.orders
+     where status in ('delivered', 'completed')
+       and released_at is null
+       and release_at is not null
+       and release_at <= now()
+     for update skip locked
+  loop
+    if r.seller_id is not null and exists (select 1 from public.wallet_entries where order_id = r.id and kind = 'sale') then
+      insert into public.wallet_entries (seller_id, order_id, kind, pending_delta, available_delta, note)
+      values (r.seller_id, r.id, 'release', -r.seller_net, r.seller_net, 'انتهاء فترة الاحتجاز');
+    end if;
+    update public.orders
+       set released_at = now(),
+           status = case when status = 'delivered' then 'completed' else status end,
+           updated_at = now()
+     where id = r.id;
+    n := n + 1;
+  end loop;
+  return n;
+end $$;
+revoke all on function public.release_matured_orders() from public, anon;
+grant execute on function public.release_matured_orders() to authenticated;
 
-        <!-- SECTION 7: CALL OF DUTY (Part 6 & 7) -->
-        <div id="sectionCod" class="hidden space-y-6">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gun text-amber-400"></i> قسم Call of Duty (الجزء 6 و 7)</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="eldorado-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-amber-400">1. الحسابات (الجزء 6 و 7)</h3>
-                    <p class="text-[11px] text-slate-300">حسابات الأجزاء الحديثة مع الضمان.</p>
-                    <button onclick="alert('حسابات CoD')" class="w-full bg-amber-600 text-black font-bold py-2 rounded-xl text-xs">عرض الحسابات</button>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-amber-400">2. العملات وأكواد الشحن (CP)</h3>
-                    <p class="text-[11px] text-slate-300">شحن نقاط CP للأجزاء 6 و 7.</p>
-                    <button onclick="alert('شحن CP')" class="w-full bg-amber-600 text-black font-bold py-2 rounded-xl text-xs">شحن نقاط CP</button>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-amber-500/50">
-                    <h3 class="text-xs font-bold text-amber-400">3. طلب حساب بمواصفات خاصة</h3>
-                    <p class="text-[11px] text-slate-300">اطلب حساب بلفلات سلاح معينة.</p>
-                    <button onclick="openCustomOrderModal('Call of Duty')" class="w-full bg-eldorado-gold text-black font-bold py-2 rounded-xl text-xs">طلب خاص</button>
-                </div>
-            </div>
-        </div>
+-- الأدمن يمدّد الاحتجاز على طلب معيّن (مثلًا للاشتباه)
+create or replace function public.extend_hold(p_order_id bigint, p_hours int)
+returns void
+language plpgsql security definer set search_path = public as $$
+begin
+  perform public._require_admin();
+  if p_hours is null or p_hours <= 0 or p_hours > 720 then raise exception 'bad_hours'; end if;
+  update public.orders
+     set release_at = coalesce(release_at, now()) + make_interval(hours => p_hours), updated_at = now()
+   where id = p_order_id and released_at is null;
+  if not found then raise exception 'bad_status'; end if;
+end $$;
+revoke all on function public.extend_hold(bigint, int) from public, anon;
+grant execute on function public.extend_hold(bigint, int) to authenticated;
 
-        <!-- SECTION 8: OTHER GAMES -->
-        <div id="sectionOtherGames" class="hidden space-y-6">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-gamepad text-purple-400"></i> روبلوكس، فورتنايت، وابيكس</h2>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                <div class="eldorado-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-purple-400">1. قسم الحسابات</h3>
-                    <p class="text-[11px] text-slate-300">حسابات نادرة وروبوكس.</p>
-                    <button onclick="alert('حسابات الألعاب الأخرى')" class="w-full bg-purple-600 text-white font-bold py-2 rounded-xl text-xs">عرض الحسابات</button>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-3">
-                    <h3 class="text-xs font-bold text-purple-400">2. العملات وأكواد الشحن</h3>
-                    <p class="text-[11px] text-slate-300">شحن روبوكس وV-Bucks.</p>
-                    <button onclick="alert('عملات الألعاب')" class="w-full bg-purple-600 text-white font-bold py-2 rounded-xl text-xs">عرض العملات</button>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-purple-500/50">
-                    <h3 class="text-xs font-bold text-purple-400">3. طلبات خاصة</h3>
-                    <p class="text-[11px] text-slate-300">اطلب سكنات وكميات مخصصة.</p>
-                    <button onclick="openCustomOrderModal('Other Games')" class="w-full bg-eldorado-gold text-black font-bold py-2 rounded-xl text-xs">طلب خاص</button>
-                </div>
-            </div>
-        </div>
+-- ---------------------------------------------------------------------
+-- 8) محفظة البائع + طلب السحب
+-- ---------------------------------------------------------------------
+create or replace function public.my_wallet()
+returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare v_uid uuid := auth.uid(); v_p numeric; v_a numeric; v_q numeric;
+begin
+  if v_uid is null then raise exception 'login_required'; end if;
+  perform public.release_matured_orders();
+  select coalesce(sum(pending_delta), 0), coalesce(sum(available_delta), 0)
+    into v_p, v_a from public.wallet_entries where seller_id = v_uid;
+  select coalesce(sum(amount_egp), 0) into v_q
+    from public.payout_requests where seller_id = v_uid and status = 'requested';
+  return jsonb_build_object(
+    'pending', v_p,
+    'available', v_a,
+    'in_payout_queue', v_q,
+    'next_payout_date', public.next_payout_date(now()),
+    'hold_hours', public._setting('hold_hours', '72')::int,
+    'min_payout', public._setting('min_payout_egp', '100')::numeric
+  );
+end $$;
 
-        <!-- SECTION 9: BOOSTING -->
-        <div id="sectionBoosting" class="hidden space-y-6">
-            <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-chart-line text-eldorado-gold"></i> قسم بوستنج الألعاب</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                <div class="eldorado-card p-4 rounded-xl space-y-2">
-                    <h4 class="text-xs font-bold text-white">LoL Boosting</h4>
-                    <button onclick="alert('طلب LoL Boosting')" class="bg-eldorado-gold text-black font-bold px-3 py-1.5 rounded text-xs w-full">احجز بوستنج</button>
-                </div>
-                <div class="eldorado-card p-4 rounded-xl space-y-2">
-                    <h4 class="text-xs font-bold text-white">Valorant Boosting</h4>
-                    <button onclick="alert('طلب Valorant Boosting')" class="bg-eldorado-gold text-black font-bold px-3 py-1.5 rounded text-xs w-full">احجز بوستنج</button>
-                </div>
-                <div class="eldorado-card p-4 rounded-xl space-y-2">
-                    <h4 class="text-xs font-bold text-white">CoD Weapon Leveling</h4>
-                    <button onclick="alert('طلب CoD Boosting')" class="bg-eldorado-gold text-black font-bold px-3 py-1.5 rounded text-xs w-full">احجز بوستنج</button>
-                </div>
-            </div>
-        </div>
+create or replace function public.request_payout(p_amount numeric, p_method text, p_account text)
+returns public.payout_requests
+language plpgsql security definer set search_path = public as $$
+declare
+  v_uid uuid := auth.uid(); v_avail numeric; v_min numeric; v_amt numeric(10,2); v_row public.payout_requests;
+begin
+  if v_uid is null then raise exception 'login_required'; end if;
+  if not exists (select 1 from public.profiles where id = v_uid and role = 'seller') then
+    raise exception 'not_seller';
+  end if;
+  perform pg_advisory_xact_lock(hashtext('wallet:' || v_uid::text));
+  perform public.release_matured_orders();
+  v_min := public._setting('min_payout_egp', '100')::numeric;
+  v_amt := round(p_amount, 2);
+  if v_amt is null or v_amt < v_min then raise exception 'below_min_payout'; end if;
+  select coalesce(sum(available_delta), 0) into v_avail from public.wallet_entries where seller_id = v_uid;
+  if v_amt > v_avail then raise exception 'insufficient_balance'; end if;
+  insert into public.payout_requests (seller_id, amount_egp, method, account, batch_date)
+  values (v_uid, v_amt, p_method, trim(p_account), public.next_payout_date(now()))
+  returning * into v_row;
+  insert into public.wallet_entries (seller_id, payout_id, kind, available_delta, note)
+  values (v_uid, v_row.id, 'payout_request', -v_amt, 'طلب سحب #' || v_row.id::text);
+  return v_row;
+end $$;
 
-        <!-- SECTION 10: FEEDBACK -->
-        <div id="sectionFeedback" class="hidden space-y-6">
-            <div class="border-b border-eldorado-border pb-3 flex justify-between items-center">
-                <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-star text-amber-400"></i> تقييمات وفيد باك المنصة</h2>
-                <a href="https://discord.com/channels/1354499627247992994/1393426500342251530" target="_blank" class="bg-[#5865F2] text-white font-bold px-4 py-2 rounded-xl text-xs">فيد باك الديسكورد</a>
-            </div>
-            <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-amber-500/30">
-                <h3 class="text-xs font-bold text-white">اترك تقييمك</h3>
-                <input type="text" id="feedbackName" placeholder="اسمك" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-xs text-white">
-                <textarea id="feedbackComment" placeholder="رأيك في الخدمة..." class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-xs text-white h-20"></textarea>
-                <button onclick="submitSiteFeedback()" class="bg-amber-500 text-black font-bold px-4 py-2 rounded-xl text-xs">إرسال التقييم</button>
-            </div>
-            <div id="feedbackList" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div class="eldorado-card p-4 rounded-xl space-y-2 border border-eldorado-border">
-                    <div class="flex justify-between items-center"><h4 class="text-xs font-bold text-white">Ahmed Gamer</h4><span class="text-amber-400">⭐⭐⭐⭐⭐</span></div>
-                    <p class="text-[11px] text-slate-300">سرعة خرافية في التسليم وأمان تام!</p>
-                </div>
-            </div>
-        </div>
+revoke all on function public.my_wallet() from public, anon;
+revoke all on function public.request_payout(numeric, text, text) from public, anon;
+grant execute on function public.my_wallet() to authenticated;
+grant execute on function public.request_payout(numeric, text, text) to authenticated;
 
-        <!-- SECTION 11: DAILY OFFERS -->
-        <div id="sectionDailyOffers" class="hidden space-y-6">
-            <div class="eldorado-card p-5 rounded-2xl space-y-4 border border-eldorado-purple/40">
-                <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-bullhorn text-eldorado-purple"></i> العروض اليومية والتنبيهات</h2>
-                <div id="chatBox" class="bg-black p-4 rounded-xl h-48 overflow-y-auto space-y-3 text-xs border border-eldorado-border">
-                    <div class="text-slate-500 text-center">حائط العروض اليومية...</div>
-                    <div class="text-white bg-slate-900 p-2.5 rounded-lg border border-eldorado-border"><strong class="text-eldorado-gold">ADMIN:</strong> عروض الكبسولات سارية الآن!</div>
-                </div>
-                <div class="flex gap-2">
-                    <input type="text" id="chatInput" placeholder="اكتب عرضك..." class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-xs text-white">
-                    <button onclick="sendChatMessage()" class="bg-eldorado-purple text-white font-bold px-5 py-2 rounded-xl text-xs">نشر</button>
-                </div>
-            </div>
-        </div>
+-- ---------------------------------------------------------------------
+-- 9) أزرار الأدمن: تم الدفع / رفض السحب / ملخص الالتزامات
+-- ---------------------------------------------------------------------
+create or replace function public.mark_payout_paid(p_id bigint, p_note text default null)
+returns void
+language plpgsql security definer set search_path = public as $$
+declare v_r public.payout_requests;
+begin
+  perform public._require_admin();
+  select * into v_r from public.payout_requests where id = p_id and status = 'requested' for update;
+  if not found then raise exception 'bad_status'; end if;
+  update public.payout_requests set status = 'paid', processed_at = now(), admin_note = left(p_note, 300) where id = p_id;
+  insert into public.transactions (user_id, type, amount_egp, note)
+  values (v_r.seller_id, 'payout', v_r.amount_egp, 'سحب #' || p_id::text || ' - ' || v_r.method);
+end $$;
 
-        <!-- SECTION 12: DISCORD HUB -->
-        <div id="sectionDiscordHub" class="hidden space-y-6">
-            <div class="eldorado-card p-8 rounded-2xl text-center space-y-6 border border-[#5865F2]/40">
-                <div class="w-20 h-20 bg-[#5865F2]/20 text-[#5865F2] rounded-3xl mx-auto flex items-center justify-center text-4xl border border-[#5865F2]/40">
-                    <i class="fa-brands fa-discord"></i>
-                </div>
-                <h2 class="text-lg font-bold text-white">انضم إلى مجتمعنا الرسمي على الديسكورد</h2>
-                <a href="https://discord.gg/6yAsj6EYP" target="_blank" class="inline-flex items-center gap-2 bg-[#5865F2] text-white font-bold px-8 py-3.5 rounded-xl text-xs hover:bg-indigo-600 transition">
-                    <i class="fa-brands fa-discord text-base"></i> انضم لسيرفر الديسكورد الآن
-                </a>
-            </div>
-        </div>
+create or replace function public.reject_payout(p_id bigint, p_reason text default null)
+returns void
+language plpgsql security definer set search_path = public as $$
+declare v_r public.payout_requests;
+begin
+  perform public._require_admin();
+  select * into v_r from public.payout_requests where id = p_id and status = 'requested' for update;
+  if not found then raise exception 'bad_status'; end if;
+  update public.payout_requests set status = 'rejected', processed_at = now(), admin_note = left(p_reason, 300) where id = p_id;
+  insert into public.wallet_entries (seller_id, payout_id, kind, available_delta, note)
+  values (v_r.seller_id, p_id, 'payout_reversal', v_r.amount_egp, 'رفض طلب سحب #' || p_id::text);
+end $$;
 
-    </main>
+-- أرصدة كل البائعين
+create or replace function public.admin_wallets()
+returns table (uid uuid, name text, pending numeric, available numeric, queued numeric)
+language plpgsql security definer set search_path = public as $$
+begin
+  perform public._require_admin();
+  perform public.release_matured_orders();
+  return query
+    select p.id, p.display_name,
+           coalesce((select sum(w.pending_delta)   from public.wallet_entries w where w.seller_id = p.id), 0),
+           coalesce((select sum(w.available_delta) from public.wallet_entries w where w.seller_id = p.id), 0),
+           coalesce((select sum(r.amount_egp) from public.payout_requests r where r.seller_id = p.id and r.status = 'requested'), 0)
+      from public.profiles p
+     where p.role = 'seller'
+     order by p.display_name;
+end $$;
 
-    <!-- MODAL: AUTH -->
-    <div id="authModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="eldorado-card w-full max-w-md p-6 rounded-2xl space-y-4">
-            <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
-                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-user-lock text-eldorado-cyan"></i> تسجيل الدخول / حساب جديد</h3>
-                <button onclick="closeAuthModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <input type="email" placeholder="البريد الإلكتروني" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                <input type="password" placeholder="كلمة المرور" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                <select class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                    <option value="buyer">مشتري مميز (VIP Buyer)</option>
-                    <option value="vendor">بائع معتمد (Verified Vendor)</option>
-                </select>
-                <button onclick="alert('تم تسجيل الدخول بنجاح!')" class="w-full bg-eldorado-cyan text-black font-bold py-2.5 rounded-xl">دخول / إنشاء حساب</button>
-            </div>
-        </div>
-    </div>
+-- إجمالي اللي عليك للبائعين (لازم تفضل فلوس بالقدر ده في محفظتك الفعلية)
+create or replace function public.admin_escrow_summary()
+returns jsonb
+language plpgsql security definer set search_path = public as $$
+declare v_p numeric; v_a numeric; v_q numeric;
+begin
+  perform public._require_admin();
+  perform public.release_matured_orders();
+  select coalesce(sum(pending_delta), 0), coalesce(sum(available_delta), 0) into v_p, v_a from public.wallet_entries;
+  select coalesce(sum(amount_egp), 0) into v_q from public.payout_requests where status = 'requested';
+  return jsonb_build_object('pending', v_p, 'available', v_a, 'queued', v_q, 'owed_total', v_p + v_a + v_q);
+end $$;
 
-    <!-- MODAL: CUSTOM ORDER -->
-    <div id="customOrderModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="eldorado-card w-full max-w-md p-6 rounded-2xl space-y-4">
-            <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
-                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-clipboard-list text-eldorado-gold"></i> طلب حساب بمواصفات خاصة</h3>
-                <button onclick="closeCustomOrderModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <input type="text" id="customGame" readonly class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-eldorado-gold font-bold">
-                <textarea placeholder="اكتب المواصفات بدقة (رانكد، سكنات، ميزانية)..." class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-3 text-white h-24"></textarea>
-                <button onclick="submitCustomOrder()" class="w-full bg-eldorado-gold text-black font-bold py-2.5 rounded-xl">إرسال الطلب</button>
-            </div>
-        </div>
-    </div>
+revoke all on function public.mark_payout_paid(bigint, text) from public, anon;
+revoke all on function public.reject_payout(bigint, text) from public, anon;
+revoke all on function public.admin_wallets() from public, anon;
+revoke all on function public.admin_escrow_summary() from public, anon;
+grant execute on function public.mark_payout_paid(bigint, text) to authenticated;
+grant execute on function public.reject_payout(bigint, text) to authenticated;
+grant execute on function public.admin_wallets() to authenticated;
+grant execute on function public.admin_escrow_summary() to authenticated;
 
-    <!-- MODAL: VENDOR KYC -->
-    <div id="vendorKYCModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="eldorado-card w-full max-w-lg p-6 rounded-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
-                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-camera text-eldorado-danger"></i> توثيق الهوية كبائع</h3>
-                <button onclick="closeVendorKYCModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <input type="text" placeholder="الاسم رباعي" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                <input type="text" placeholder="رقم الهاتف (فودافون كاش)" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                <button onclick="alert('تم إرسال طلب التوثيق')" class="w-full bg-eldorado-danger text-white font-bold py-3 rounded-xl">إرسال الطلب</button>
-            </div>
-        </div>
-    </div>
+-- إشعار ديسكورد عند طلب سحب جديد
+create or replace function public.trg_payout_notify() returns trigger
+language plpgsql security definer set search_path = public as $$
+begin
+  perform public.notify_admin('💰 طلب سحب جديد #' || new.id::text || ' — ' || new.amount_egp::text
+                              || ' EGP — دفعة يوم ' || new.batch_date::text);
+  return null;
+end $$;
+drop trigger if exists payout_notify on public.payout_requests;
+create trigger payout_notify after insert on public.payout_requests
+  for each row execute function public.trg_payout_notify();
 
-    <!-- MODAL: WITHDRAW -->
-    <div id="withdrawModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="eldorado-card w-full max-w-md p-6 rounded-2xl space-y-4">
-            <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
-                <h3 class="text-sm font-bold text-white"><i class="fa-solid fa-wallet text-eldorado-purple"></i> طلب سحب أرباح</h3>
-                <button onclick="closeWithdrawModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
-            </div>
-            <div class="space-y-3 text-xs">
-                <input type="number" placeholder="المبلغ (EGP)" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                <input type="text" placeholder="رقم المحفظة أو InstaPay" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                <button onclick="alert('تم إرسال طلب السحب!')" class="w-full bg-eldorado-purple text-white font-bold py-2.5 rounded-xl">إرسال الطلب</button>
-            </div>
-        </div>
-    </div>
+do $$ begin alter publication supabase_realtime add table public.payout_requests;
+exception when duplicate_object then null; end $$;
 
-    <!-- SCRIPT LOGIC -->
-    <script>
-        const SUPABASE_URL = 'https://afzyerpeoirbcxwymsqg.supabase.co';
-        const SUPABASE_ANON_KEY = 'sb_publishable_2HPQNM4LN_XHKizBIORz_A_qhLRF...';
+-- ---------------------------------------------------------------------
+-- 10) اختياري: تحرير تلقائي كل ساعة حتى لو محدش فتح الموقع
+--     فعّل pg_cron من Database > Extensions ثم شغّل السطر (شيل --):
+-- ---------------------------------------------------------------------
+-- select cron.schedule('release-escrow', '0 * * * *', $$select public.release_matured_orders()$$);
 
-        let supabaseClient = null;
-        try {
-            supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        } catch (e) {
-            console.error("DB Init Error:", e);
-        }
+-- ---------------------------------------------------------------------
+-- 11) تغيير الإعدادات (أمثلة، شغّلها بعد ما تقرر الأرقام)
+-- ---------------------------------------------------------------------
+-- update public.app_settings set value = '72' where key = 'hold_hours';
+-- update public.app_settings set value = '10' where key = 'commission_percent';
+-- update public.app_settings set value = '100' where key = 'min_payout_egp';
 
-        function switchTab(tab) {
-            const tabs = ['capsules', 'gamepass', 'streaming', 'steam', 'lol', 'valorant', 'cod', 'otherGames', 'boosting', 'feedback', 'dailyOffers', 'discordHub'];
-            tabs.forEach(t => {
-                const el = document.getElementById('section' + t.charAt(0).toUpperCase() + t.slice(1));
-                if(el) el.classList.add('hidden');
-            });
-
-            const target = document.getElementById('section' + tab.charAt(0).toUpperCase() + tab.slice(1));
-            if(target) target.classList.remove('hidden');
-        }
-
-        function openAuthModal() { document.getElementById('authModal').classList.remove('hidden'); }
-        function closeAuthModal() { document.getElementById('authModal').classList.add('hidden'); }
-
-        function openVendorKYCModal() { document.getElementById('vendorKYCModal').classList.remove('hidden'); }
-        function closeVendorKYCModal() { document.getElementById('vendorKYCModal').classList.add('hidden'); }
-
-        function openWithdrawModal() { document.getElementById('withdrawModal').classList.remove('hidden'); }
-        function closeWithdrawModal() { document.getElementById('withdrawModal').classList.add('hidden'); }
-
-        function openCustomOrderModal(gameName) {
-            document.getElementById('customGame').value = 'لعبة: ' + gameName;
-            document.getElementById('customOrderModal').classList.remove('hidden');
-        }
-        function closeCustomOrderModal() { document.getElementById('customOrderModal').classList.add('hidden'); }
-
-        function submitCustomOrder() {
-            alert("تم إرسال طلبك بالمواصفات الخاصة بنجاح!");
-            closeCustomOrderModal();
-        }
-
-        function submitSiteFeedback() {
-            const name = document.getElementById('feedbackName').value.trim();
-            const comment = document.getElementById('feedbackComment').value.trim();
-            if(!name || !comment) return alert("املأ الحقول أولاً!");
-            
-            const list = document.getElementById('feedbackList');
-            const card = document.createElement('div');
-            card.className = 'eldorado-card p-4 rounded-xl space-y-2 border border-amber-500/30';
-            card.innerHTML = `<div class="flex justify-between items-center"><h4 class="text-xs font-bold text-white">${name}</h4><span class="text-amber-400">⭐⭐⭐⭐⭐</span></div><p class="text-[11px] text-slate-300">${comment}</p>`;
-            list.prepend(card);
-            document.getElementById('feedbackName').value = '';
-            document.getElementById('feedbackComment').value = '';
-            alert("تم إضافة تقييمك بنجاح!");
-        }
-
-        function sendChatMessage() {
-            const input = document.getElementById('chatInput');
-            const box = document.getElementById('chatBox');
-            if(!input.value.trim()) return;
-            box.innerHTML += `<div class="text-white bg-slate-900 p-2.5 rounded-lg border border-eldorado-border"><strong class="text-eldorado-gold">ADMIN:</strong> ${input.value}</div>`;
-            input.value = ''; box.scrollTop = box.scrollHeight;
-        }
-    </script>
-</body>
-</html>
+-- ---------------------------------------------------------------------
+-- 12) اختبار يدوي قبل ما نبني الواجهة (بدّل الإيميل والرقم):
+--     1) خلّي حساب تجريبي بائع:
+--        update public.profiles set role = 'seller'
+--         where id = (select id from auth.users where email = 'SELLER_TEST@example.com');
+--     2) اربط منتج بيه:
+--        update public.products set seller_id = (select id from auth.users where email = 'SELLER_TEST@example.com')
+--         where title like 'Spotify%';
+-- ---------------------------------------------------------------------
