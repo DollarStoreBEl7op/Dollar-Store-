@@ -3,304 +3,324 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dollar Store | 90s Gaming & Analytics Hub</title>
+    <title>Dollar Store | 90s Gaming Marketplace</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
+    <!-- FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
-
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Reem+Kufi:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        eldorado: {
-                            bg: '#0b0e14',
-                            card: '#151a23',
-                            border: '#222b3b',
-                            accent: '#00ff66',
-                            gold: '#ffb700',
-                            cyan: '#00f0ff',
-                            purple: '#8b5cf6',
-                            danger: '#ef4444'
+                        eldo: {
+                            bg: '#090a0f',
+                            card: '#12141c',
+                            border: '#1f2430',
+                            green: '#00d26a',
+                            gold: '#ffb703',
+                            cyan: '#00f2fe',
+                            red: '#ef4444'
                         }
                     },
                     fontFamily: {
                         pixel: ['"Press Start 2P"', 'monospace'],
-                        cairo: ['Cairo', 'sans-serif']
+                        arabic: ['"Reem Kufi"', 'sans-serif']
                     }
                 }
             }
         }
     </script>
-
     <style>
-        body { font-family: 'Cairo', sans-serif; background-color: #0b0e14; color: #e2e8f0; }
-        .pixel-title { font-family: 'Press Start 2P', monospace; text-shadow: 2px 2px #8b5cf6; }
-        .eldorado-card { background: #151a23; border: 1px solid #222b3b; transition: all 0.2s ease; }
-        .eldorado-card:hover { border-color: #00ff66; transform: translateY(-3px); }
-        .gold-border-glow { border-color: #ffb700; box-shadow: 0 0 12px rgba(255, 183, 0, 0.25); }
-        .marquee { white-space: nowrap; overflow: hidden; box-sizing: border-box; }
-        .marquee-content { display: inline-block; padding-right: 100%; animation: marquee 25s linear infinite; }
-        @keyframes marquee { 0% { transform: translate(0, 0); } 100% { transform: translate(100%, 0); } }
-        .crt-scanline {
-            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
-            background-size: 100% 4px;
-        }
+        body { font-family: 'Reem Kufi', sans-serif; background-color: #090a0f; color: #f1f5f9; }
+        .pixel-text { font-family: 'Press Start 2P', monospace; }
+        .eldo-card { background: #12141c; border: 1px solid #1f2430; transition: all 0.2s ease; }
+        .eldo-card:hover { border-color: #00d26a; box-shadow: 0 4px 20px rgba(0, 210, 106, 0.1); }
+        .eldo-btn { transition: all 0.2s ease; }
+        .eldo-btn:active { transform: scale(0.98); }
     </style>
 </head>
-<body class="min-h-screen flex flex-col justify-between selection:bg-eldorado-accent selection:text-black crt-scanline">
+<body class="min-h-screen flex flex-col justify-between selection:bg-eldo-green selection:text-black">
 
-    <!-- Top Live Ticker Bar -->
-    <div class="bg-[#05070a] border-b border-eldorado-border py-1.5 px-4 text-xs flex justify-between items-center text-slate-400 overflow-hidden">
-        <div class="marquee w-full">
-            <div class="marquee-content flex gap-8 items-center text-[11px]">
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-chart-line text-eldorado-accent"></i> مبيعات اليوم: <strong class="text-white">$4,850 EGP</strong> <span class="text-eldorado-accent">(+18.5%)</span></span>
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-star text-eldorado-gold"></i> تقييمات اليوم: <strong class="text-eldorado-gold">+342 تقييم ممتاز</strong></span>
-                <span class="flex items-center gap-1.5"><i class="fa-solid fa-users text-purple-400"></i> أعلى مسوق هذا الأسبوع: <strong class="text-white">Hassan_VIP (أرباح $240)</strong></span>
-            </div>
-        </div>
+    <!-- Top Banner / Ticker -->
+    <div class="bg-black border-b border-eldo-border py-2 px-4 text-xs text-center text-eldo-gold font-bold flex justify-center items-center gap-2">
+        <i class="fa-solid fa-gamepad animate-pulse"></i> 
+        <span>سوق Dollar Store الرقمي — أسرع وأمان تام لنظام الاحتجاز (Escrow) والبيع المباشر</span>
     </div>
 
-    <!-- Header / Navigation Bar -->
-    <header class="sticky top-0 z-40 bg-eldorado-bg/95 backdrop-blur-md border-b border-eldorado-border px-4 py-3 shadow-xl">
-        <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
-            
-            <!-- Logo -->
-            <div class="flex items-center gap-3 cursor-pointer" onclick="switchTab('capsules')">
-                <div class="w-10 h-10 bg-eldorado-accent rounded-xl flex items-center justify-center border-2 border-white shadow-[0_0_15px_rgba(0,255,102,0.4)]">
-                    <i class="fa-solid fa-gamepad text-black text-xl font-black"></i>
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 bg-[#090a0f]/95 backdrop-blur-md border-b border-eldo-border px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.reload()">
+                <div class="w-10 h-10 bg-eldo-green rounded-lg flex items-center justify-center shadow-lg shadow-eldo-green/20">
+                    <i class="fa-solid fa-store text-black text-lg"></i>
                 </div>
                 <div>
-                    <h1 class="pixel-title text-sm text-eldorado-accent tracking-wider">DOLLAR STORE</h1>
-                    <p class="text-[8px] text-eldorado-gold font-pixel">90S ARCADE GAMING HUB</p>
+                    <h1 class="pixel-text text-xs text-eldo-green tracking-wider">DOLLAR STORE</h1>
+                    <p class="text-[9px] text-slate-400 font-mono">SECURE GAMING MARKET</p>
                 </div>
             </div>
 
             <!-- Search Bar -->
-            <div class="flex-1 max-w-md w-full relative">
-                <input type="text" id="searchInput" placeholder="ابحث عن ألعاب، حسابات، كبسولات..." class="w-full bg-[#151a23] border border-eldorado-border rounded-xl py-2 px-4 pr-10 text-xs text-white focus:outline-none focus:border-eldorado-accent">
-                <i class="fa-solid fa-magnifying-glass absolute right-3 top-3 text-slate-400 text-xs"></i>
+            <div class="flex-1 max-w-md mx-auto hidden md:block">
+                <div class="relative">
+                    <input type="text" placeholder="ابحث عن حسابات، كبسولات، اشتراكات..." class="w-full bg-[#12141c] border border-eldo-border px-4 py-2 rounded-lg text-xs text-white focus:outline-none focus:border-eldo-green">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-500"></i>
+                </div>
             </div>
 
-            <!-- User Actions -->
-            <div class="flex items-center gap-2">
-                <button onclick="switchTab('analyticsHub')" class="bg-gradient-to-r from-amber-500 to-yellow-400 text-black font-black px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-[0_0_12px_rgba(255,183,0,0.4)]">
-                    <i class="fa-solid fa-chart-line text-black"></i> الإحصائيات والأرباح
+            <!-- Auth Controls -->
+            <div class="flex items-center gap-2 text-xs">
+                <button onclick="openAuthModal()" id="btn-login" class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold">
+                    <i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول
                 </button>
-                <button onclick="openVendorKYCModal()" class="bg-eldorado-danger text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 hover:bg-red-600 transition shadow-lg">
-                    <i class="fa-solid fa-camera"></i> انضم كبائع معتمد
-                </button>
-                <button onclick="openAdminPanel()" class="bg-red-600 text-white font-bold px-3 py-2 rounded-xl text-xs flex items-center gap-1.5 shadow-lg hover:bg-red-700 transition">
-                    <i class="fa-solid fa-crown text-yellow-300"></i> الآمر الناهي
-                </button>
+                <div id="user-badge" class="hidden flex items-center gap-2 bg-[#12141c] px-3 py-1.5 rounded-lg border border-eldo-border">
+                    <span id="user-name" class="font-bold text-eldo-green"></span>
+                    <button onclick="handleLogout()" class="text-eldo-red"><i class="fa-solid fa-power-off"></i></button>
+                </div>
             </div>
-        </div>
-
-        <!-- Dynamic Navigation Tabs -->
-        <div class="max-w-7xl mx-auto flex items-center gap-4 mt-3 pt-2 border-t border-eldorado-border/40 text-xs text-slate-300 overflow-x-auto whitespace-nowrap">
-            <button onclick="switchTab('capsules')" class="hover:text-eldorado-accent font-bold flex items-center gap-1 text-eldorado-accent"><i class="fa-solid fa-capsules"></i> الكبسولات (45ج)</button>
-            <button onclick="switchTab('analyticsHub')" class="hover:text-eldorado-gold font-bold flex items-center gap-1 text-eldorado-gold"><i class="fa-solid fa-[#investing] fa-chart-pie"></i> لوحة الإحصائيات والإحالات (2.5%)</button>
-            <button onclick="switchTab('tradeChat')" class="hover:text-purple-400 font-bold flex items-center gap-1"><i class="fa-solid fa-comments"></i> شات التداول</button>
-            <button onclick="switchTab('discordHub')" class="hover:text-indigo-400 font-bold flex items-center gap-1"><i class="fa-brands fa-discord"></i> سيرفر الديسكورد</button>
         </div>
     </header>
 
-    <!-- Main Content Body -->
-    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-8">
-
-        <!-- SECTION: CAPSULES -->
-        <div id="sectionCapsules" class="space-y-6">
-            <div class="border-b border-eldorado-border pb-3 flex justify-between items-center">
-                <div>
-                    <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-capsules text-eldorado-accent"></i> قسم كبسولات لول الحصرية</h2>
-                    <p class="text-[11px] text-slate-400">أسعار موحدة: <strong class="text-eldorado-accent">45 EGP فقط</strong> للحساب.</p>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                <div class="eldorado-card p-5 rounded-2xl space-y-3 border border-emerald-500/30">
-                    <h3 class="text-xs font-bold text-white">كبسولة ويست (EUW Capsule)</h3>
-                    <p class="text-[11px] text-slate-300">أكونت لفل 1 يحتوي على 350 RP + XP Boost لمدة 30 يوم.</p>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldorado-border">
-                        <span class="text-xs font-mono font-bold text-eldorado-accent">45 EGP</span>
-                        <button onclick="createTicket('شراء كبسولة EUW')" class="bg-eldorado-accent text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء فوري</button>
-                    </div>
-                </div>
-            </div>
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-6">
+        
+        <!-- Category Pills -->
+        <div class="flex gap-2 overflow-x-auto pb-2 text-xs scrollbar-none">
+            <button class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold whitespace-nowrap"><i class="fa-solid fa-box"></i> الكبسولات (45 EGP)</button>
+            <button class="eldo-btn bg-[#12141c] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">الاشتراكات الرقمية</button>
+            <button class="eldo-btn bg-[#12141c] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">حسابات ليفل 30</button>
         </div>
 
-        <!-- NEW SECTION: ANALYTICS & AFFILIATE INVESTING-STYLE HUB -->
-        <div id="sectionAnalyticsHub" class="hidden space-y-6">
-            <!-- Header Banner -->
-            <div class="bg-gradient-to-r from-slate-900 via-[#151a23] to-slate-900 border border-eldorado-gold/40 p-6 rounded-2xl space-y-3 gold-border-glow">
-                <div class="flex justify-between items-center">
+        <!-- Products Grid -->
+        <div>
+            <h2 class="text-sm font-bold text-white mb-4 flex items-center gap-2 border-r-4 border-eldo-green pr-3">
+                المنتجات الأكثر طلباً
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" id="products-grid">
+                
+                <!-- Product Card 1 -->
+                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
                     <div>
-                        <h2 class="text-base font-bold text-white flex items-center gap-2">
-                            <i class="fa-solid fa-chart-line text-eldorado-gold text-lg"></i> بورصة Dollar Store والإحصائيات الحية
-                        </h2>
-                        <p class="text-xs text-slate-400">متابعة لحظية لمبيعات المنصة، التقييمات، وأرباح المسوقين عبر نظام الإحالة (2.5%).</p>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">فوري</span>
+                            <span class="pixel-text text-xs text-eldo-green font-bold">45 EGP</span>
+                        </div>
+                        <h3 class="font-bold text-white text-sm mb-1">كبسولة ويست (EUW Capsule)</h3>
+                        <p class="text-xs text-slate-400">أكونت لفل 1 يحتوي على 350 RP + XP Boost لمدة 30 يوم.</p>
                     </div>
-                    <span class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 text-[10px] font-bold px-3 py-1 rounded-full animate-pulse">
-                        ● تحديث مباشر
-                    </span>
+                    <button onclick="startPurchase(1, 'كبسولة ويست (EUW Capsule)', 45)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                        <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                    </button>
                 </div>
-            </div>
 
-            <!-- 4 Main Stats Cards -->
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <div class="eldorado-card p-5 rounded-2xl border-l-4 border-l-eldorado-accent space-y-2">
-                    <span class="text-[11px] text-slate-400 font-bold">مبيعات اليوم الإجمالية</span>
-                    <div class="text-xl font-bold text-white font-mono">$4,850 EGP</div>
-                    <span class="text-[10px] text-eldorado-accent font-bold"><i class="fa-solid fa-arrow-trend-up"></i> +18.5% مقارنة بأمس</span>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl border-l-4 border-l-eldorado-gold space-y-2">
-                    <span class="text-[11px] text-slate-400 font-bold">إجمالي الفيدباك والتقييمات</span>
-                    <div class="text-xl font-bold text-white font-mono">14,290</div>
-                    <span class="text-[10px] text-eldorado-gold font-bold"><i class="fa-solid fa-star"></i> 99.4% تقييم إيجابي</span>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl border-l-4 border-l-purple-500 space-y-2">
-                    <span class="text-[11px] text-slate-400 font-bold">عمولات المسوقين الموزعة (2.5%)</span>
-                    <div class="text-xl font-bold text-white font-mono">$1,120 EGP</div>
-                    <span class="text-[10px] text-purple-400 font-bold"><i class="fa-solid fa-users"></i> تم دفعها لـ 48 مسوق</span>
-                </div>
-                <div class="eldorado-card p-5 rounded-2xl border-l-4 border-l-eldorado-cyan space-y-2">
-                    <span class="text-[11px] text-slate-400 font-bold">عدد البائعين المعتمدين</span>
-                    <div class="text-xl font-bold text-white font-mono">158 بائع</div>
-                    <span class="text-[10px] text-eldorado-cyan font-bold"><i class="fa-solid fa-shield-check"></i> موثقين بالبطاقة 100%</span>
-                </div>
-            </div>
-
-            <!-- Top Affiliates Leaderboard & Referral Calculator Grid -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <!-- Leaderboard (2 cols) -->
-                <div class="lg:col-span-2 eldorado-card p-6 rounded-2xl space-y-4 border border-eldorado-border">
-                    <h3 class="text-sm font-bold text-white flex items-center gap-2 border-b border-eldorado-border pb-3">
-                        <i class="fa-solid fa-trophy text-eldorado-gold"></i> قائمة أعلى المسوقين أرباحاً هذا الشهر (2.5% من العمولة)
-                    </h3>
-                    <div class="space-y-3 text-xs">
-                        <!-- Top 1 -->
-                        <div class="flex justify-between items-center bg-slate-900/80 p-3 rounded-xl border border-amber-500/30">
-                            <div class="flex items-center gap-3">
-                                <span class="w-6 h-6 rounded-full bg-amber-500 text-black font-black text-center leading-6">1</span>
-                                <div>
-                                    <h4 class="font-bold text-white">Hassan_VIP</h4>
-                                    <span class="text-[10px] text-slate-400">أدخل 14 بائع معتمد</span>
-                                </div>
-                            </div>
-                            <div class="text-left">
-                                <div class="font-bold text-eldorado-accent">$240.00 EGP</div>
-                                <span class="text-[10px] text-slate-500">أرباح إحالات</span>
-                            </div>
+                <!-- Product Card 2 -->
+                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">فوري</span>
+                            <span class="pixel-text text-xs text-eldo-green font-bold">45 EGP</span>
                         </div>
-                        <!-- Top 2 -->
-                        <div class="flex justify-between items-center bg-slate-900/80 p-3 rounded-xl border border-slate-700">
-                            <div class="flex items-center gap-3">
-                                <span class="w-6 h-6 rounded-full bg-slate-400 text-black font-black text-center leading-6">2</span>
-                                <div>
-                                    <h4 class="font-bold text-white"> GamerPro_EG</h4>
-                                    <span class="text-[10px] text-slate-400">أدخل 9 بائعين معتمدين</span>
-                                </div>
-                            </div>
-                            <div class="text-left">
-                                <div class="font-bold text-eldorado-accent">$165.50 EGP</div>
-                                <span class="text-[10px] text-slate-500">أرباح إحالات</span>
-                            </div>
-                        </div>
+                        <h3 class="font-bold text-white text-sm mb-1">كبسولة نوردك (EUNE Capsule)</h3>
+                        <p class="text-xs text-slate-400">أكونت لفل 1 يحتوي على 350 RP + XP Boost لمدة 30 يوم.</p>
                     </div>
+                    <button onclick="startPurchase(2, 'كبسولة نوردك (EUNE Capsule)', 45)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                        <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                    </button>
                 </div>
 
-                <!-- Calculator (1 col) -->
-                <div class="eldorado-card p-6 rounded-2xl space-y-4 border border-eldorado-accent/30">
-                    <h3 class="text-sm font-bold text-white flex items-center gap-2 border-b border-eldorado-border pb-3">
-                        <i class="fa-solid fa-calculator text-eldorado-accent"></i> حاسبة أرباح الإحالة (2.5%)
-                    </h3>
-                    <div class="space-y-3 text-xs">
-                        <p class="text-slate-300">أدخل عدد البائعين المتوقع إدخالهم لحساب أرباحك الصافية:</p>
-                        <div>
-                            <label class="block text-slate-400 mb-1">عدد البائعين:</label>
-                            <input type="number" id="calcVendors" value="5" oninput="calculateAffiliateEarnings()" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white font-mono">
+                <!-- Product Card 3 -->
+                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] bg-eldo-cyan/10 text-eldo-cyan px-2 py-0.5 rounded font-bold">اشتراك</span>
+                            <span class="pixel-text text-xs text-eldo-green font-bold">80 EGP</span>
                         </div>
-                        <div class="bg-slate-900 p-3 rounded-xl border border-eldorado-border space-y-1">
-                            <span class="text-[10px] text-slate-400">متوسط أرباحك التقديرية شهرياً:</span>
-                            <div id="calcResult" class="text-lg font-bold text-eldorado-accent font-mono">$125.00 EGP</div>
-                        </div>
-                        <button onclick="openVendorKYCModal()" class="w-full bg-eldorado-accent text-black font-bold py-2 rounded-xl">احصل على كود الإحالة الآن</button>
+                        <h3 class="font-bold text-white text-sm mb-1">Spotify Premium (شهر)</h3>
+                        <p class="text-xs text-slate-400">اشتراك رسمي وضمان كامل طوال مدة الاستخدام.</p>
                     </div>
+                    <button onclick="startPurchase(3, 'Spotify Premium (شهر)', 80)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                        <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                    </button>
                 </div>
-            </div>
-        </div>
 
-        <!-- SECTION: TRADE CHAT -->
-        <div id="sectionTradeChat" class="hidden space-y-6">
-            <div class="eldorado-card p-6 rounded-2xl space-y-4 border border-purple-500/40">
-                <h2 class="text-sm font-bold text-white flex items-center gap-2"><i class="fa-solid fa-comments text-purple-400"></i> شات التداول</h2>
-                <div id="tradeChatBox" class="bg-black p-4 rounded-xl h-64 overflow-y-auto space-y-3 text-xs border border-eldorado-border">
-                    <div class="bg-slate-900/90 p-3 rounded-xl text-white">شات روبلوكس وأيبكس المباشر...</div>
-                </div>
-            </div>
-        </div>
-
-        <!-- SECTION: DISCORD HUB -->
-        <div id="sectionDiscordHub" class="hidden space-y-6">
-            <div class="eldorado-card p-8 rounded-2xl text-center space-y-6 border border-[#5865F2]/40">
-                <h2 class="text-lg font-bold text-white">انضم للديسكورد الرسمية</h2>
-                <a href="https://discord.gg/MVkskEMhq" target="_blank" class="inline-block bg-[#5865F2] text-white font-bold px-8 py-3.5 rounded-xl text-xs">دخول السيرفر المباشر</a>
             </div>
         </div>
 
     </main>
 
-    <!-- MODAL: VENDOR KYC -->
-    <div id="vendorKYCModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="eldorado-card w-full max-w-lg p-6 rounded-2xl space-y-4 max-h-[90vh] overflow-y-auto">
-            <div class="flex justify-between items-center border-b border-eldorado-border pb-2">
-                <h3 class="text-sm font-bold text-white">توثيق بائع + كود الإحالة</h3>
-                <button onclick="closeVendorKYCModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+    <!-- Footer -->
+    <footer class="bg-black border-t border-eldo-border py-4 px-4 text-center text-xs text-slate-500">
+        <p>Dollar Store © 2026 — جميع الحقوق محفوظة | دفع يدوي آمن ومحمي بنظام Escrow</p>
+    </footer>
+
+    <!-- MODAL: Auth -->
+    <div id="modal-auth" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="eldo-card w-full max-w-md p-6 rounded-xl space-y-4">
+            <div class="flex justify-between items-center border-b border-eldo-border pb-3">
+                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-user-lock text-eldo-green"></i> تسجيل الدخول</h3>
+                <button onclick="closeModal('modal-auth')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="space-y-3 text-xs">
-                <input type="text" placeholder="الاسم رباعي" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                <input type="text" placeholder="رقم فودافون كاش / InstaPay" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                <input type="text" placeholder="كود الشخص الذي دلاك (لاكتساب 2.5%)" class="w-full bg-slate-900 border border-eldorado-border rounded-xl p-2.5 text-white">
-                <button onclick="alert('تم إرسال الطلب بنجاح!')" class="w-full bg-eldorado-accent text-black font-bold py-3 rounded-xl">إرسال التوثيق</button>
-            </div>
+            <form onsubmit="handleAuth(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block mb-1 text-slate-300">البريد الإلكتروني:</label>
+                    <input type="email" id="auth-email" required class="w-full bg-[#090a0f] border border-eldo-border p-2.5 rounded-lg text-white">
+                </div>
+                <div>
+                    <label class="block mb-1 text-slate-300">كلمة المرور:</label>
+                    <input type="password" id="auth-password" required class="w-full bg-[#090a0f] border border-eldo-border p-2.5 rounded-lg text-white">
+                </div>
+                <button type="submit" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2.5 rounded-lg text-xs">متابعة</button>
+            </form>
         </div>
     </div>
 
-    <!-- ADMIN PANEL MODAL -->
-    <div id="adminModal" class="fixed inset-0 bg-black/90 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
-        <div class="eldorado-card w-full max-w-3xl p-6 rounded-2xl space-y-5 border border-red-500/50">
-            <div class="flex justify-between items-center border-b border-eldorado-border pb-3">
-                <h3 class="text-sm font-bold text-red-500">لوحة تحكم الأدمن (الآمر الناهي)</h3>
-                <button onclick="closeAdminPanel()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+    <!-- MODAL: Terms -->
+    <div id="modal-terms" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="eldo-card w-full max-w-lg p-6 rounded-xl space-y-4">
+            <div class="flex justify-between items-center border-b border-eldo-border pb-3">
+                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-file-contract text-eldo-gold"></i> شروط الشراء والضمان</h3>
+                <button onclick="closeModal('modal-terms')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="text-xs text-white">لوحة التحكم السريّة والسيطرة الكاملة مفعلة.</div>
+            <div class="bg-[#090a0f] p-3 rounded-lg border border-eldo-border text-xs leading-relaxed text-slate-300 space-y-2">
+                <p>1. مدة الضمان تبدأ فور استلام بيانات السلعة.</p>
+                <p>2. الدخول والتأكد من الحساب فوراً دون لعب مباريات لتفعيل الضمان.</p>
+                <p>3. أموالك تحظى بحماية نظام الاحتجاز (Escrow) لمدة 72 ساعة.</p>
+            </div>
+            <div class="flex items-center gap-2">
+                <input type="checkbox" id="chk-terms" class="w-4 h-4 accent-eldo-green">
+                <label for="chk-terms" class="text-xs text-white cursor-pointer font-bold">أوافق على الشروط والأحكام</label>
+            </div>
+            <button onclick="confirmOrder()" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2.5 rounded-lg text-xs">موافقة وإنشاء الطلب</button>
         </div>
     </div>
 
+    <!-- MODAL: Payment -->
+    <div id="modal-payment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="eldo-card w-full max-w-md p-6 rounded-xl space-y-4">
+            <div class="flex justify-between items-center border-b border-eldo-border pb-3">
+                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-wallet text-eldo-green"></i> تفاصيل الدفع اليدوي</h3>
+                <button onclick="closeModal('modal-payment')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="bg-[#090a0f] p-3 rounded-lg border border-eldo-border text-xs space-y-2">
+                <div class="flex justify-between"><span class="text-slate-400">رقم الطلب:</span> <span id="pay-code" class="pixel-text text-eldo-gold"></span></div>
+                <div class="flex justify-between"><span class="text-slate-400">المبلغ:</span> <span id="pay-price" class="pixel-text text-eldo-green"></span></div>
+                <div class="flex justify-between pt-2 border-t border-slate-800"><span class="text-slate-400">فودافون كاش / إنستاباي:</span> <span class="font-mono text-white font-bold">01000000000</span></div>
+            </div>
+            <form onsubmit="submitPaymentProof(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block mb-1 text-slate-300">رقم محفظتك المحول منها:</label>
+                    <input type="text" id="pay-phone" placeholder="010xxxxxxxx" required class="w-full bg-[#090a0f] border border-eldo-border p-2 rounded-lg text-white mb-2">
+                    <label class="block mb-1 text-slate-300">صورة إيصال التحويل:</label>
+                    <input type="file" id="pay-file" accept="image/*" required class="w-full bg-[#090a0f] border border-eldo-border p-2 rounded-lg text-slate-400 file:bg-eldo-green file:text-black file:border-0 file:px-3 file:py-1 file:rounded">
+                </div>
+                <button type="submit" id="btn-proof" class="w-full eldo-btn bg-eldo-gold text-black font-bold py-2.5 rounded-lg text-xs">إرسال الإثبات للأدمن</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- SCRIPT -->
     <script>
-        function switchTab(tabId) {
-            ['sectionCapsules', 'sectionAnalyticsHub', 'sectionTradeChat', 'sectionDiscordHub'].forEach(s => {
-                const el = document.getElementById(s);
-                if(el) el.classList.add('hidden');
-            });
-            if(tabId === 'capsules') document.getElementById('sectionCapsules').classList.remove('hidden');
-            if(tabId === 'analyticsHub') document.getElementById('sectionAnalyticsHub').classList.remove('hidden');
-            if(tabId === 'tradeChat') document.getElementById('sectionTradeChat').classList.remove('hidden');
-            if(tabId === 'discordHub') document.getElementById('sectionDiscordHub').classList.remove('hidden');
+        const SUPABASE_URL = 'https://afzyerpeoirbcxwymsqg.supabase.co';
+        const SUPABASE_KEY = 'PASTE_YOUR_PUBLISHABLE_KEY_HERE';
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+        let user = null, activeProduct = null, orderId = null, orderCode = null;
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) { user = session.user; updateUI(); }
+        });
+
+        function updateUI() {
+            if (user) {
+                document.getElementById('btn-login').classList.add('hidden');
+                document.getElementById('user-badge').classList.remove('hidden');
+                document.getElementById('user-name').textContent = user.email.split('@')[0];
+            } else {
+                document.getElementById('btn-login').classList.remove('hidden');
+                document.getElementById('user-badge').classList.add('hidden');
+            }
         }
 
-        function openVendorKYCModal() { document.getElementById('vendorKYCModal').classList.remove('hidden'); }
-        function closeVendorKYCModal() { document.getElementById('vendorKYCModal').classList.add('hidden'); }
-        function openAdminPanel() { document.getElementById('adminModal').classList.remove('hidden'); }
-        function closeAdminPanel() { document.getElementById('adminModal').classList.add('hidden'); }
+        function openModal(id) { document.getElementById(id).classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+        function openAuthModal() { openModal('modal-auth'); }
 
-        function calculateAffiliateEarnings() {
-            const count = document.getElementById('calcVendors').value || 0;
-            const total = count * 25; // 25 EGP تقديري لكل بائع
-            document.getElementById('calcResult').innerText = `$${total}.00 EGP`;
+        async function handleAuth(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                const { data: sData, error: sErr } = await supabase.auth.signUp({ email, password });
+                if (sErr) return alert('خطأ: ' + sErr.message);
+                user = sData.user;
+            } else { user = data.user; }
+            updateUI();
+            closeModal('modal-auth');
+            if (activeProduct) openModal('modal-terms');
+        }
+
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            user = null; updateUI();
+        }
+
+        function startPurchase(id, name, price) {
+            activeProduct = { id, name, price };
+            if (!user) { alert('سجل دخولك أولاً للمتابعة'); openAuthModal(); return; }
+            document.getElementById('chk-terms').checked = false;
+            openModal('modal-terms');
+        }
+
+        async function confirmOrder() {
+            if (!document.getElementById('chk-terms').checked) return alert('يجب الموافقة على الشروط أولاً');
+            closeModal('modal-terms');
+            try {
+                const { data, error } = await supabase.rpc('create_order', {
+                    p_product_id: activeProduct.id,
+                    p_terms_version: 'v1'
+                });
+                if (error) throw error;
+                orderId = data.id; orderCode = data.code;
+                document.getElementById('pay-code').textContent = orderCode;
+                document.getElementById('pay-price').textContent = activeProduct.price + ' EGP';
+                openModal('modal-payment');
+            } catch (err) {
+                alert('خطأ في الطلب: ' + err.message);
+            }
+        }
+
+        async function submitPaymentProof(e) {
+            e.preventDefault();
+            const file = document.getElementById('pay-file').files[0];
+            const phone = document.getElementById('pay-phone').value;
+            if (!file) return alert('اختر ملف الإيصال');
+            const btn = document.getElementById('btn-proof');
+            btn.disabled = true; btn.textContent = 'جاري الرفع...';
+            try {
+                const path = `${user.id}/${orderId}_${Date.now()}.jpg`;
+                const { error: upErr } = await supabase.storage.from('payment-proofs').upload(path, file);
+                if (upErr) throw upErr;
+                const { error: rpcErr } = await supabase.rpc('submit_payment_proof', {
+                    p_order_id: orderId,
+                    p_file_path: path,
+                    p_sender: phone,
+                    p_reference: ''
+                });
+                if (rpcErr) throw rpcErr;
+                alert('تم رفع الإثبات بنجاح وبانتظار مراجعة الأدمن!');
+                closeModal('modal-payment');
+            } catch (err) {
+                alert('خطأ: ' + err.message);
+            } finally {
+                btn.disabled = false; btn.textContent = 'إرسال الإثبات للأدمن';
+            }
         }
     </script>
 </body>
