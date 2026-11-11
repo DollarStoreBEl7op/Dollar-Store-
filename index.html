@@ -49,7 +49,7 @@
     <!-- Top Announcement Bar -->
     <div class="bg-black border-b border-eldo-border py-2 px-4 text-xs text-center text-eldo-gold font-bold flex justify-center items-center gap-2">
         <i class="fa-solid fa-shield-halved animate-pulse text-eldo-green"></i>
-        <span>Dollar Store — متجرك الرقمي الموثوق للألعاب والاشتراكات (حماية تامة وعمولة ممتازة للبائعين)</span>
+        <span>Dollar Store — متجرك الرقمي الموثوق للألعاب والاشتراكات (دفع مصري وعالمي آمن وحماية Escrow)</span>
     </div>
 
     <!-- Header Navigation -->
@@ -65,10 +65,10 @@
                 </div>
             </div>
 
-            <!-- Search Bar -->
+            <!-- Search Bar (Fully Active) -->
             <div class="flex-1 max-w-md mx-auto hidden md:block">
                 <div class="relative">
-                    <input type="text" placeholder="ابحث عن ألعاب، اشتراكات، إكس بوكس..." class="w-full bg-[#12141d] border border-eldo-border px-4 py-2 rounded-lg text-xs text-white focus:outline-none focus:border-eldo-green">
+                    <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="ابحث عن ألعاب، اشتراكات، إكس بوكس..." class="w-full bg-[#12141d] border border-eldo-border px-4 py-2 rounded-lg text-xs text-white focus:outline-none focus:border-eldo-green">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-500"></i>
                 </div>
             </div>
@@ -90,7 +90,7 @@
     <!-- Main Content Grid -->
     <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
         
-        <!-- Category Filter Tabs -->
+        <!-- Category Filter Tabs (Fully Interactive Buttons) -->
         <div class="flex gap-2 overflow-x-auto pb-2 text-xs scrollbar-none">
             <button onclick="filterCategory('all')" id="btn-cat-all" class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold whitespace-nowrap"><i class="fa-solid fa-fire"></i> الكل</button>
             <button onclick="filterCategory('streaming')" id="btn-cat-streaming" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-solid fa-tv"></i> اشتراكات البث</button>
@@ -102,7 +102,7 @@
 
         <!-- Dynamic Products Display Container -->
         <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <!-- المنتجات تعرض هنا ديناميكياً -->
+            <!-- المنتجات تتحدث تلقائياً حسب الأزرار -->
         </div>
 
     </main>
@@ -233,6 +233,7 @@
         ];
 
         let user = null, activeProduct = null, orderId = null, orderCode = null;
+        let currentCategory = 'all';
 
         document.addEventListener('DOMContentLoaded', async () => {
             renderProducts('all');
@@ -240,11 +241,22 @@
             if (session) { user = session.user; updateUI(); }
         });
 
-        function renderProducts(category) {
+        function renderProducts(category, searchQuery = '') {
+            currentCategory = category;
             const container = document.getElementById('products-container');
             container.innerHTML = '';
             
-            const filtered = category === 'all' ? productsData : productsData.filter(p => p.cat === category);
+            let filtered = category === 'all' ? productsData : productsData.filter(p => p.cat === category);
+
+            if (searchQuery.trim() !== '') {
+                const q = searchQuery.toLowerCase();
+                filtered = filtered.filter(p => p.title.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
+            }
+
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-xs">لا توجد منتجات مطابقة للبحث حالياً.</div>`;
+                return;
+            }
 
             filtered.forEach(p => {
                 container.innerHTML += `
@@ -276,7 +288,14 @@
             });
         }
 
-        function filterCategory(cat) { renderProducts(cat); }
+        function filterCategory(cat) { 
+            const query = document.getElementById('search-input').value;
+            renderProducts(cat, query); 
+        }
+
+        function handleSearch(query) {
+            renderProducts(currentCategory, query);
+        }
 
         function updateUI() {
             if (user) {
@@ -374,5 +393,3 @@
             }
         }
     </script>
-</body>
-</html>
