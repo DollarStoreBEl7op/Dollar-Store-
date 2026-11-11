@@ -66,7 +66,7 @@
             <!-- Search Bar -->
             <div class="flex-1 max-w-md mx-auto hidden md:block">
                 <div class="relative">
-                    <input type="text" id="search-input" oninput="handleSearch(this.value)" placeholder="ابحث عن ألعاب، اشتراكات نتفليكس، إكس بوكس..." class="w-full bg-[#12141d] border border-eldo-border px-4 py-2 rounded-lg text-xs text-white focus:outline-none focus:border-eldo-green">
+                    <input type="text" id="search-input" oninput="filterProducts(this.value)" placeholder="ابحث عن ألعاب، اشتراكات نتفليكس، إكس بوكس..." class="w-full bg-[#12141d] border border-eldo-border px-4 py-2 rounded-lg text-xs text-white focus:outline-none focus:border-eldo-green">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-500"></i>
                 </div>
             </div>
@@ -90,17 +90,152 @@
         
         <!-- Category Filter Tabs -->
         <div class="flex gap-2 overflow-x-auto pb-2 text-xs">
-            <button onclick="filterCategory('all')" id="btn-cat-all" class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold whitespace-nowrap"><i class="fa-solid fa-fire"></i> الكل</button>
-            <button onclick="filterCategory('streaming')" id="btn-cat-streaming" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-solid fa-tv"></i> اشتراكات البث</button>
-            <button onclick="filterCategory('xbox')" id="btn-cat-xbox" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-brands fa-xbox"></i> إكس بوكس (Xbox)</button>
-            <button onclick="filterCategory('lol')" id="btn-cat-lol" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">League of Legends</button>
-            <button onclick="filterCategory('valpubg')" id="btn-cat-valpubg" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Valorant & Pubg</button>
-            <button onclick="filterCategory('fncod')" id="btn-cat-fncod" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Fortnite & COD & Roblox</button>
+            <button onclick="switchCategory('all')" id="tab-all" class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold whitespace-nowrap"><i class="fa-solid fa-fire"></i> الكل</button>
+            <button onclick="switchCategory('streaming')" id="tab-streaming" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-solid fa-tv"></i> اشتراكات البث</button>
+            <button onclick="switchCategory('xbox')" id="tab-xbox" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-brands fa-xbox"></i> إكس بوكس (Xbox)</button>
+            <button onclick="switchCategory('lol')" id="tab-lol" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">League of Legends</button>
+            <button onclick="switchCategory('valpubg')" id="tab-valpubg" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Valorant & Pubg</button>
+            <button onclick="switchCategory('fncod')" id="tab-fncod" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Fortnite & COD & Roblox</button>
         </div>
 
-        <!-- Products Grid -->
-        <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-            <!-- المنتجات تتولد هنا ديناميكياً -->
+        <!-- Products Grid (Direct HTML for 100% Stability) -->
+        <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            
+            <!-- Item 1: Netflix -->
+            <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="streaming" data-name="netflix uhd اشتراك شهر">
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">تسليم فوري</span>
+                        <span class="text-xs text-eldo-green font-bold font-mono">120 EGP</span>
+                    </div>
+                    <h3 class="font-bold text-white text-sm mb-1">Netflix UHD (اشتراك شهر)</h3>
+                    <p class="text-xs text-slate-400">حساب خاص أو بروفايل رسمي بجودة 4K وضمان كامل المدة.</p>
+                </div>
+                <button onclick="startPurchase(1, 'Netflix UHD (اشتراك شهر)', 120)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                    <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                </button>
+            </div>
+
+            <!-- Item 2: Shahid -->
+            <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="streaming" data-name="shahid vip اشتراك شهر">
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">تسليم فوري</span>
+                        <span class="text-xs text-eldo-green font-bold font-mono">80 EGP</span>
+                    </div>
+                    <h3 class="font-bold text-white text-sm mb-1">Shahid VIP (اشتراك شهر)</h3>
+                    <p class="text-xs text-slate-400">أحدث المسلسلات والأفلام بدون إعلانات وبأعلى جودة.</p>
+                </div>
+                <button onclick="startPurchase(2, 'Shahid VIP (اشتراك شهر)', 80)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                    <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                </button>
+            </div>
+
+            <!-- Item 3: Spotify -->
+            <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="streaming" data-name="spotify premium شهر">
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">تسليم فوري</span>
+                        <span class="text-xs text-eldo-green font-bold font-mono">60 EGP</span>
+                    </div>
+                    <h3 class="font-bold text-white text-sm mb-1">Spotify Premium (شهر)</h3>
+                    <p class="text-xs text-slate-400">موسيقى بلا حدود وبدون إعلانات مع إمكانية التحميل.</p>
+                </div>
+                <button onclick="startPurchase(3, 'Spotify Premium (شهر)', 60)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                    <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                </button>
+            </div>
+
+            <!-- Item 4: Xbox Game Pass -->
+            <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="xbox" data-name="xbox game pass ultimate">
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] bg-eldo-gold/10 text-eldo-gold px-2 py-0.5 rounded font-bold">Xbox</span>
+                        <span class="text-xs text-eldo-green font-bold font-mono">150 EGP</span>
+                    </div>
+                    <h3 class="font-bold text-white text-sm mb-1">Xbox Game Pass Ultimate</h3>
+                    <p class="text-xs text-slate-400">اشتراك لفترة محدودة مع مكتبة ضخمة من الألعاب.</p>
+                </div>
+                <button onclick="startPurchase(4, 'Xbox Game Pass Ultimate', 150)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                    <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                </button>
+            </div>
+
+            <!-- Item 5: LoL Level 30 -->
+            <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="lol" data-name="league of legends level 30">
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] bg-eldo-cyan/10 text-eldo-cyan px-2 py-0.5 rounded font-bold">LoL</span>
+                        <span class="text-xs text-eldo-green font-bold font-mono">95 EGP</span>
+                    </div>
+                    <h3 class="font-bold text-white text-sm mb-1">League of Legends (Level 30)</h3>
+                    <p class="text-xs text-slate-400">حسابات ليفل 30 جاهزة للـ Ranked مع كبسولات وبداية قوية.</p>
+                </div>
+                <button onclick="startPurchase(5, 'League of Legends Level 30', 95)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                    <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                </button>
+            </div>
+
+            <!-- Item 6: Valorant -->
+            <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="valpubg" data-name="valorant smurf accounts">
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] bg-eldo-red/10 text-eldo-red px-2 py-0.5 rounded font-bold">Valorant</span>
+                        <span class="text-xs text-eldo-green font-bold font-mono">110 EGP</span>
+                    </div>
+                    <h3 class="font-bold text-white text-sm mb-1">Valorant Smurf Accounts</h3>
+                    <p class="text-xs text-slate-400">حسابات فالورانت جاهزة ومفعلة مع Skins عشوائية مميزة.</p>
+                </div>
+                <button onclick="startPurchase(6, 'Valorant Smurf Account', 110)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                    <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                </button>
+            </div>
+
+            <!-- Item 7: Pubg -->
+            <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="valpubg" data-name="pubg mobile uc accounts">
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] bg-eldo-red/10 text-eldo-red px-2 py-0.5 rounded font-bold">Pubg</span>
+                        <span class="text-xs text-eldo-green font-bold font-mono">130 EGP</span>
+                    </div>
+                    <h3 class="font-bold text-white text-sm mb-1">Pubg Mobile UC & Accounts</h3>
+                    <p class="text-xs text-slate-400">حسابات ببجي موبايل قوية وباقات شدات مضمونة.</p>
+                </div>
+                <button onclick="startPurchase(7, 'Pubg Mobile UC & Accounts', 130)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                    <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                </button>
+            </div>
+
+            <!-- Item 8: Fortnite -->
+            <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="fncod" data-name="fortnite rare skins account">
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] bg-eldo-gold/10 text-eldo-gold px-2 py-0.5 rounded font-bold">Fortnite</span>
+                        <span class="text-xs text-eldo-green font-bold font-mono">140 EGP</span>
+                    </div>
+                    <h3 class="font-bold text-white text-sm mb-1">Fortnite Rare Skins Account</h3>
+                    <p class="text-xs text-slate-400">حسابات فورت نايت نادرة مع سكنات قديمة وإضافات حصرية.</p>
+                </div>
+                <button onclick="startPurchase(8, 'Fortnite Rare Skins Account', 140)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                    <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                </button>
+            </div>
+
+            <!-- Item 9: COD & Roblox -->
+            <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="fncod" data-name="call of duty roblox accounts">
+                <div>
+                    <div class="flex justify-between items-start mb-2">
+                        <span class="text-[10px] bg-eldo-cyan/10 text-eldo-cyan px-2 py-0.5 rounded font-bold">COD / Roblox</span>
+                        <span class="text-xs text-eldo-green font-bold font-mono">90 EGP</span>
+                    </div>
+                    <h3 class="font-bold text-white text-sm mb-1">Call of Duty & Roblox Accounts</h3>
+                    <p class="text-xs text-slate-400">حسابات كول آف ديوتي متقدمة وروبلوكس بروبوكسات جاهزة.</p>
+                </div>
+                <button onclick="startPurchase(9, 'COD & Roblox Accounts', 90)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                    <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                </button>
+            </div>
+
         </div>
 
     </main>
@@ -159,7 +294,7 @@
         </div>
     </div>
 
-    <!-- MODAL: Payment (Vodafone Cash, InstaPay, Binance) -->
+    <!-- MODAL: Payment -->
     <div id="modal-payment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="eldo-card w-full max-w-md p-6 rounded-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-eldo-border pb-3">
@@ -212,69 +347,31 @@
         const SUPABASE_KEY = 'PASTE_YOUR_PUBLISHABLE_KEY_HERE';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-        const productsData = [
-            { id: 1, cat: 'streaming', title: 'Netflix UHD (اشتراك شهر)', price: 120, desc: 'حساب خاص أو بروفايل رسمي بجودة 4K وضمان كامل المدة.', badge: 'تسليم فوري', tagColor: 'green' },
-            { id: 2, cat: 'streaming', title: 'Shahid VIP (اشتراك شهر)', price: 80, desc: 'أحدث المسلسلات والأفلام بدون إعلانات وبأعلى جودة.', badge: 'تسليم فوري', tagColor: 'green' },
-            { id: 3, cat: 'streaming', title: 'Spotify Premium (شهر)', price: 60, desc: 'موسيقى بلا حدود وبدون إعلانات مع إمكانية التحميل.', badge: 'تسليم فوري', tagColor: 'green' },
-            { id: 4, cat: 'xbox', title: 'Xbox Game Pass Ultimate', price: 150, desc: 'اشتراك لفترة محدودة مع مكتبة ضخمة من الألعاب.', badge: 'Xbox', tagColor: 'gold' },
-            { id: 5, cat: 'xbox', title: 'Xbox Live Gold (3 Months)', price: 210, desc: 'اشتراك شهور للعب الجماعي أونلاين وألعاب شهرية.', badge: 'Xbox', tagColor: 'gold' },
-            { id: 6, cat: 'lol', title: 'League of Legends (Level 30)', price: 95, desc: 'حسابات ليفل 30 جاهزة للـ Ranked مع كبسولات وبداية قوية.', badge: 'LoL', tagColor: 'cyan' },
-            { id: 7, cat: 'lol', title: 'League of Legends Smurf Unranked', price: 75, desc: 'حساب نظيف بـ Blue Essence عالي وبدون رانك سابق.', badge: 'LoL', tagColor: 'cyan' },
-            { id: 8, cat: 'valpubg', title: 'Valorant Smurf Accounts', price: 110, desc: 'حسابات فالورانت جاهزة ومفعلة مع Skins عشوائية مميزة.', badge: 'Valorant', tagColor: 'red' },
-            { id: 9, cat: 'valpubg', title: 'Pubg Mobile UC & Accounts', price: 130, desc: 'حسابات ببجي موبايل قوية وباقات شدات مضمونة.', badge: 'Pubg', tagColor: 'red' },
-            { id: 10, cat: 'fncod', title: 'Fortnite Rare Skins Account', price: 140, desc: 'حسابات فورت نايت نادرة مع سكنات قديمة وإضافات حصرية.', badge: 'Fortnite', tagColor: 'gold' },
-            { id: 11, cat: 'fncod', title: 'Call of Duty Modern Warfare Bundle', price: 160, desc: 'حساب كول آف ديوتي متقدم مع رتب وأسلحة مفعلة.', badge: 'COD', tagColor: 'gold' },
-            { id: 12, cat: 'fncod', title: 'Roblox Account + Robux', price: 85, desc: 'حساب روبلوكس جاهز ومحشو بروبوكسات وإكسسوارات.', badge: 'Roblox', tagColor: 'cyan' }
-        ];
-
         let user = null, activeProduct = null, orderId = null, orderCode = null;
-        let currentCategory = 'all';
+        let activeCategory = 'all';
 
         document.addEventListener('DOMContentLoaded', async () => {
-            renderProducts('all');
             const { data: { session } } = await supabase.auth.getSession();
             if (session) { user = session.user; updateUI(); }
         });
 
-        function renderProducts(category, searchQuery = '') {
-            currentCategory = category;
-            const container = document.getElementById('products-container');
-            container.innerHTML = '';
+        function switchCategory(cat) {
+            activeCategory = cat;
+            const items = document.querySelectorAll('.product-item');
             
-            let filtered = category === 'all' ? productsData : productsData.filter(p => p.cat === category);
-
-            if (searchQuery.trim() !== '') {
-                const q = searchQuery.toLowerCase();
-                filtered = filtered.filter(p => p.title.toLowerCase().includes(q) || p.desc.toLowerCase().includes(q));
-            }
-
-            if (filtered.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-12 text-slate-500 text-xs">لا توجد منتجات مطابقة للبحث حالياً.</div>`;
-                return;
-            }
-
-            filtered.forEach(p => {
-                container.innerHTML += `
-                    <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
-                        <div>
-                            <div class="flex justify-between items-start mb-2">
-                                <span class="text-[10px] bg-eldo-${p.tagColor}/10 text-eldo-${p.tagColor} px-2 py-0.5 rounded font-bold">${p.badge}</span>
-                                <span class="text-xs text-eldo-green font-bold font-mono">${p.price} EGP</span>
-                            </div>
-                            <h3 class="font-bold text-white text-sm mb-1">${p.title}</h3>
-                            <p class="text-xs text-slate-400">${p.desc}</p>
-                        </div>
-                        <button onclick="startPurchase(${p.id}, '${p.title}', ${p.price})" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
-                            <i class="fa-solid fa-cart-shopping"></i> شراء فوري
-                        </button>
-                    </div>
-                `;
+            items.forEach(item => {
+                const itemCat = item.getAttribute('data-category');
+                if (cat === 'all' || itemCat === cat) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
             });
 
             ['all', 'streaming', 'xbox', 'lol', 'valpubg', 'fncod'].forEach(c => {
-                const btn = document.getElementById(`btn-cat-${c}`);
+                const btn = document.getElementById(`tab-${c}`);
                 if (btn) {
-                    if (c === category) {
+                    if (c === cat) {
                         btn.className = "eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold whitespace-nowrap";
                     } else {
                         btn.className = "eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500";
@@ -283,13 +380,22 @@
             });
         }
 
-        function filterCategory(cat) { 
-            const query = document.getElementById('search-input').value;
-            renderProducts(cat, query); 
-        }
+        function filterProducts(query) {
+            const q = query.toLowerCase().trim();
+            const items = document.querySelectorAll('.product-item');
 
-        function handleSearch(query) {
-            renderProducts(currentCategory, query);
+            items.forEach(item => {
+                const name = item.getAttribute('data-name');
+                const itemCat = item.getAttribute('data-category');
+                const matchesCat = (activeCategory === 'all' || itemCat === activeCategory);
+                const matchesSearch = name.includes(q);
+
+                if (matchesCat && matchesSearch) {
+                    item.style.display = 'flex';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
         }
 
         function updateUI() {
