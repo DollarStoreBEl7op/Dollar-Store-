@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dollar Store | 90s Gaming Marketplace</title>
+    <title>Dollar Store | 90s Gaming & Services Hub</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome -->
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Reem+Kufi:wght@400;600;700;800&display=swap" rel="stylesheet">
-    <!-- Supabase -->
+    <!-- Supabase JS -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         tailwind.config = {
@@ -18,11 +18,11 @@
                 extend: {
                     colors: {
                         eldo: {
-                            bg: '#090a0f',
-                            card: '#12141c',
-                            border: '#1f2430',
-                            green: '#00d26a',
-                            gold: '#ffb703',
+                            bg: '#0b0c10',
+                            card: '#12141d',
+                            border: '#1f2333',
+                            green: '#00dc64',
+                            gold: '#f59e0b',
                             cyan: '#00f2fe',
                             red: '#ef4444'
                         }
@@ -36,39 +36,39 @@
         }
     </script>
     <style>
-        body { font-family: 'Reem Kufi', sans-serif; background-color: #090a0f; color: #f1f5f9; }
+        body { font-family: 'Reem Kufi', sans-serif; background-color: #0b0c10; color: #f1f5f9; }
         .pixel-text { font-family: 'Press Start 2P', monospace; }
-        .eldo-card { background: #12141c; border: 1px solid #1f2430; transition: all 0.2s ease; }
-        .eldo-card:hover { border-color: #00d26a; box-shadow: 0 4px 20px rgba(0, 210, 106, 0.1); }
+        .eldo-card { background: #12141d; border: 1px solid #1f2333; transition: all 0.2s ease; }
+        .eldo-card:hover { border-color: #00dc64; box-shadow: 0 4px 20px rgba(0, 220, 100, 0.12); }
         .eldo-btn { transition: all 0.2s ease; }
         .eldo-btn:active { transform: scale(0.98); }
     </style>
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-eldo-green selection:text-black">
 
-    <!-- Top Banner / Ticker -->
+    <!-- Top Announcement Bar -->
     <div class="bg-black border-b border-eldo-border py-2 px-4 text-xs text-center text-eldo-gold font-bold flex justify-center items-center gap-2">
-        <i class="fa-solid fa-gamepad animate-pulse"></i> 
-        <span>سوق Dollar Store الرقمي — أسرع وأمان تام لنظام الاحتجاز (Escrow) والبيع المباشر</span>
+        <i class="fa-solid fa-shield-halved animate-pulse text-eldo-green"></i>
+        <span>Dollar Store — متجرك الرقمي الموثوق للألعاب والاشتراكات (دفع مصري وعالمي آمن)</span>
     </div>
 
     <!-- Header Navigation -->
-    <header class="sticky top-0 z-40 bg-[#090a0f]/95 backdrop-blur-md border-b border-eldo-border px-4 py-3">
+    <header class="sticky top-0 z-40 bg-[#0b0c10]/95 backdrop-blur-md border-b border-eldo-border px-4 py-3">
         <div class="max-w-7xl mx-auto flex flex-wrap justify-between items-center gap-4">
             <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.reload()">
-                <div class="w-10 h-10 bg-eldo-green rounded-lg flex items-center justify-center shadow-lg shadow-eldo-green/20">
+                <div class="w-10 h-10 bg-eldo-green rounded-xl flex items-center justify-center shadow-lg shadow-eldo-green/20">
                     <i class="fa-solid fa-store text-black text-lg"></i>
                 </div>
                 <div>
                     <h1 class="pixel-text text-xs text-eldo-green tracking-wider">DOLLAR STORE</h1>
-                    <p class="text-[9px] text-slate-400 font-mono">SECURE GAMING MARKET</p>
+                    <p class="text-[9px] text-slate-400 font-mono">GAMING & SERVICES HUB</p>
                 </div>
             </div>
 
             <!-- Search Bar -->
             <div class="flex-1 max-w-md mx-auto hidden md:block">
                 <div class="relative">
-                    <input type="text" placeholder="ابحث عن حسابات، كبسولات، اشتراكات..." class="w-full bg-[#12141c] border border-eldo-border px-4 py-2 rounded-lg text-xs text-white focus:outline-none focus:border-eldo-green">
+                    <input type="text" placeholder="ابحث عن ألعاب، اشتراكات، إكس بوكس..." class="w-full bg-[#12141d] border border-eldo-border px-4 py-2 rounded-lg text-xs text-white focus:outline-none focus:border-eldo-green">
                     <i class="fa-solid fa-magnifying-glass absolute left-3 top-3 text-slate-500"></i>
                 </div>
             </div>
@@ -78,7 +78,7 @@
                 <button onclick="openAuthModal()" id="btn-login" class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold">
                     <i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول
                 </button>
-                <div id="user-badge" class="hidden flex items-center gap-2 bg-[#12141c] px-3 py-1.5 rounded-lg border border-eldo-border">
+                <div id="user-badge" class="hidden flex items-center gap-2 bg-[#12141d] px-3 py-1.5 rounded-lg border border-eldo-border">
                     <span id="user-name" class="font-bold text-eldo-green"></span>
                     <button onclick="handleLogout()" class="text-eldo-red"><i class="fa-solid fa-power-off"></i></button>
                 </div>
@@ -86,66 +86,136 @@
         </div>
     </header>
 
-    <!-- Main Container -->
-    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-6">
+    <!-- Main Content Grid -->
+    <main class="max-w-7xl mx-auto px-4 py-8 flex-grow w-full space-y-8">
         
-        <!-- Category Pills -->
+        <!-- Category Filter Tabs -->
         <div class="flex gap-2 overflow-x-auto pb-2 text-xs scrollbar-none">
-            <button class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold whitespace-nowrap"><i class="fa-solid fa-box"></i> الكبسولات (45 EGP)</button>
-            <button class="eldo-btn bg-[#12141c] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">الاشتراكات الرقمية</button>
-            <button class="eldo-btn bg-[#12141c] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">حسابات ليفل 30</button>
+            <button class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold whitespace-nowrap"><i class="fa-solid fa-fire"></i> الكل</button>
+            <button class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-solid fa-tv"></i> اشتراكات البث</button>
+            <button class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-solid fa-gamepad"></i> إكس بوكس (Xbox)</button>
+            <button class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">League of Legends</button>
+            <button class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Valorant & Pubg</button>
+            <button class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Fortnite & COD & Roblox</button>
         </div>
 
-        <!-- Products Grid -->
+        <!-- Section 1: Streaming Subscriptions -->
         <div>
             <h2 class="text-sm font-bold text-white mb-4 flex items-center gap-2 border-r-4 border-eldo-green pr-3">
-                المنتجات الأكثر طلباً
+                <i class="fa-solid fa-film text-eldo-green"></i> اشتراكات البث الرقمي (Netflix, Shahid, Spotify)
             </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6" id="products-grid">
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
                 
-                <!-- Product Card 1 -->
                 <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
                     <div>
                         <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">فوري</span>
-                            <span class="pixel-text text-xs text-eldo-green font-bold">45 EGP</span>
+                            <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">تسليم فوري</span>
+                            <span class="pixel-text text-xs text-eldo-green font-bold">120 EGP</span>
                         </div>
-                        <h3 class="font-bold text-white text-sm mb-1">كبسولة ويست (EUW Capsule)</h3>
-                        <p class="text-xs text-slate-400">أكونت لفل 1 يحتوي على 350 RP + XP Boost لمدة 30 يوم.</p>
+                        <h3 class="font-bold text-white text-sm mb-1">Netflix UHD (اشتراك شهر)</h3>
+                        <p class="text-xs text-slate-400">حساب خاص أو بروفايل رسمي بجودة 4K وضمان كامل المدة.</p>
                     </div>
-                    <button onclick="startPurchase(1, 'كبسولة ويست (EUW Capsule)', 45)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                    <button onclick="startPurchase(1, 'Netflix UHD (شهر)', 120)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
                         <i class="fa-solid fa-cart-shopping"></i> شراء فوري
                     </button>
                 </div>
 
-                <!-- Product Card 2 -->
                 <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
                     <div>
                         <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">فوري</span>
-                            <span class="pixel-text text-xs text-eldo-green font-bold">45 EGP</span>
-                        </div>
-                        <h3 class="font-bold text-white text-sm mb-1">كبسولة نوردك (EUNE Capsule)</h3>
-                        <p class="text-xs text-slate-400">أكونت لفل 1 يحتوي على 350 RP + XP Boost لمدة 30 يوم.</p>
-                    </div>
-                    <button onclick="startPurchase(2, 'كبسولة نوردك (EUNE Capsule)', 45)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
-                        <i class="fa-solid fa-cart-shopping"></i> شراء فوري
-                    </button>
-                </div>
-
-                <!-- Product Card 3 -->
-                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] bg-eldo-cyan/10 text-eldo-cyan px-2 py-0.5 rounded font-bold">اشتراك</span>
+                            <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">تسليم فوري</span>
                             <span class="pixel-text text-xs text-eldo-green font-bold">80 EGP</span>
                         </div>
-                        <h3 class="font-bold text-white text-sm mb-1">Spotify Premium (شهر)</h3>
-                        <p class="text-xs text-slate-400">اشتراك رسمي وضمان كامل طوال مدة الاستخدام.</p>
+                        <h3 class="font-bold text-white text-sm mb-1">Shahid VIP (اشتراك شهر)</h3>
+                        <p class="text-xs text-slate-400">استمتع بأحدث المسلسلات والأفلام بدون إعلانات وبأعلى جودة.</p>
                     </div>
-                    <button onclick="startPurchase(3, 'Spotify Premium (شهر)', 80)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                    <button onclick="startPurchase(2, 'Shahid VIP (شهر)', 80)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
                         <i class="fa-solid fa-cart-shopping"></i> شراء فوري
                     </button>
+                </div>
+
+                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
+                    <div>
+                        <div class="flex justify-between items-start mb-2">
+                            <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">تسليم فوري</span>
+                            <span class="pixel-text text-xs text-eldo-green font-bold">60 EGP</span>
+                        </div>
+                        <h3 class="font-bold text-white text-sm mb-1">Spotify Premium (شهر)</h3>
+                        <p class="text-xs text-slate-400">موسيقى بلا حدود وبدون إعلانات مع إمكانية التحميل.</p>
+                    </div>
+                    <button onclick="startPurchase(3, 'Spotify Premium (شهر)', 60)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                        <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                    </button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Section 2: Xbox & Games Accounts -->
+        <div>
+            <h2 class="text-sm font-bold text-white mb-4 flex items-center gap-2 border-r-4 border-eldo-gold pr-3">
+                <i class="fa-brands fa-xbox text-eldo-gold"></i> حسابات وألعاب إكس بوكس (Xbox) والألعاب الكبرى
+            </h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+                
+                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-[10px] bg-eldo-gold/10 text-eldo-gold px-2 py-0.5 rounded font-bold">Xbox</span>
+                        <h3 class="font-bold text-white text-sm mt-2 mb-1">Xbox Game Pass Ultimate</h3>
+                        <p class="text-xs text-slate-400">اشتراك لفترة محدودة مع مكتبة ضخمة من الألعاب.</p>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-eldo-border">
+                        <span class="pixel-text text-xs text-eldo-green">150 EGP</span>
+                        <button onclick="startPurchase(4, 'Xbox Game Pass Ultimate', 150)" class="eldo-btn bg-eldo-green text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء</button>
+                    </div>
+                </div>
+
+                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-[10px] bg-eldo-cyan/10 text-eldo-cyan px-2 py-0.5 rounded font-bold">LoL</span>
+                        <h3 class="font-bold text-white text-sm mt-2 mb-1">League of Legends (Level 30)</h3>
+                        <p class="text-xs text-slate-400">حسابات ليفل 30 جاهزة للـ Ranked مع كبسولات وبداية قوية.</p>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-eldo-border">
+                        <span class="pixel-text text-xs text-eldo-green">95 EGP</span>
+                        <button onclick="startPurchase(5, 'League of Legends Level 30', 95)" class="eldo-btn bg-eldo-green text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء</button>
+                    </div>
+                </div>
+
+                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-[10px] bg-eldo-red/10 text-eldo-red px-2 py-0.5 rounded font-bold">Valorant</span>
+                        <h3 class="font-bold text-white text-sm mt-2 mb-1">Valorant Smurf Accounts</h3>
+                        <p class="text-xs text-slate-400">حسابات فالورانت جاهزة ومفعلة مع Skins عشوائية مميزة.</p>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-eldo-border">
+                        <span class="pixel-text text-xs text-eldo-green">110 EGP</span>
+                        <button onclick="startPurchase(6, 'Valorant Smurf Account', 110)" class="eldo-btn bg-eldo-green text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء</button>
+                    </div>
+                </div>
+
+                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-[10px] bg-eldo-gold/10 text-eldo-gold px-2 py-0.5 rounded font-bold">Fortnite & Pubg</span>
+                        <h3 class="font-bold text-white text-sm mt-2 mb-1">Fortnite Rare Skins & Pubg</h3>
+                        <p class="text-xs text-slate-400">حسابات فورت نايت نادرة وبابجي موبايل وبي دي بإضافات قوية.</p>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-eldo-border">
+                        <span class="pixel-text text-xs text-eldo-green">130 EGP</span>
+                        <button onclick="startPurchase(7, 'Fortnite / Pubg Account', 130)" class="eldo-btn bg-eldo-green text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء</button>
+                    </div>
+                </div>
+
+                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
+                    <div>
+                        <span class="text-[10px] bg-eldo-cyan/10 text-eldo-cyan px-2 py-0.5 rounded font-bold">COD / Roblox</span>
+                        <h3 class="font-bold text-white text-sm mt-2 mb-1">Call of Duty & Roblox Accounts</h3>
+                        <p class="text-xs text-slate-400">حسابات كول آف ديوتي متقدمة وروبلوكس بروبوكسات جاهزة.</p>
+                    </div>
+                    <div class="flex justify-between items-center pt-2 border-t border-eldo-border">
+                        <span class="pixel-text text-xs text-eldo-green">90 EGP</span>
+                        <button onclick="startPurchase(8, 'COD & Roblox Bundle', 90)" class="eldo-btn bg-eldo-green text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء</button>
+                    </div>
                 </div>
 
             </div>
@@ -154,8 +224,9 @@
     </main>
 
     <!-- Footer -->
-    <footer class="bg-black border-t border-eldo-border py-4 px-4 text-center text-xs text-slate-500">
-        <p>Dollar Store © 2026 — جميع الحقوق محفوظة | دفع يدوي آمن ومحمي بنظام Escrow</p>
+    <footer class="bg-black border-t border-eldo-border py-6 px-4 text-center text-xs text-slate-500 space-y-2">
+        <p>Dollar Store © 2026 — سوقك الرقمي الأول للألعاب والاشتراكات بمعايير أمان عالمية.</p>
+        <p class="text-[10px] text-slate-400">طرق الدفع المعتمدة: فودافون كاش، إنستاباي، وبينانس باي.</p>
     </footer>
 
     <!-- MODAL: Auth -->
@@ -168,11 +239,11 @@
             <form onsubmit="handleAuth(event)" class="space-y-3 text-xs">
                 <div>
                     <label class="block mb-1 text-slate-300">البريد الإلكتروني:</label>
-                    <input type="email" id="auth-email" required class="w-full bg-[#090a0f] border border-eldo-border p-2.5 rounded-lg text-white">
+                    <input type="email" id="auth-email" required class="w-full bg-[#0b0c10] border border-eldo-border p-2.5 rounded-lg text-white">
                 </div>
                 <div>
                     <label class="block mb-1 text-slate-300">كلمة المرور:</label>
-                    <input type="password" id="auth-password" required class="w-full bg-[#090a0f] border border-eldo-border p-2.5 rounded-lg text-white">
+                    <input type="password" id="auth-password" required class="w-full bg-[#0b0c10] border border-eldo-border p-2.5 rounded-lg text-white">
                 </div>
                 <button type="submit" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2.5 rounded-lg text-xs">متابعة</button>
             </form>
@@ -186,9 +257,9 @@
                 <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-file-contract text-eldo-gold"></i> شروط الشراء والضمان</h3>
                 <button onclick="closeModal('modal-terms')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="bg-[#090a0f] p-3 rounded-lg border border-eldo-border text-xs leading-relaxed text-slate-300 space-y-2">
+            <div class="bg-[#0b0c10] p-3 rounded-lg border border-eldo-border text-xs leading-relaxed text-slate-300 space-y-2">
                 <p>1. مدة الضمان تبدأ فور استلام بيانات السلعة.</p>
-                <p>2. الدخول والتأكد من الحساب فوراً دون لعب مباريات لتفعيل الضمان.</p>
+                <p>2. الدخول والتأكد من الحساب فوراً لتفعيل الضمان.</p>
                 <p>3. أموالك تحظى بحماية نظام الاحتجاز (Escrow) لمدة 72 ساعة.</p>
             </div>
             <div class="flex items-center gap-2">
@@ -199,26 +270,52 @@
         </div>
     </div>
 
-    <!-- MODAL: Payment -->
+    <!-- MODAL: Payment (Updated with your exact 3 Egyptian payment methods & screenshot requirement) -->
     <div id="modal-payment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
-        <div class="eldo-card w-full max-w-md p-6 rounded-xl space-y-4">
+        <div class="eldo-card w-full max-w-md p-6 rounded-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-eldo-border pb-3">
-                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-wallet text-eldo-green"></i> تفاصيل الدفع اليدوي</h3>
+                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-wallet text-eldo-green"></i> بيانات الدفع المعتمدة</h3>
                 <button onclick="closeModal('modal-payment')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
-            <div class="bg-[#090a0f] p-3 rounded-lg border border-eldo-border text-xs space-y-2">
+            
+            <div class="bg-[#0b0c10] p-3 rounded-lg border border-eldo-border text-xs space-y-3">
                 <div class="flex justify-between"><span class="text-slate-400">رقم الطلب:</span> <span id="pay-code" class="pixel-text text-eldo-gold"></span></div>
-                <div class="flex justify-between"><span class="text-slate-400">المبلغ:</span> <span id="pay-price" class="pixel-text text-eldo-green"></span></div>
-                <div class="flex justify-between pt-2 border-t border-slate-800"><span class="text-slate-400">فودافون كاش / إنستاباي:</span> <span class="font-mono text-white font-bold">01000000000</span></div>
+                <div class="flex justify-between"><span class="text-slate-400">المبلغ الإجمالي:</span> <span id="pay-price" class="pixel-text text-eldo-green"></span></div>
+                
+                <div class="pt-2 border-t border-slate-800 space-y-2">
+                    <p class="font-bold text-eldo-gold">اختر طريقة الدفع المناسبة وحول المبلغ:</p>
+                    
+                    <!-- Vodafone Cash -->
+                    <div class="bg-black/40 p-2 rounded border border-slate-800">
+                        <div class="font-bold text-white">Vodafone Cash</div>
+                        <div class="text-eldo-green font-mono">01031652348</div>
+                        <div class="text-[10px] text-slate-400">باسم: حسام حسن</div>
+                    </div>
+
+                    <!-- InstaPay -->
+                    <div class="bg-black/40 p-2 rounded border border-slate-800">
+                        <div class="font-bold text-white">InstaPay Egypt</div>
+                        <div class="text-eldo-cyan font-mono">01200086093</div>
+                        <div class="text-[10px] text-slate-400">باسم: ناه</div>
+                    </div>
+
+                    <!-- Binance Pay -->
+                    <div class="bg-black/40 p-2 rounded border border-slate-800">
+                        <div class="font-bold text-white">Binance Pay ID</div>
+                        <div class="text-eldo-gold font-mono">467365311</div>
+                        <div class="text-[10px] text-slate-400">باسم: Mahmuud</div>
+                    </div>
+                </div>
             </div>
+
             <form onsubmit="submitPaymentProof(event)" class="space-y-3 text-xs">
                 <div>
-                    <label class="block mb-1 text-slate-300">رقم محفظتك المحول منها:</label>
-                    <input type="text" id="pay-phone" placeholder="010xxxxxxxx" required class="w-full bg-[#090a0f] border border-eldo-border p-2 rounded-lg text-white mb-2">
-                    <label class="block mb-1 text-slate-300">صورة إيصال التحويل:</label>
-                    <input type="file" id="pay-file" accept="image/*" required class="w-full bg-[#090a0f] border border-eldo-border p-2 rounded-lg text-slate-400 file:bg-eldo-green file:text-black file:border-0 file:px-3 file:py-1 file:rounded">
+                    <label class="block mb-1 text-slate-300">رقم محفظتك أو تفاصيل الحساب المحول منه:</label>
+                    <input type="text" id="pay-phone" placeholder="اكتب رقمك أو معرف التحويل هنا" required class="w-full bg-[#0b0c10] border border-eldo-border p-2 rounded-lg text-white mb-2">
+                    <label class="block mb-1 text-eldo-green font-bold">إرفاق سكرين شوت الإيصال بعد التحويل: *</label>
+                    <input type="file" id="pay-file" accept="image/*" required class="w-full bg-[#0b0c10] border border-eldo-border p-2 rounded-lg text-slate-400 file:bg-eldo-green file:text-black file:border-0 file:px-3 file:py-1 file:rounded">
                 </div>
-                <button type="submit" id="btn-proof" class="w-full eldo-btn bg-eldo-gold text-black font-bold py-2.5 rounded-lg text-xs">إرسال الإثبات للأدمن</button>
+                <button type="submit" id="btn-proof" class="w-full eldo-btn bg-eldo-gold text-black font-bold py-2.5 rounded-lg text-xs">تأكيد وإرسال الإيصال للأدمن</button>
             </form>
         </div>
     </div>
@@ -300,7 +397,7 @@
             e.preventDefault();
             const file = document.getElementById('pay-file').files[0];
             const phone = document.getElementById('pay-phone').value;
-            if (!file) return alert('اختر ملف الإيصال');
+            if (!file) return alert('اختر ملف سكرين شوت الإيصال');
             const btn = document.getElementById('btn-proof');
             btn.disabled = true; btn.textContent = 'جاري الرفع...';
             try {
@@ -314,12 +411,12 @@
                     p_reference: ''
                 });
                 if (rpcErr) throw rpcErr;
-                alert('تم رفع الإثبات بنجاح وبانتظار مراجعة الأدمن!');
+                alert('تم إرسال سكرين شوت الإيصال بنجاح وبانتظار مراجعة الأدمن وتسليم طلبك!');
                 closeModal('modal-payment');
             } catch (err) {
                 alert('خطأ: ' + err.message);
             } finally {
-                btn.disabled = false; btn.textContent = 'إرسال الإثبات للأدمن';
+                btn.disabled = false; btn.textContent = 'تأكيد وإرسال الإيصال للأدمن';
             }
         }
     </script>
