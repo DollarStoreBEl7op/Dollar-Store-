@@ -44,10 +44,21 @@
 </head>
 <body class="min-h-screen flex flex-col justify-between selection:bg-eldo-green selection:text-black">
 
-    <!-- Top Ticker -->
-    <div class="bg-black border-b border-eldo-border py-2 px-4 text-xs text-center text-eldo-gold font-bold flex justify-center items-center gap-2">
-        <i class="fa-solid fa-shield-halved text-eldo-green"></i>
-        <span>Dollar Store — المنصة الأولى للخدمات الرقمية وحسابات الألعاب بنظام حماية Escrow</span>
+    <!-- Top Announcement Bar & Discord / Trading Links -->
+    <div class="bg-black border-b border-eldo-border py-2 px-4 text-xs flex flex-wrap justify-between items-center font-bold">
+        <div class="text-eldo-gold flex items-center gap-2">
+            <i class="fa-solid fa-shield-halved text-eldo-green"></i>
+            <span>Dollar Store — متجرك الرقمي الموثوق بنظام حماية Escrow</span>
+        </div>
+        <div class="flex items-center gap-4">
+            <a href="https://discord.gg/yourserver" target="_blank" class="text-eldo-cyan hover:underline flex items-center gap-1">
+                <i class="fa-brands fa-discord"></i> سيرفر الديسكورد
+            </a>
+            <span class="text-slate-600">|</span>
+            <a href="#trading-chat" onclick="alert('شات التداول متاح للأعضاء المسجلين حالياً')" class="text-eldo-green hover:underline flex items-center gap-1">
+                <i class="fa-solid fa-comments"></i> شات التداول
+            </a>
+        </div>
     </div>
 
     <!-- Header -->
@@ -71,15 +82,15 @@
                 </div>
             </div>
 
-            <!-- Auth/Profile -->
+            <!-- Auth/Profile Button -->
             <div class="flex items-center gap-2 text-xs">
-                <button onclick="openAuthModal()" id="btn-login" class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold">
+                <button onclick="openAuthModal()" id="btn-login" class="eldo-btn bg-eldo-green text-black px-4 py-2.5 rounded-lg font-bold shadow-lg shadow-eldo-green/20">
                     <i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول / انضمام
                 </button>
                 <div id="user-badge" class="hidden flex items-center gap-2 bg-[#12141d] px-3 py-1.5 rounded-lg border border-eldo-border">
                     <span id="user-name" class="font-bold text-eldo-green"></span>
                     <span id="user-role-tag" class="text-[9px] bg-eldo-gold/20 text-eldo-gold px-1.5 py-0.5 rounded font-bold"></span>
-                    <button onclick="handleLogout()" class="text-eldo-red mr-2"><i class="fa-solid fa-power-off"></i></button>
+                    <button onclick="handleLogout()" class="text-eldo-red mr-2" title="خروج"><i class="fa-solid fa-power-off"></i></button>
                 </div>
             </div>
         </div>
@@ -90,18 +101,18 @@
         
         <!-- Category Filter Tabs -->
         <div class="flex gap-2 overflow-x-auto pb-2 text-xs">
-            <button onclick="switchCategory('all')" id="tab-all" class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold whitespace-nowrap"><i class="fa-solid fa-fire"></i> الكل</button>
-            <button onclick="switchCategory('streaming')" id="tab-streaming" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-solid fa-tv"></i> اشتراكات البث</button>
-            <button onclick="switchCategory('xbox')" id="tab-xbox" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-brands fa-xbox"></i> إكس بوكس (Xbox)</button>
-            <button onclick="switchCategory('lol')" id="tab-lol" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">League of Legends</button>
-            <button onclick="switchCategory('valpubg')" id="tab-valpubg" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Valorant & Pubg</button>
-            <button onclick="switchCategory('fncod')" id="tab-fncod" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Fortnite & COD & Roblox</button>
+            <button onclick="switchCategory('all')" id="tab-all" class="eldo-btn bg-eldo-green text-black px-4 py-2.5 rounded-lg font-bold whitespace-nowrap"><i class="fa-solid fa-fire"></i> الكل</button>
+            <button onclick="switchCategory('streaming')" id="tab-streaming" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2.5 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-solid fa-tv"></i> اشتراكات البث</button>
+            <button onclick="switchCategory('xbox')" id="tab-xbox" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2.5 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-brands fa-xbox"></i> إكس بوكس (Xbox)</button>
+            <button onclick="switchCategory('lol')" id="tab-lol" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2.5 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">League of Legends</button>
+            <button onclick="switchCategory('valpubg')" id="tab-valpubg" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2.5 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Valorant & Pubg</button>
+            <button onclick="switchCategory('fncod')" id="tab-fncod" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2.5 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Fortnite & COD & Roblox</button>
         </div>
 
-        <!-- Products Grid (Direct HTML for 100% Stability) -->
+        <!-- Products Grid -->
         <div id="products-grid" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
             
-            <!-- Item 1: Netflix -->
+            <!-- Item 1 -->
             <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="streaming" data-name="netflix uhd اشتراك شهر">
                 <div>
                     <div class="flex justify-between items-start mb-2">
@@ -116,7 +127,7 @@
                 </button>
             </div>
 
-            <!-- Item 2: Shahid -->
+            <!-- Item 2 -->
             <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="streaming" data-name="shahid vip اشتراك شهر">
                 <div>
                     <div class="flex justify-between items-start mb-2">
@@ -131,7 +142,7 @@
                 </button>
             </div>
 
-            <!-- Item 3: Spotify -->
+            <!-- Item 3 -->
             <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="streaming" data-name="spotify premium شهر">
                 <div>
                     <div class="flex justify-between items-start mb-2">
@@ -146,7 +157,7 @@
                 </button>
             </div>
 
-            <!-- Item 4: Xbox Game Pass -->
+            <!-- Item 4 -->
             <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="xbox" data-name="xbox game pass ultimate">
                 <div>
                     <div class="flex justify-between items-start mb-2">
@@ -161,7 +172,7 @@
                 </button>
             </div>
 
-            <!-- Item 5: LoL Level 30 -->
+            <!-- Item 5 -->
             <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="lol" data-name="league of legends level 30">
                 <div>
                     <div class="flex justify-between items-start mb-2">
@@ -176,7 +187,7 @@
                 </button>
             </div>
 
-            <!-- Item 6: Valorant -->
+            <!-- Item 6 -->
             <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="valpubg" data-name="valorant smurf accounts">
                 <div>
                     <div class="flex justify-between items-start mb-2">
@@ -191,7 +202,7 @@
                 </button>
             </div>
 
-            <!-- Item 7: Pubg -->
+            <!-- Item 7 -->
             <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="valpubg" data-name="pubg mobile uc accounts">
                 <div>
                     <div class="flex justify-between items-start mb-2">
@@ -206,7 +217,7 @@
                 </button>
             </div>
 
-            <!-- Item 8: Fortnite -->
+            <!-- Item 8 -->
             <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="fncod" data-name="fortnite rare skins account">
                 <div>
                     <div class="flex justify-between items-start mb-2">
@@ -221,7 +232,7 @@
                 </button>
             </div>
 
-            <!-- Item 9: COD & Roblox -->
+            <!-- Item 9 -->
             <div class="product-item eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4" data-category="fncod" data-name="call of duty roblox accounts">
                 <div>
                     <div class="flex justify-between items-start mb-2">
@@ -246,11 +257,11 @@
         <p class="text-[10px] text-slate-400">طرق الدفع: فودافون كاش، إنستاباي، وبينانس باي.</p>
     </footer>
 
-    <!-- MODAL: Auth -->
+    <!-- MODAL: Auth (Buyer / Seller) -->
     <div id="modal-auth" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="eldo-card w-full max-w-md p-6 rounded-xl space-y-4">
             <div class="flex justify-between items-center border-b border-eldo-border pb-3">
-                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-user-lock text-eldo-green"></i> تسجيل الدخول / إنشاء حساب</h3>
+                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-user-lock text-eldo-green"></i> تسجيل الدخول / انضمام للمنصة</h3>
                 <button onclick="closeModal('modal-auth')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form onsubmit="handleAuth(event)" class="space-y-3 text-xs">
@@ -263,13 +274,13 @@
                     <input type="password" id="auth-password" required class="w-full bg-[#090a0f] border border-eldo-border p-2.5 rounded-lg text-white">
                 </div>
                 <div>
-                    <label class="block mb-1 text-eldo-gold font-bold">طبيعة حسابك في المنصة:</label>
+                    <label class="block mb-1 text-eldo-gold font-bold">حدد طبيعة حسابك:</label>
                     <select id="auth-role" class="w-full bg-[#090a0f] border border-eldo-border p-2.5 rounded-lg text-white">
                         <option value="buyer">🛒 مشتري (أبحث عن شراء حسابات واشتراكات)</option>
                         <option value="seller">💼 بائع معتمد (أريد عرض وبيع منتجاتي وحساباتي)</option>
                     </select>
                 </div>
-                <button type="submit" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2.5 rounded-lg text-xs mt-2">متابعة</button>
+                <button type="submit" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2.5 rounded-lg text-xs mt-2">متابعة الدخول</button>
             </form>
         </div>
     </div>
@@ -288,13 +299,13 @@
             </div>
             <div class="flex items-center gap-2">
                 <input type="checkbox" id="chk-terms" class="w-4 h-4 accent-eldo-green">
-                <label for="chk-terms" class="text-xs text-white cursor-pointer font-bold">أوافق على الشروط والأحكام</label>
+                <label for="chk-terms" class="text-xs text-white cursor-pointer font-bold">أوافق على الشروط والأحكام الكاملة</label>
             </div>
             <button onclick="confirmOrder()" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2.5 rounded-lg text-xs">موافقة وإنشاء الطلب</button>
         </div>
     </div>
 
-    <!-- MODAL: Payment -->
+    <!-- MODAL: Payment (Vodafone, InstaPay, Binance) -->
     <div id="modal-payment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="eldo-card w-full max-w-md p-6 rounded-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-eldo-border pb-3">
@@ -307,7 +318,7 @@
                 <div class="flex justify-between"><span class="text-slate-400">المبلغ الإجمالي:</span> <span id="pay-price" class="font-bold text-eldo-green font-mono"></span></div>
                 
                 <div class="pt-2 border-t border-slate-800 space-y-2">
-                    <p class="font-bold text-eldo-gold">اختر طريقة الدفع المناسبة وحول المبلغ:</p>
+                    <p class="font-bold text-eldo-gold">اختر طريقة الدفع المحول إليها:</p>
                     
                     <div class="bg-black/40 p-2 rounded border border-slate-800">
                         <div class="font-bold text-white">Vodafone Cash</div>
@@ -372,9 +383,9 @@
                 const btn = document.getElementById(`tab-${c}`);
                 if (btn) {
                     if (c === cat) {
-                        btn.className = "eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold whitespace-nowrap";
+                        btn.className = "eldo-btn bg-eldo-green text-black px-4 py-2.5 rounded-lg font-bold whitespace-nowrap shadow-lg shadow-eldo-green/20";
                     } else {
-                        btn.className = "eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500";
+                        btn.className = "eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2.5 rounded-lg font-bold whitespace-nowrap hover:border-slate-500";
                     }
                 }
             });
