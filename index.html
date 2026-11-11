@@ -1,444 +1,372 @@
--- =====================================================================
--- Dollar Store - المرحلة 3: نظام الاحتجاز (Escrow) + محفظة البائع + سحب أسبوعي (الجمعة)
--- شغّله بعد schema.sql ثم schema_phase2.sql.
--- آمن لإعادة التشغيل أكتر من مرة.
---
--- الفكرة:
---   بيع -> بعد التسليم الفلوس "معلّقة" عند البائع (pending)
---   بعد فترة الاحتجاز (72 ساعة، أو لحد نهاية الضمان لو أطول) وبدون مشكلة -> "متاحة" (available)
---   البائع يطلب سحب -> يدخل دفعة الجمعة القادمة -> الأدمن يحوّل يدويًا ويضغط "تم الدفع"
--- الفلوس الفعلية بتفضل في محفظتك أنت، والجداول دي بتسجّل حقوق كل بائع بس.
--- =====================================================================
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dollar Store | 90s Gaming Ultimate Marketplace</title>
 
--- ---------------------------------------------------------------------
--- 0) إعدادات (أرقام مبدئية، عدّلها بأمر update في آخر الملف)
--- ---------------------------------------------------------------------
-insert into public.app_settings (key, value) values
-  ('hold_hours',         '72'),   -- مدة الاحتجاز بعد التسليم
-  ('commission_percent', '10'),   -- عمولة المنصة على منتجات البائعين (رقم مبدئي)
-  ('min_payout_egp',     '100'),  -- أقل مبلغ سحب (رقم مبدئي)
-  ('payout_weekday',     '5'),    -- يوم الدفع: 5 = الجمعة (1 = الاثنين ... 7 = الأحد)
-  ('seller_terms_text',
-   '1) فلوس كل عملية بتتعلّق عند المنصة لحد انتهاء فترة الاحتجاز (72 ساعة من التسليم، أو لحد نهاية الضمان لو أطول).' || E'\n' ||
-   '2) لو المشتري بلّغ عن مشكلة، بيتجمّد المبلغ لحد ما الإدارة تفصل فيها.' || E'\n' ||
-   '3) بعد انتهاء الفترة بدون مشاكل، المبلغ بيتحول لرصيد متاح تقدر تطلب سحبه.' || E'\n' ||
-   '4) طلبات السحب بتتحوّل مرة كل أسبوع يوم الجمعة، وبحد أدنى للسحب بيحدده الموقع.' || E'\n' ||
-   '5) عمولة المنصة بتتخصم من كل عملية بيع.' || E'\n' ||
-   '6) أي مبلغ اتسلّم للمشتري كاسترجاع بيتخصم من رصيدك المعلّق.' || E'\n' ||
-   '7) التوثيق بالهوية شرط قبل أول عملية سحب.')
-on conflict (key) do nothing;
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- Google Fonts: Retro 90s (Press Start 2P for EN/Numbers & Reem Kufi for AR) -->
+    <link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=Reem+Kufi:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <!-- Supabase JS Client -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
--- الشروط تتقرا للكل (نسخة المشتري ونسخة البائع)
-drop policy if exists settings_read on public.app_settings;
-create policy settings_read on public.app_settings
-  for select using (key in ('terms_version', 'terms_text', 'seller_terms_text'));
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        nes: {
+                            bg: '#0f0f1b',
+                            card: '#1a1a2e',
+                            border: '#2a2a4a',
+                            green: '#00e676',
+                            gold: '#ffc107',
+                            cyan: '#00e5ff',
+                            red: '#ff1744',
+                            purple: '#d500f9'
+                        }
+                    },
+                    fontFamily: {
+                        pixel: ['"Press Start 2P"', 'monospace'],
+                        arabic: ['"Reem Kufi"', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
 
-create or replace function public._setting(p_key text, p_default text) returns text
-language sql stable security definer set search_path = public as $$
-  select coalesce((select value from public.app_settings where key = p_key), p_default);
-$$;
-revoke all on function public._setting(text, text) from public, anon, authenticated;
+    <style>
+        body { font-family: 'Reem Kufi', sans-serif; background-color: #0f0f1b; color: #f1f5f9; }
+        .pixel-text { font-family: 'Press Start 2P', monospace; }
+        .tab-btn { border: 3px solid #2a2a4a; box-shadow: 4px 4px 0px #000; transition: all 0.1s ease; }
+        .tab-btn:active { transform: translate(2px, 2px); box-shadow: 2px 2px 0px #000; }
+        .nes-card { background: #1a1a2e; border: 3px solid #2a2a4a; box-shadow: 5px 5px 0px #000; }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between selection:bg-nes-green selection:text-black">
 
--- ---------------------------------------------------------------------
--- 1) ربط المنتجات والطلبات بالبائع
---    seller_id = null  ->  منتج المتجر نفسه (مفيش محفظة بائع)
--- ---------------------------------------------------------------------
-alter table public.products add column if not exists seller_id uuid references public.profiles(id);
+    <!-- Top Announcement Bar -->
+    <div id="announcement-bar" class="bg-black border-b-2 border-nes-border py-2 px-4 text-xs text-center text-nes-gold font-bold">
+        <i class="fa-solid fa-bullhorn"></i> مرحباً بك في Dollar Store - سوق ألعاب التسعينات الرائد!
+    </div>
 
-alter table public.orders
-  add column if not exists seller_id      uuid references public.profiles(id),
-  add column if not exists commission_pct numeric(5,2) not null default 0,
-  add column if not exists seller_net     numeric(10,2),
-  add column if not exists release_at     timestamptz,
-  add column if not exists released_at    timestamptz;
+    <!-- Header Navigation -->
+    <header class="sticky top-0 z-40 bg-nes-bg/95 backdrop-blur-md border-b-4 border-nes-border px-4 py-3">
+        <div class="max-w-7xl mx-auto flex justify-between items-center gap-4">
+            <div class="flex items-center gap-3 cursor-pointer" onclick="window.location.reload()">
+                <div class="w-10 h-10 bg-nes-green rounded flex items-center justify-center border-2 border-white shadow-[3px_3px_0px_#000]">
+                    <i class="fa-solid fa-gamepad text-black text-xl"></i>
+                </div>
+                <div>
+                    <h1 class="pixel-text text-sm text-nes-green">DOLLAR STORE</h1>
+                    <p class="text-[10px] text-nes-gold">90S GAMING MARKETPLACE</p>
+                </div>
+            </div>
 
--- البائع يشوف مبيعاته (من غير بيانات التسليم)
-drop policy if exists orders_read on public.orders;
-create policy orders_read on public.orders for select to authenticated
-  using (buyer_id = auth.uid() or seller_id = auth.uid() or public.is_admin());
+            <!-- Auth / User Controls -->
+            <div id="auth-controls" class="flex items-center gap-3">
+                <button onclick="openAuthModal()" id="btn-login-modal" class="tab-btn bg-nes-cyan text-black px-4 py-2 font-bold text-xs rounded">
+                    <i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول
+                </button>
+                <div id="user-profile-badge" class="hidden flex items-center gap-2 bg-nes-card px-3 py-1.5 rounded border-2 border-nes-border">
+                    <i class="fa-solid fa-user text-nes-green"></i>
+                    <span id="user-display-name" class="text-xs font-bold text-white"></span>
+                    <button onclick="handleLogout()" class="text-xs text-nes-red mr-2 font-bold"><i class="fa-solid fa-power-off"></i></button>
+                </div>
+            </div>
+        </div>
+    </header>
 
--- ---------------------------------------------------------------------
--- 2) طلبات السحب + دفتر المحفظة (القراءة فقط للعميل)
--- ---------------------------------------------------------------------
-create table if not exists public.payout_requests (
-  id           bigint generated always as identity primary key,
-  seller_id    uuid not null references public.profiles(id),
-  amount_egp   numeric(10,2) not null check (amount_egp > 0),
-  method       text not null check (method in ('vodafone_cash', 'instapay')),
-  account      text not null check (char_length(account) between 5 and 60),
-  status       text not null default 'requested' check (status in ('requested', 'paid', 'rejected')),
-  batch_date   date not null,
-  admin_note   text,
-  created_at   timestamptz not null default now(),
-  processed_at timestamptz
-);
-alter table public.payout_requests enable row level security;
-revoke all on public.payout_requests from anon, authenticated;
-grant select on public.payout_requests to authenticated;
-drop policy if exists payouts_read on public.payout_requests;
-create policy payouts_read on public.payout_requests for select to authenticated
-  using (seller_id = auth.uid() or public.is_admin());
+    <!-- Main Container -->
+    <main class="max-w-7xl mx-auto px-4 py-6 flex-grow w-full space-y-8">
+        
+        <!-- Products Grid Placeholder -->
+        <div id="products-section">
+            <h2 class="text-lg font-bold text-white mb-4 border-r-4 border-nes-green pr-3">المنتجات والخدمات المتاحة</h2>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="products-grid">
+                <!-- Example Product Card -->
+                <div class="nes-card p-5 rounded space-y-3">
+                    <div class="flex justify-between items-center">
+                        <h3 class="font-bold text-white text-sm">كبسولة League of Legends</h3>
+                        <span class="pixel-text text-xs text-nes-green">45 EGP</span>
+                    </div>
+                    <p class="text-xs text-slate-400">حساب يحتوي على 350 RP و XP Boost لمدة 30 يوم.</p>
+                    <button onclick="startPurchaseFlow(1, 'كبسولة League of Legends', 45)" class="w-full tab-btn bg-nes-green text-black font-bold py-2 rounded text-xs">
+                        <i class="fa-solid fa-cart-shopping"></i> شراء الآن
+                    </button>
+                </div>
+            </div>
+        </div>
 
-create table if not exists public.wallet_entries (
-  id              bigint generated always as identity primary key,
-  seller_id       uuid not null references public.profiles(id),
-  order_id        bigint references public.orders(id),
-  payout_id       bigint references public.payout_requests(id),
-  kind            text not null check (kind in ('sale','release','refund_reversal','payout_request','payout_reversal','adjustment')),
-  pending_delta   numeric(10,2) not null default 0,
-  available_delta numeric(10,2) not null default 0,
-  note            text,
-  created_at      timestamptz not null default now()
-);
-create index if not exists wallet_seller_idx on public.wallet_entries (seller_id, created_at desc);
-alter table public.wallet_entries enable row level security;
-revoke all on public.wallet_entries from anon, authenticated;
-grant select on public.wallet_entries to authenticated;
-drop policy if exists wallet_read on public.wallet_entries;
-create policy wallet_read on public.wallet_entries for select to authenticated
-  using (seller_id = auth.uid() or public.is_admin());
+    </main>
 
--- ---------------------------------------------------------------------
--- 3) تاريخ دفعة الجمعة القادمة (بتوقيت القاهرة)
---    طلب يوم الجمعة نفسه يدخل الجمعة اللي بعدها
--- ---------------------------------------------------------------------
-create or replace function public.next_payout_date(p_ts timestamptz default now())
-returns date
-language plpgsql stable security definer set search_path = public as $$
-declare
-  v_day date := (p_ts at time zone 'Africa/Cairo')::date;
-  v_dow int  := extract(isodow from v_day)::int;
-  v_w   int  := public._setting('payout_weekday', '5')::int;
-begin
-  return v_day + case when v_dow < v_w then v_w - v_dow else v_w - v_dow + 7 end;
-end $$;
-revoke all on function public.next_payout_date(timestamptz) from public, anon;
-grant execute on function public.next_payout_date(timestamptz) to authenticated;
+    <!-- MODAL 1: Auth Modal -->
+    <div id="modal-auth" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="nes-card w-full max-w-md p-6 rounded space-y-4">
+            <div class="flex justify-between items-center border-b-2 border-nes-border pb-2">
+                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-user-lock text-nes-cyan"></i> تسجيل الدخول</h3>
+                <button onclick="closeModal('modal-auth')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="handleAuthSubmit(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block mb-1 text-slate-300">البريد الإلكتروني:</label>
+                    <input type="email" id="auth-email" required class="w-full bg-black border-2 border-nes-border p-2.5 rounded text-white focus:outline-none focus:border-nes-cyan">
+                </div>
+                <div>
+                    <label class="block mb-1 text-slate-300">كلمة المرور:</label>
+                    <input type="password" id="auth-password" required class="w-full bg-black border-2 border-nes-border p-2.5 rounded text-white focus:outline-none focus:border-nes-cyan">
+                </div>
+                <button type="submit" class="w-full tab-btn bg-nes-cyan text-black font-bold py-2.5 rounded text-xs">متابعة</button>
+            </form>
+        </div>
+    </div>
 
--- ---------------------------------------------------------------------
--- 4) إنشاء الطلب (نسخة محدّثة: بتسجل البائع والعمولة)
--- ---------------------------------------------------------------------
-create or replace function public.create_order(p_product_id bigint, p_terms_version text)
-returns public.orders
-language plpgsql security definer set search_path = public as $$
-declare
-  v_uid   uuid := auth.uid();
-  v_prod  public.products;
-  v_cur   text;
-  v_terms text;
-  v_open  int;
-  v_pct   numeric(5,2) := 0;
-  v_net   numeric(10,2);
-  v_order public.orders;
-begin
-  if v_uid is null then raise exception 'login_required'; end if;
-  select value into v_cur from public.app_settings where key = 'terms_version';
-  if p_terms_version is distinct from v_cur then raise exception 'terms_not_accepted'; end if;
-  select * into v_prod from public.products where id = p_product_id and is_active;
-  if not found then raise exception 'product_not_found'; end if;
-  if v_prod.seller_id = v_uid then raise exception 'own_product'; end if;
-  if v_prod.delivery_mode = 'inventory'
-     and not exists (select 1 from public.inventory_items where product_id = v_prod.id and status = 'available') then
-    raise exception 'out_of_stock';
-  end if;
-  select count(*) into v_open from public.orders
-    where buyer_id = v_uid and status in ('awaiting_payment', 'under_review');
-  if v_open >= 3 then raise exception 'too_many_open_orders'; end if;
-  if v_prod.seller_id is not null then
-    v_pct := public._setting('commission_percent', '10')::numeric;
-    v_net := round(v_prod.price_egp * (1 - v_pct / 100), 2);
-  end if;
-  select value into v_terms from public.app_settings where key = 'terms_text';
-  insert into public.orders (buyer_id, product_id, price_egp, warranty_hours, terms_version, terms_snapshot,
-                             seller_id, commission_pct, seller_net)
-  values (v_uid, v_prod.id, v_prod.price_egp, v_prod.warranty_hours, v_cur,
-          coalesce(v_terms, '') || E'\n---\n' || coalesce(v_prod.warranty_terms, ''),
-          v_prod.seller_id, v_pct, v_net)
-  returning * into v_order;
-  return v_order;
-end $$;
+    <!-- MODAL 2: Terms & Order Confirmation Modal -->
+    <div id="modal-terms" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="nes-card w-full max-w-lg p-6 rounded space-y-4 max-h-[90vh] overflow-y-auto">
+            <div class="flex justify-between items-center border-b-2 border-nes-border pb-2">
+                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-file-contract text-nes-gold"></i> الشروط وأحكام الضمان</h3>
+                <button onclick="closeModal('modal-terms')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="bg-black/60 p-4 rounded border border-nes-border text-xs leading-relaxed space-y-2 text-slate-300">
+                <h4 class="font-bold text-nes-gold">شروط الشراء والضمان:</h4>
+                <p>1. مدة الضمان محددة بالمنتج وتبدأ فور استلام بيانات السلعة.</p>
+                <p>2. يُشترط الدخول للتأكد من المنتج فور التسليم وبدون لعب أي مباريات أو تغيير بيانات لمنع إلغاء الضمان.</p>
+                <p>3. في حالة التحويل الخطأ أو الإلغاء بدون سبب من المشتري لا يتم الاسترجاع.</p>
+            </div>
 
--- ---------------------------------------------------------------------
--- 5) التسليم (نسخة محدّثة): بيبدأ الاحتجاز ويسجل مستحقات البائع "معلّقة"
--- ---------------------------------------------------------------------
-create or replace function public.deliver_order(p_order_id bigint, p_secret text default null)
-returns void
-language plpgsql security definer set search_path = public as $$
-declare
-  v_o public.orders; v_secret text; v_warranty timestamptz; v_hold timestamptz;
-begin
-  perform public._require_admin();
-  select * into v_o from public.orders where id = p_order_id for update;
-  if not found then raise exception 'order_not_found'; end if;
-  if v_o.status not in ('paid', 'problem') then raise exception 'bad_status'; end if;
-  if v_o.inventory_item_id is not null then
-    select secret into v_secret from public.inventory_items where id = v_o.inventory_item_id;
-    update public.inventory_items set status = 'sold' where id = v_o.inventory_item_id;
-  end if;
-  v_secret := coalesce(nullif(trim(p_secret), ''), v_secret);
-  if v_secret is null then raise exception 'secret_required'; end if;
-  insert into public.order_secrets (order_id, secret) values (v_o.id, v_secret)
-  on conflict (order_id) do update set secret = excluded.secret, created_at = now();
+            <div class="flex items-center gap-2 pt-2">
+                <input type="checkbox" id="chk-accept-terms" class="w-4 h-4 accent-nes-green cursor-pointer">
+                <label for="chk-accept-terms" class="text-xs font-bold text-white cursor-pointer">أوافق صراحة على كافة الشروط والأحكام الخاصة بالطلب</label>
+            </div>
 
-  v_warranty := now() + make_interval(hours => v_o.warranty_hours);
-  v_hold     := now() + make_interval(hours => public._setting('hold_hours', '72')::int);
-  update public.orders
-     set status = 'delivered', delivered_at = now(), warranty_until = v_warranty,
-         release_at = greatest(v_warranty, v_hold), updated_at = now()
-   where id = v_o.id;
+            <button onclick="confirmOrderTerms()" class="w-full tab-btn bg-nes-green text-black font-bold py-2.5 rounded text-xs">
+                موافقة وإنشاء الطلب
+            </button>
+        </div>
+    </div>
 
-  if v_o.seller_id is not null
-     and not exists (select 1 from public.wallet_entries where order_id = v_o.id and kind = 'sale') then
-    insert into public.wallet_entries (seller_id, order_id, kind, pending_delta, note)
-    values (v_o.seller_id, v_o.id, 'sale', v_o.seller_net, 'بيع ' || v_o.code);
-    insert into public.transactions (order_id, user_id, type, amount_egp, note)
-    values (v_o.id, v_o.seller_id, 'commission', v_o.price_egp - v_o.seller_net,
-            'عمولة المنصة ' || v_o.commission_pct::text || '%');
-  end if;
-end $$;
+    <!-- MODAL 3: Payment Instructions & Proof Upload -->
+    <div id="modal-payment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="nes-card w-full max-w-md p-6 rounded space-y-4">
+            <div class="flex justify-between items-center border-b-2 border-nes-border pb-2">
+                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-wallet text-nes-green"></i> تعليمات الدفع اليدوي</h3>
+                <button onclick="closeModal('modal-payment')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="bg-black p-4 rounded border border-nes-border space-y-2 text-xs">
+                <div class="flex justify-between">
+                    <span class="text-slate-400">رقم الطلب:</span>
+                    <span id="pay-order-code" class="pixel-text text-nes-gold"></span>
+                </div>
+                <div class="flex justify-between">
+                    <span class="text-slate-400">المبلغ المطلوب:</span>
+                    <span id="pay-amount" class="pixel-text text-nes-green"></span>
+                </div>
+                <div class="flex justify-between pt-2 border-t border-slate-800">
+                    <span class="text-slate-400">رقم المحفظة / InstaPay:</span>
+                    <span class="font-bold text-white font-mono">01000000000</span>
+                </div>
+            </div>
 
--- ---------------------------------------------------------------------
--- 6) حل المشاكل (نسخة محدّثة): الاسترجاع بيخصم من المعلّق عند البائع
--- ---------------------------------------------------------------------
-create or replace function public.resolve_order(p_order_id bigint, p_action text, p_note text default null)
-returns void
-language plpgsql security definer set search_path = public as $$
-declare v_o public.orders;
-begin
-  perform public._require_admin();
-  select * into v_o from public.orders where id = p_order_id for update;
-  if not found then raise exception 'order_not_found'; end if;
-  if p_action = 'refund' then
-    if v_o.status not in ('paid', 'delivered', 'problem') then raise exception 'bad_status'; end if;
-    update public.orders set status = 'refunded', admin_note = left(p_note, 500), updated_at = now() where id = v_o.id;
-    insert into public.transactions (order_id, user_id, type, amount_egp, note)
-    values (v_o.id, v_o.buyer_id, 'refund', v_o.price_egp, left(p_note, 200));
-    update public.inventory_items set status = 'available', order_id = null
-     where id = v_o.inventory_item_id and status = 'reserved';
-    if v_o.seller_id is not null
-       and exists (select 1 from public.wallet_entries where order_id = v_o.id and kind = 'sale')
-       and not exists (select 1 from public.wallet_entries where order_id = v_o.id and kind in ('release', 'refund_reversal')) then
-      insert into public.wallet_entries (seller_id, order_id, kind, pending_delta, note)
-      values (v_o.seller_id, v_o.id, 'refund_reversal', -v_o.seller_net, 'استرجاع للمشتري ' || v_o.code);
-      insert into public.transactions (order_id, user_id, type, amount_egp, note)
-      values (v_o.id, v_o.seller_id, 'commission', -(v_o.price_egp - v_o.seller_net), 'عكس العمولة بسبب الاسترجاع');
-    end if;
-  elsif p_action = 'complete' then
-    if v_o.status not in ('delivered', 'problem') then raise exception 'bad_status'; end if;
-    update public.orders set status = 'completed', admin_note = left(p_note, 500), updated_at = now() where id = v_o.id;
-  elsif p_action = 'cancel' then
-    if v_o.status not in ('awaiting_payment', 'under_review') then raise exception 'bad_status'; end if;
-    update public.orders set status = 'cancelled', admin_note = left(p_note, 500), updated_at = now() where id = v_o.id;
-  else
-    raise exception 'bad_action';
-  end if;
-end $$;
+            <form onsubmit="handlePaymentUpload(event)" class="space-y-3 text-xs">
+                <div>
+                    <label class="block mb-1 text-slate-300">رقم محفظتك المحول منها (اختياري):</label>
+                    <input type="text" id="pay-sender-phone" placeholder="010xxxxxxxx" class="w-full bg-black border border-nes-border p-2 rounded text-white mb-2">
+                    <label class="block mb-1 text-slate-300">إرفاق صورة تحويل الإثبات:</label>
+                    <input type="file" id="pay-proof-file" accept="image/*" required class="w-full bg-black border border-nes-border p-2 rounded text-slate-400 file:bg-nes-green file:text-black file:border-0 file:px-3 file:py-1 file:rounded file:font-bold">
+                </div>
+                <button type="submit" id="btn-submit-payment" class="w-full tab-btn bg-nes-gold text-black font-bold py-2.5 rounded text-xs">
+                    تأكيد وإرسال الإثبات
+                </button>
+            </form>
+        </div>
+    </div>
 
--- ---------------------------------------------------------------------
--- 7) تحرير المبالغ اللي خلصت فترة احتجازها (معلّق -> متاح)
---    الطلبات في حالة "مشكلة" مش بتتحرر. بتتنادى تلقائي عند فتح المحفظة.
--- ---------------------------------------------------------------------
-create or replace function public.release_matured_orders()
-returns int
-language plpgsql security definer set search_path = public as $$
-declare r record; n int := 0;
-begin
-  for r in
-    select id, seller_id, seller_net, status
-      from public.orders
-     where status in ('delivered', 'completed')
-       and released_at is null
-       and release_at is not null
-       and release_at <= now()
-     for update skip locked
-  loop
-    if r.seller_id is not null and exists (select 1 from public.wallet_entries where order_id = r.id and kind = 'sale') then
-      insert into public.wallet_entries (seller_id, order_id, kind, pending_delta, available_delta, note)
-      values (r.seller_id, r.id, 'release', -r.seller_net, r.seller_net, 'انتهاء فترة الاحتجاز');
-    end if;
-    update public.orders
-       set released_at = now(),
-           status = case when status = 'delivered' then 'completed' else status end,
-           updated_at = now()
-     where id = r.id;
-    n := n + 1;
-  end loop;
-  return n;
-end $$;
-revoke all on function public.release_matured_orders() from public, anon;
-grant execute on function public.release_matured_orders() to authenticated;
+    <!-- MAIN JAVASCRIPT LOGIC -->
+    <script>
+        // Initialize Supabase Client
+        const SUPABASE_URL = 'https://afzyerpeoirbcxwymsqg.supabase.co';
+        const SUPABASE_KEY = 'PASTE_YOUR_PUBLISHABLE_KEY_HERE'; 
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
--- الأدمن يمدّد الاحتجاز على طلب معيّن (مثلًا للاشتباه)
-create or replace function public.extend_hold(p_order_id bigint, p_hours int)
-returns void
-language plpgsql security definer set search_path = public as $$
-begin
-  perform public._require_admin();
-  if p_hours is null or p_hours <= 0 or p_hours > 720 then raise exception 'bad_hours'; end if;
-  update public.orders
-     set release_at = coalesce(release_at, now()) + make_interval(hours => p_hours), updated_at = now()
-   where id = p_order_id and released_at is null;
-  if not found then raise exception 'bad_status'; end if;
-end $$;
-revoke all on function public.extend_hold(bigint, int) from public, anon;
-grant execute on function public.extend_hold(bigint, int) to authenticated;
+        let currentUser = null;
+        let activeProductToBuy = null;
+        let activeOrderId = null;
+        let activeOrderCode = null;
 
--- ---------------------------------------------------------------------
--- 8) محفظة البائع + طلب السحب
--- ---------------------------------------------------------------------
-create or replace function public.my_wallet()
-returns jsonb
-language plpgsql security definer set search_path = public as $$
-declare v_uid uuid := auth.uid(); v_p numeric; v_a numeric; v_q numeric;
-begin
-  if v_uid is null then raise exception 'login_required'; end if;
-  perform public.release_matured_orders();
-  select coalesce(sum(pending_delta), 0), coalesce(sum(available_delta), 0)
-    into v_p, v_a from public.wallet_entries where seller_id = v_uid;
-  select coalesce(sum(amount_egp), 0) into v_q
-    from public.payout_requests where seller_id = v_uid and status = 'requested';
-  return jsonb_build_object(
-    'pending', v_p,
-    'available', v_a,
-    'in_payout_queue', v_q,
-    'next_payout_date', public.next_payout_date(now()),
-    'hold_hours', public._setting('hold_hours', '72')::int,
-    'min_payout', public._setting('min_payout_egp', '100')::numeric
-  );
-end $$;
+        // Init Auth Check
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            if (session) {
+                currentUser = session.user;
+                updateAuthUI();
+            }
+        });
 
-create or replace function public.request_payout(p_amount numeric, p_method text, p_account text)
-returns public.payout_requests
-language plpgsql security definer set search_path = public as $$
-declare
-  v_uid uuid := auth.uid(); v_avail numeric; v_min numeric; v_amt numeric(10,2); v_row public.payout_requests;
-begin
-  if v_uid is null then raise exception 'login_required'; end if;
-  if not exists (select 1 from public.profiles where id = v_uid and role = 'seller') then
-    raise exception 'not_seller';
-  end if;
-  perform pg_advisory_xact_lock(hashtext('wallet:' || v_uid::text));
-  perform public.release_matured_orders();
-  v_min := public._setting('min_payout_egp', '100')::numeric;
-  v_amt := round(p_amount, 2);
-  if v_amt is null or v_amt < v_min then raise exception 'below_min_payout'; end if;
-  select coalesce(sum(available_delta), 0) into v_avail from public.wallet_entries where seller_id = v_uid;
-  if v_amt > v_avail then raise exception 'insufficient_balance'; end if;
-  insert into public.payout_requests (seller_id, amount_egp, method, account, batch_date)
-  values (v_uid, v_amt, p_method, trim(p_account), public.next_payout_date(now()))
-  returning * into v_row;
-  insert into public.wallet_entries (seller_id, payout_id, kind, available_delta, note)
-  values (v_uid, v_row.id, 'payout_request', -v_amt, 'طلب سحب #' || v_row.id::text);
-  return v_row;
-end $$;
+        function updateAuthUI() {
+            if (currentUser) {
+                document.getElementById('btn-login-modal').classList.add('hidden');
+                document.getElementById('user-profile-badge').classList.remove('hidden');
+                document.getElementById('user-display-name').textContent = currentUser.email.split('@')[0];
+            } else {
+                document.getElementById('btn-login-modal').classList.remove('hidden');
+                document.getElementById('user-profile-badge').classList.add('hidden');
+            }
+        }
 
-revoke all on function public.my_wallet() from public, anon;
-revoke all on function public.request_payout(numeric, text, text) from public, anon;
-grant execute on function public.my_wallet() to authenticated;
-grant execute on function public.request_payout(numeric, text, text) to authenticated;
+        function openAuthModal() { document.getElementById('modal-auth').classList.remove('hidden'); }
+        function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
 
--- ---------------------------------------------------------------------
--- 9) أزرار الأدمن: تم الدفع / رفض السحب / ملخص الالتزامات
--- ---------------------------------------------------------------------
-create or replace function public.mark_payout_paid(p_id bigint, p_note text default null)
-returns void
-language plpgsql security definer set search_path = public as $$
-declare v_r public.payout_requests;
-begin
-  perform public._require_admin();
-  select * into v_r from public.payout_requests where id = p_id and status = 'requested' for update;
-  if not found then raise exception 'bad_status'; end if;
-  update public.payout_requests set status = 'paid', processed_at = now(), admin_note = left(p_note, 300) where id = p_id;
-  insert into public.transactions (user_id, type, amount_egp, note)
-  values (v_r.seller_id, 'payout', v_r.amount_egp, 'سحب #' || p_id::text || ' - ' || v_r.method);
-end $$;
+        async function handleAuthSubmit(e) {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
 
-create or replace function public.reject_payout(p_id bigint, p_reason text default null)
-returns void
-language plpgsql security definer set search_path = public as $$
-declare v_r public.payout_requests;
-begin
-  perform public._require_admin();
-  select * into v_r from public.payout_requests where id = p_id and status = 'requested' for update;
-  if not found then raise exception 'bad_status'; end if;
-  update public.payout_requests set status = 'rejected', processed_at = now(), admin_note = left(p_reason, 300) where id = p_id;
-  insert into public.wallet_entries (seller_id, payout_id, kind, available_delta, note)
-  values (v_r.seller_id, p_id, 'payout_reversal', v_r.amount_egp, 'رفض طلب سحب #' || p_id::text);
-end $$;
+            const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+            if (error) {
+                const { data: signUpData, error: signUpErr } = await supabase.auth.signUp({ email, password });
+                if (signUpErr) return alert('خطأ في الدخول/التسجيل: ' + signUpErr.message);
+                currentUser = signUpData.user;
+            } else {
+                currentUser = data.user;
+            }
 
--- أرصدة كل البائعين
-create or replace function public.admin_wallets()
-returns table (uid uuid, name text, pending numeric, available numeric, queued numeric)
-language plpgsql security definer set search_path = public as $$
-begin
-  perform public._require_admin();
-  perform public.release_matured_orders();
-  return query
-    select p.id, p.display_name,
-           coalesce((select sum(w.pending_delta)   from public.wallet_entries w where w.seller_id = p.id), 0),
-           coalesce((select sum(w.available_delta) from public.wallet_entries w where w.seller_id = p.id), 0),
-           coalesce((select sum(r.amount_egp) from public.payout_requests r where r.seller_id = p.id and r.status = 'requested'), 0)
-      from public.profiles p
-     where p.role = 'seller'
-     order by p.display_name;
-end $$;
+            updateAuthUI();
+            closeModal('modal-auth');
+            
+            if (activeProductToBuy) {
+                showTermsModal();
+            }
+        }
 
--- إجمالي اللي عليك للبائعين (لازم تفضل فلوس بالقدر ده في محفظتك الفعلية)
-create or replace function public.admin_escrow_summary()
-returns jsonb
-language plpgsql security definer set search_path = public as $$
-declare v_p numeric; v_a numeric; v_q numeric;
-begin
-  perform public._require_admin();
-  perform public.release_matured_orders();
-  select coalesce(sum(pending_delta), 0), coalesce(sum(available_delta), 0) into v_p, v_a from public.wallet_entries;
-  select coalesce(sum(amount_egp), 0) into v_q from public.payout_requests where status = 'requested';
-  return jsonb_build_object('pending', v_p, 'available', v_a, 'queued', v_q, 'owed_total', v_p + v_a + v_q);
-end $$;
+        async function handleLogout() {
+            await supabase.auth.signOut();
+            currentUser = null;
+            updateAuthUI();
+        }
 
-revoke all on function public.mark_payout_paid(bigint, text) from public, anon;
-revoke all on function public.reject_payout(bigint, text) from public, anon;
-revoke all on function public.admin_wallets() from public, anon;
-revoke all on function public.admin_escrow_summary() from public, anon;
-grant execute on function public.mark_payout_paid(bigint, text) to authenticated;
-grant execute on function public.reject_payout(bigint, text) to authenticated;
-grant execute on function public.admin_wallets() to authenticated;
-grant execute on function public.admin_escrow_summary() to authenticated;
+        function startPurchaseFlow(productId, name, price) {
+            activeProductToBuy = { id: productId, name, price };
+            if (!currentUser) {
+                alert('يرجى تسجيل الدخول أولاً لإتمام الشراء.');
+                openAuthModal();
+                return;
+            }
+            showTermsModal();
+        }
 
--- إشعار ديسكورد عند طلب سحب جديد
-create or replace function public.trg_payout_notify() returns trigger
-language plpgsql security definer set search_path = public as $$
-begin
-  perform public.notify_admin('💰 طلب سحب جديد #' || new.id::text || ' — ' || new.amount_egp::text
-                              || ' EGP — دفعة يوم ' || new.batch_date::text);
-  return null;
-end $$;
-drop trigger if exists payout_notify on public.payout_requests;
-create trigger payout_notify after insert on public.payout_requests
-  for each row execute function public.trg_payout_notify();
+        function showTermsModal() {
+            document.getElementById('chk-accept-terms').checked = false;
+            document.getElementById('modal-terms').classList.remove('hidden');
+        }
 
-do $$ begin alter publication supabase_realtime add table public.payout_requests;
-exception when duplicate_object then null; end $$;
+        async function confirmOrderTerms() {
+            const accepted = document.getElementById('chk-accept-terms').checked;
+            if (!accepted) return alert('يجب الموافقة على الشروط أولاً للمتابعة.');
 
--- ---------------------------------------------------------------------
--- 10) اختياري: تحرير تلقائي كل ساعة حتى لو محدش فتح الموقع
---     فعّل pg_cron من Database > Extensions ثم شغّل السطر (شيل --):
--- ---------------------------------------------------------------------
--- select cron.schedule('release-escrow', '0 * * * *', $$select public.release_matured_orders()$$);
+            closeModal('modal-terms');
 
--- ---------------------------------------------------------------------
--- 11) تغيير الإعدادات (أمثلة، شغّلها بعد ما تقرر الأرقام)
--- ---------------------------------------------------------------------
--- update public.app_settings set value = '72' where key = 'hold_hours';
--- update public.app_settings set value = '10' where key = 'commission_percent';
--- update public.app_settings set value = '100' where key = 'min_payout_egp';
+            try {
+                // استدعاء دالة create_order المتوافقة مع قاعدة البيانات
+                const { data, error } = await supabase.rpc('create_order', {
+                    p_product_id: activeProductToBuy.id,
+                    p_terms_version: 'v1'
+                });
 
--- ---------------------------------------------------------------------
--- 12) اختبار يدوي قبل ما نبني الواجهة (بدّل الإيميل والرقم):
---     1) خلّي حساب تجريبي بائع:
---        update public.profiles set role = 'seller'
---         where id = (select id from auth.users where email = 'SELLER_TEST@example.com');
---     2) اربط منتج بيه:
---        update public.products set seller_id = (select id from auth.users where email = 'SELLER_TEST@example.com')
---         where title like 'Spotify%';
--- ---------------------------------------------------------------------
+                if (error) throw error;
+
+                // الـ RPC ترجع جدول الطلب بالكامل (Object)
+                activeOrderId = data.id;
+                activeOrderCode = data.code;
+                
+                document.getElementById('pay-order-code').textContent = activeOrderCode;
+                document.getElementById('pay-amount').textContent = activeProductToBuy.price + ' EGP';
+                document.getElementById('modal-payment').classList.remove('hidden');
+
+            } catch (err) {
+                alert('حدث خطأ أثناء إنشاء الطلب: ' + err.message);
+            }
+        }
+
+        function compressImage(file, maxWidth = 1000, quality = 0.7) {
+            return new Promise((resolve) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = Math.round((height * maxWidth) / width);
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        canvas.toBlob((blob) => resolve(blob), 'image/jpeg', quality);
+                    };
+                };
+            });
+        }
+
+        async function handlePaymentUpload(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('pay-proof-file');
+            const senderPhone = document.getElementById('pay-sender-phone').value;
+            if (!fileInput.files.length) return alert('اختر صورة التحويل أولاً.');
+
+            const btn = document.getElementById('btn-submit-payment');
+            btn.disabled = true;
+            btn.textContent = 'جاري الضغط والرفع...';
+
+            try {
+                const rawFile = fileInput.files[0];
+                const compressedBlob = await compressImage(rawFile);
+                
+                // المسار مطابق لسياسة التخزين (Bucket storage policies)
+                const filePath = `${currentUser.id}/${activeOrderId}_${Date.now()}.jpg`;
+
+                const { error: uploadErr } = await supabase.storage
+                    .from('payment-proofs')
+                    .upload(filePath, compressedBlob, { contentType: 'image/jpeg' });
+
+                if (uploadErr) throw uploadErr;
+
+                // استدعاء دالة submit_payment_proof الصحيحة
+                const { error: rpcErr } = await supabase.rpc('submit_payment_proof', {
+                    p_order_id: activeOrderId,
+                    p_file_path: filePath,
+                    p_sender: senderPhone || 'غير محدد',
+                    p_reference: ''
+                });
+
+                if (rpcErr) throw rpcErr;
+
+                alert('تم رفع إثبات التحويل بنجاح! الطلب الآن قيد المراجعة لدى الأدمن.');
+                closeModal('modal-payment');
+
+            } catch (err) {
+                alert('خطأ في إرسال الإثبات: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'تأكيد وإرسال الإثبات';
+            }
+        }
+    </script>
+</body>
+</html>
