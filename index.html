@@ -49,7 +49,7 @@
     <!-- Top Announcement Bar -->
     <div class="bg-black border-b border-eldo-border py-2 px-4 text-xs text-center text-eldo-gold font-bold flex justify-center items-center gap-2">
         <i class="fa-solid fa-shield-halved animate-pulse text-eldo-green"></i>
-        <span>Dollar Store — متجرك الرقمي الموثوق للألعاب والاشتراكات (دفع مصري وعالمي آمن)</span>
+        <span>Dollar Store — متجرك الرقمي الموثوق للألعاب والاشتراكات (حماية تامة وعمولة ممتازة للبائعين)</span>
     </div>
 
     <!-- Header Navigation -->
@@ -76,11 +76,12 @@
             <!-- Auth Controls -->
             <div class="flex items-center gap-2 text-xs">
                 <button onclick="openAuthModal()" id="btn-login" class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold">
-                    <i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول
+                    <i class="fa-solid fa-right-to-bracket"></i> تسجيل الدخول / انضمام
                 </button>
                 <div id="user-badge" class="hidden flex items-center gap-2 bg-[#12141d] px-3 py-1.5 rounded-lg border border-eldo-border">
                     <span id="user-name" class="font-bold text-eldo-green"></span>
-                    <button onclick="handleLogout()" class="text-eldo-red"><i class="fa-solid fa-power-off"></i></button>
+                    <span id="user-role-tag" class="text-[9px] bg-eldo-gold/20 text-eldo-gold px-1.5 py-0.5 rounded font-bold"></span>
+                    <button onclick="handleLogout()" class="text-eldo-red mr-2"><i class="fa-solid fa-power-off"></i></button>
                 </div>
             </div>
         </div>
@@ -91,134 +92,17 @@
         
         <!-- Category Filter Tabs -->
         <div class="flex gap-2 overflow-x-auto pb-2 text-xs scrollbar-none">
-            <button class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold whitespace-nowrap"><i class="fa-solid fa-fire"></i> الكل</button>
-            <button class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-solid fa-tv"></i> اشتراكات البث</button>
-            <button class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-solid fa-gamepad"></i> إكس بوكس (Xbox)</button>
-            <button class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">League of Legends</button>
-            <button class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Valorant & Pubg</button>
-            <button class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Fortnite & COD & Roblox</button>
+            <button onclick="filterCategory('all')" id="btn-cat-all" class="eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold whitespace-nowrap"><i class="fa-solid fa-fire"></i> الكل</button>
+            <button onclick="filterCategory('streaming')" id="btn-cat-streaming" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-solid fa-tv"></i> اشتراكات البث</button>
+            <button onclick="filterCategory('xbox')" id="btn-cat-xbox" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500"><i class="fa-brands fa-xbox"></i> إكس بوكس (Xbox)</button>
+            <button onclick="filterCategory('lol')" id="btn-cat-lol" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">League of Legends</button>
+            <button onclick="filterCategory('valpubg')" id="btn-cat-valpubg" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Valorant & Pubg</button>
+            <button onclick="filterCategory('fncod')" id="btn-cat-fncod" class="eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500">Fortnite & COD & Roblox</button>
         </div>
 
-        <!-- Section 1: Streaming Subscriptions -->
-        <div>
-            <h2 class="text-sm font-bold text-white mb-4 flex items-center gap-2 border-r-4 border-eldo-green pr-3">
-                <i class="fa-solid fa-film text-eldo-green"></i> اشتراكات البث الرقمي (Netflix, Shahid, Spotify)
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                
-                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">تسليم فوري</span>
-                            <span class="pixel-text text-xs text-eldo-green font-bold">120 EGP</span>
-                        </div>
-                        <h3 class="font-bold text-white text-sm mb-1">Netflix UHD (اشتراك شهر)</h3>
-                        <p class="text-xs text-slate-400">حساب خاص أو بروفايل رسمي بجودة 4K وضمان كامل المدة.</p>
-                    </div>
-                    <button onclick="startPurchase(1, 'Netflix UHD (شهر)', 120)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
-                        <i class="fa-solid fa-cart-shopping"></i> شراء فوري
-                    </button>
-                </div>
-
-                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">تسليم فوري</span>
-                            <span class="pixel-text text-xs text-eldo-green font-bold">80 EGP</span>
-                        </div>
-                        <h3 class="font-bold text-white text-sm mb-1">Shahid VIP (اشتراك شهر)</h3>
-                        <p class="text-xs text-slate-400">استمتع بأحدث المسلسلات والأفلام بدون إعلانات وبأعلى جودة.</p>
-                    </div>
-                    <button onclick="startPurchase(2, 'Shahid VIP (شهر)', 80)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
-                        <i class="fa-solid fa-cart-shopping"></i> شراء فوري
-                    </button>
-                </div>
-
-                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
-                    <div>
-                        <div class="flex justify-between items-start mb-2">
-                            <span class="text-[10px] bg-eldo-green/10 text-eldo-green px-2 py-0.5 rounded font-bold">تسليم فوري</span>
-                            <span class="pixel-text text-xs text-eldo-green font-bold">60 EGP</span>
-                        </div>
-                        <h3 class="font-bold text-white text-sm mb-1">Spotify Premium (شهر)</h3>
-                        <p class="text-xs text-slate-400">موسيقى بلا حدود وبدون إعلانات مع إمكانية التحميل.</p>
-                    </div>
-                    <button onclick="startPurchase(3, 'Spotify Premium (شهر)', 60)" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
-                        <i class="fa-solid fa-cart-shopping"></i> شراء فوري
-                    </button>
-                </div>
-
-            </div>
-        </div>
-
-        <!-- Section 2: Xbox & Games Accounts -->
-        <div>
-            <h2 class="text-sm font-bold text-white mb-4 flex items-center gap-2 border-r-4 border-eldo-gold pr-3">
-                <i class="fa-brands fa-xbox text-eldo-gold"></i> حسابات وألعاب إكس بوكس (Xbox) والألعاب الكبرى
-            </h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-                
-                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
-                    <div>
-                        <span class="text-[10px] bg-eldo-gold/10 text-eldo-gold px-2 py-0.5 rounded font-bold">Xbox</span>
-                        <h3 class="font-bold text-white text-sm mt-2 mb-1">Xbox Game Pass Ultimate</h3>
-                        <p class="text-xs text-slate-400">اشتراك لفترة محدودة مع مكتبة ضخمة من الألعاب.</p>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldo-border">
-                        <span class="pixel-text text-xs text-eldo-green">150 EGP</span>
-                        <button onclick="startPurchase(4, 'Xbox Game Pass Ultimate', 150)" class="eldo-btn bg-eldo-green text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء</button>
-                    </div>
-                </div>
-
-                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
-                    <div>
-                        <span class="text-[10px] bg-eldo-cyan/10 text-eldo-cyan px-2 py-0.5 rounded font-bold">LoL</span>
-                        <h3 class="font-bold text-white text-sm mt-2 mb-1">League of Legends (Level 30)</h3>
-                        <p class="text-xs text-slate-400">حسابات ليفل 30 جاهزة للـ Ranked مع كبسولات وبداية قوية.</p>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldo-border">
-                        <span class="pixel-text text-xs text-eldo-green">95 EGP</span>
-                        <button onclick="startPurchase(5, 'League of Legends Level 30', 95)" class="eldo-btn bg-eldo-green text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء</button>
-                    </div>
-                </div>
-
-                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
-                    <div>
-                        <span class="text-[10px] bg-eldo-red/10 text-eldo-red px-2 py-0.5 rounded font-bold">Valorant</span>
-                        <h3 class="font-bold text-white text-sm mt-2 mb-1">Valorant Smurf Accounts</h3>
-                        <p class="text-xs text-slate-400">حسابات فالورانت جاهزة ومفعلة مع Skins عشوائية مميزة.</p>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldo-border">
-                        <span class="pixel-text text-xs text-eldo-green">110 EGP</span>
-                        <button onclick="startPurchase(6, 'Valorant Smurf Account', 110)" class="eldo-btn bg-eldo-green text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء</button>
-                    </div>
-                </div>
-
-                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
-                    <div>
-                        <span class="text-[10px] bg-eldo-gold/10 text-eldo-gold px-2 py-0.5 rounded font-bold">Fortnite & Pubg</span>
-                        <h3 class="font-bold text-white text-sm mt-2 mb-1">Fortnite Rare Skins & Pubg</h3>
-                        <p class="text-xs text-slate-400">حسابات فورت نايت نادرة وبابجي موبايل وبي دي بإضافات قوية.</p>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldo-border">
-                        <span class="pixel-text text-xs text-eldo-green">130 EGP</span>
-                        <button onclick="startPurchase(7, 'Fortnite / Pubg Account', 130)" class="eldo-btn bg-eldo-green text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء</button>
-                    </div>
-                </div>
-
-                <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
-                    <div>
-                        <span class="text-[10px] bg-eldo-cyan/10 text-eldo-cyan px-2 py-0.5 rounded font-bold">COD / Roblox</span>
-                        <h3 class="font-bold text-white text-sm mt-2 mb-1">Call of Duty & Roblox Accounts</h3>
-                        <p class="text-xs text-slate-400">حسابات كول آف ديوتي متقدمة وروبلوكس بروبوكسات جاهزة.</p>
-                    </div>
-                    <div class="flex justify-between items-center pt-2 border-t border-eldo-border">
-                        <span class="pixel-text text-xs text-eldo-green">90 EGP</span>
-                        <button onclick="startPurchase(8, 'COD & Roblox Bundle', 90)" class="eldo-btn bg-eldo-green text-black font-bold px-3 py-1.5 rounded-lg text-xs">شراء</button>
-                    </div>
-                </div>
-
-            </div>
+        <!-- Dynamic Products Display Container -->
+        <div id="products-container" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            <!-- المنتجات تعرض هنا ديناميكياً -->
         </div>
 
     </main>
@@ -233,7 +117,7 @@
     <div id="modal-auth" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="eldo-card w-full max-w-md p-6 rounded-xl space-y-4">
             <div class="flex justify-between items-center border-b border-eldo-border pb-3">
-                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-user-lock text-eldo-green"></i> تسجيل الدخول</h3>
+                <h3 class="font-bold text-sm text-white"><i class="fa-solid fa-user-lock text-eldo-green"></i> تسجيل الدخول / إنشاء حساب</h3>
                 <button onclick="closeModal('modal-auth')" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form onsubmit="handleAuth(event)" class="space-y-3 text-xs">
@@ -245,7 +129,14 @@
                     <label class="block mb-1 text-slate-300">كلمة المرور:</label>
                     <input type="password" id="auth-password" required class="w-full bg-[#0b0c10] border border-eldo-border p-2.5 rounded-lg text-white">
                 </div>
-                <button type="submit" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2.5 rounded-lg text-xs">متابعة</button>
+                <div>
+                    <label class="block mb-1 text-eldo-gold font-bold">حدد طبيعة حسابك في المنصة:</label>
+                    <select id="auth-role" class="w-full bg-[#0b0c10] border border-eldo-border p-2.5 rounded-lg text-white">
+                        <option value="buyer">🛒 مشتري (أبحث عن شراء حسابات واشتراكات)</option>
+                        <option value="seller">💼 بائع معتمد (أريد عرض وبيع منتجاتي وحساباتي)</option>
+                    </select>
+                </div>
+                <button type="submit" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2.5 rounded-lg text-xs mt-2">متابعة</button>
             </form>
         </div>
     </div>
@@ -270,7 +161,7 @@
         </div>
     </div>
 
-    <!-- MODAL: Payment (Updated with your exact 3 Egyptian payment methods & screenshot requirement) -->
+    <!-- MODAL: Payment -->
     <div id="modal-payment" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
         <div class="eldo-card w-full max-w-md p-6 rounded-xl space-y-4 max-h-[90vh] overflow-y-auto">
             <div class="flex justify-between items-center border-b border-eldo-border pb-3">
@@ -326,18 +217,73 @@
         const SUPABASE_KEY = 'PASTE_YOUR_PUBLISHABLE_KEY_HERE';
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
+        const productsData = [
+            { id: 1, cat: 'streaming', title: 'Netflix UHD (اشتراك شهر)', price: 120, desc: 'حساب خاص أو بروفايل رسمي بجودة 4K وضمان كامل المدة.', badge: 'تسليم فوري', tagColor: 'green' },
+            { id: 2, cat: 'streaming', title: 'Shahid VIP (اشتراك شهر)', price: 80, desc: 'أحدث المسلسلات والأفلام بدون إعلانات وبأعلى جودة.', badge: 'تسليم فوري', tagColor: 'green' },
+            { id: 3, cat: 'streaming', title: 'Spotify Premium (شهر)', price: 60, desc: 'موسيقى بلا حدود وبدون إعلانات مع إمكانية التحميل.', badge: 'تسليم فوري', tagColor: 'green' },
+            { id: 4, cat: 'xbox', title: 'Xbox Game Pass Ultimate', price: 150, desc: 'اشتراك لفترة محدودة مع مكتبة ضخمة من الألعاب العريقة.', badge: 'Xbox', tagColor: 'gold' },
+            { id: 5, cat: 'xbox', title: 'Xbox Live Gold (3 Months)', price: 210, desc: 'اشتراك شهور للعب الجماعي أونلاين وألعاب مجانية شهرية.', badge: 'Xbox', tagColor: 'gold' },
+            { id: 6, cat: 'lol', title: 'League of Legends (Level 30)', price: 95, desc: 'حسابات ليفل 30 جاهزة للـ Ranked مع كبسولات وبداية قوية.', badge: 'LoL', tagColor: 'cyan' },
+            { id: 7, cat: 'lol', title: 'League of Legends Smurf Unranked', price: 75, desc: 'حساب نظيف بـ Blue Essence عالي وبدون رانك سابق.', badge: 'LoL', tagColor: 'cyan' },
+            { id: 8, cat: 'valpubg', title: 'Valorant Smurf Accounts', price: 110, desc: 'حسابات فالورانت جاهزة ومفعلة مع Skins عشوائية مميزة.', badge: 'Valorant', tagColor: 'red' },
+            { id: 9, cat: 'valpubg', title: 'Pubg Mobile UC & Accounts', price: 130, desc: 'حسابات ببجي موبايل قوية وباقات شدات مضمونة.', badge: 'Pubg', tagColor: 'red' },
+            { id: 10, cat: 'fncod', title: 'Fortnite Rare Skins Account', price: 140, desc: 'حسابات فورت نايت نادرة مع سكنات قديمة وإضافات حصرية.', badge: 'Fortnite', tagColor: 'gold' },
+            { id: 11, cat: 'fncod', title: 'Call of Duty Modern Warfare Bundle', price: 160, desc: 'حساب كول آف ديوتي متقدم مع رتب وأسلحة مفعلة.', badge: 'COD', tagColor: 'gold' },
+            { id: 12, cat: 'fncod', title: 'Roblox Account + Robux', price: 85, desc: 'حساب روبلوكس جاهز ومحشو بروبوكسات وإكسسوارات.', badge: 'Roblox', tagColor: 'cyan' }
+        ];
+
         let user = null, activeProduct = null, orderId = null, orderCode = null;
 
         document.addEventListener('DOMContentLoaded', async () => {
+            renderProducts('all');
             const { data: { session } } = await supabase.auth.getSession();
             if (session) { user = session.user; updateUI(); }
         });
+
+        function renderProducts(category) {
+            const container = document.getElementById('products-container');
+            container.innerHTML = '';
+            
+            const filtered = category === 'all' ? productsData : productsData.filter(p => p.cat === category);
+
+            filtered.forEach(p => {
+                container.innerHTML += `
+                    <div class="eldo-card p-4 rounded-xl flex flex-col justify-between space-y-4">
+                        <div>
+                            <div class="flex justify-between items-start mb-2">
+                                <span class="text-[10px] bg-eldo-${p.tagColor}/10 text-eldo-${p.tagColor} px-2 py-0.5 rounded font-bold">${p.badge}</span>
+                                <span class="pixel-text text-xs text-eldo-green font-bold">${p.price} EGP</span>
+                            </div>
+                            <h3 class="font-bold text-white text-sm mb-1">${p.title}</h3>
+                            <p class="text-xs text-slate-400">${p.desc}</p>
+                        </div>
+                        <button onclick="startPurchase(${p.id}, '${p.title}', ${p.price})" class="w-full eldo-btn bg-eldo-green text-black font-bold py-2 rounded-lg text-xs">
+                            <i class="fa-solid fa-cart-shopping"></i> شراء فوري
+                        </button>
+                    </div>
+                `;
+            });
+
+            ['all', 'streaming', 'xbox', 'lol', 'valpubg', 'fncod'].forEach(c => {
+                const btn = document.getElementById(`btn-cat-${c}`);
+                if (btn) {
+                    if (c === category) {
+                        btn.className = "eldo-btn bg-eldo-green text-black px-4 py-2 rounded-lg font-bold whitespace-nowrap";
+                    } else {
+                        btn.className = "eldo-btn bg-[#12141d] text-slate-300 border border-eldo-border px-4 py-2 rounded-lg font-bold whitespace-nowrap hover:border-slate-500";
+                    }
+                }
+            });
+        }
+
+        function filterCategory(cat) { renderProducts(cat); }
 
         function updateUI() {
             if (user) {
                 document.getElementById('btn-login').classList.add('hidden');
                 document.getElementById('user-badge').classList.remove('hidden');
                 document.getElementById('user-name').textContent = user.email.split('@')[0];
+                document.getElementById('user-role-tag').textContent = user.user_metadata?.role === 'seller' ? 'بائع' : 'مشتري';
             } else {
                 document.getElementById('btn-login').classList.remove('hidden');
                 document.getElementById('user-badge').classList.add('hidden');
@@ -352,14 +298,22 @@
             e.preventDefault();
             const email = document.getElementById('auth-email').value;
             const password = document.getElementById('auth-password').value;
+            const role = document.getElementById('auth-role').value;
+
             const { data, error } = await supabase.auth.signInWithPassword({ email, password });
             if (error) {
-                const { data: sData, error: sErr } = await supabase.auth.signUp({ email, password });
-                if (sErr) return alert('خطأ: ' + sErr.message);
+                const { data: sData, error: sErr } = await supabase.auth.signUp({ 
+                    email, 
+                    password,
+                    options: { data: { role: role } }
+                });
+                if (sErr) return alert('خطأ في التسجيل: ' + sErr.message);
                 user = sData.user;
             } else { user = data.user; }
+            
             updateUI();
             closeModal('modal-auth');
+            alert(role === 'seller' ? 'مرحباً بك كبائع معتمد في Dollar Store!' : 'مرحباً بك كمشتري في Dollar Store!');
             if (activeProduct) openModal('modal-terms');
         }
 
@@ -389,7 +343,7 @@
                 document.getElementById('pay-price').textContent = activeProduct.price + ' EGP';
                 openModal('modal-payment');
             } catch (err) {
-                alert('خطأ في الطلب: ' + err.message);
+                alert('خطأ في إنشاء الطلب: ' + err.message);
             }
         }
 
@@ -411,7 +365,7 @@
                     p_reference: ''
                 });
                 if (rpcErr) throw rpcErr;
-                alert('تم إرسال سكرين شوت الإيصال بنجاح وبانتظار مراجعة الأدمن وتسليم طلبك!');
+                alert('تم إرسال الإيصال بنجاح! سيتم مراجعته وتسليمك الطلب فوراً.');
                 closeModal('modal-payment');
             } catch (err) {
                 alert('خطأ: ' + err.message);
