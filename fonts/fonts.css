@@ -1,0 +1,8 @@
+﻿@font-face { font-family: 'Press Start 2P'; src: url('/fonts/press-start-2p-400.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Unixel'; src: url('/fonts/unixel-400.woff2') format('woff2'); font-weight: 400; font-style: normal; font-display: swap; unicode-range: U+0600-06FF, U+0750-077F, U+08A0-08FF, U+FB50-FDFF, U+FE70-FEFF; }
+@font-face { font-family: 'Handjet'; src: url('/fonts/handjet-600.ttf') format('truetype'); font-weight: 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Manrope'; src: url('/fonts/manrope-400.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Manrope'; src: url('/fonts/manrope-600.ttf') format('truetype'); font-weight: 500 800; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Tajawal'; src: url('/fonts/tajawal-400.ttf') format('truetype'); font-weight: 400; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Tajawal'; src: url('/fonts/tajawal-500.ttf') format('truetype'); font-weight: 500 600; font-style: normal; font-display: swap; }
+@font-face { font-family: 'Tajawal'; src: url('/fonts/tajawal-700.ttf') format('truetype'); font-weight: 700 800; font-style: normal; font-display: swap; }
