@@ -1,0 +1,1 @@
+import{D as e}from"./index-DXVlcFom.js";function t(t){let{orders:n,loading:r,error:i}=e();return{orders:t?n.filter(e=>e.userId===t.id):[],loading:r,error:i}}function n(){let{orders:t,loading:n,error:r,refresh:i,mode:a}=e();return{orders:t,loading:n,error:r,refresh:i,mode:a}}export{t as n,n as t};
