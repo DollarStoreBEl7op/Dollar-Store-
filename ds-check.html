@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DOLLAR STORE — connection check</title>
+<style>body{font:15px/1.5 system-ui,sans-serif;background:#0b1012;color:#e6f2ee;max-width:760px;margin:2rem auto;padding:0 1rem}
+li{margin:.55rem 0;list-style:none}.ok{color:#72e5b0}.bad{color:#ff8a8a}.dim{color:#8fa3a0}small{display:block;color:#8fa3a0}</style></head>
+<body><h1>DOLLAR STORE — connection check</h1>
+<p class="dim">Open this page on your live site. Fix the first ✘ and reload. Nothing secret is displayed; the only request sent is to your own Supabase URL.</p>
+<ul id="r"></ul>
+<script>
+const B='/Dollar-Store-/', out=document.getElementById('r');
+function add(ok,msg,fix){const li=document.createElement('li');li.className=ok?'ok':'bad';li.textContent=(ok?'✔ ':'✘ ')+msg;if(!ok&&fix){const s=document.createElement('small');s.textContent='Fix: '+fix;li.appendChild(s)}out.appendChild(li);return ok}
+const get=u=>fetch(u+(u.includes('?')?'&':'?')+'t='+Date.now(),{cache:'no-store'});
+(async()=>{
+  let cfg={};
+  try{const r=await get(B+'config.js');const t=await r.text();if(!r.ok||!/DS_CONFIG/.test(t))throw 0;
+      const w={DS_CONFIG:{}};new Function('window',t)(w);cfg=w.DS_CONFIG;add(true,'config.js is published')}
+  catch{add(false,'config.js is NOT found at '+location.origin+B+'config.js','upload config.js to the repo ROOT (same folder as index.html), not inside assets/ or a dist/ folder.');return}
+  try{const t=await(await get(B+'index.html')).text();add(/config\.js/.test(t),'index.html loads config.js','replace index.html with the new version (it has one extra <script src=".../config.js"> line).')}catch{add(false,'could not read index.html')}
+  try{const t=await(await get(B+'assets/supabase-BtIX_baO.js')).text();add(/__DS_SUPABASE__/.test(t),'assets/supabase-BtIX_baO.js is the NEW patched file','replace assets/supabase-BtIX_baO.js with the new file (same name), wait ~2 minutes, then hard-refresh (Ctrl+Shift+R).')}catch{add(false,'could not read the supabase chunk')}
+  const u=String(cfg.supabaseUrl||'').trim().replace(/\/+$/,''),k=String(cfg.supabaseAnonKey||'').trim();
+  if(!add(!!u&&!!k&&!/YOUR-|PASTE_/i.test(u+k),'config.js has real values (not placeholders)','edit config.js: paste your Project URL and anon/publishable key.'))return;
+  if(!add(/^https:\/\/[^\s\/]+\.[^\s\/]+$/.test(u),'URL format looks right: '+u,'use exactly the "Project URL" (https://xxxx.supabase.co) — no /rest/v1 and no spaces.'))return;
+  let leak=false;try{leak=JSON.parse(atob(k.split('.')[1].replace(/-/g,'+').replace(/_/g,'/'))).role==='service_role'}catch{}
+  if(!add(!leak&&!/^sb_secret_/.test(k),'key is a public key (not a secret key)','you pasted a SECRET key. Rotate it in Supabase now, then paste the anon/publishable key.'))return;
+  const libs=[cfg.supabaseLibUrl,'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.119.0/+esm','https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm','https://esm.sh/@supabase/supabase-js@2'].filter(Boolean);
+  let lib=null;for(const l of libs){try{const m=await import(l);if(m.createClient){lib=l;break}}catch{}}
+  if(!add(!!lib,lib?'supabase-js library loads ('+new URL(lib,location.href).host+')':'supabase-js library could NOT be downloaded','a browser shield/ad-blocker is blocking cdn.jsdelivr.net and esm.sh. Disable shields for this site, or self-host the library and set supabaseLibUrl in config.js.'))return;
+  try{const r=await fetch(u+'/auth/v1/settings',{headers:{apikey:k}});
+      if(r.status===401||r.status===403){add(false,'Supabase rejected the key (HTTP '+r.status+')','copy the anon/publishable key again from Project Settings → API (the whole value, no spaces).');return}
+      if(!r.ok){add(false,'Supabase answered HTTP '+r.status,'check the Project URL; make sure the project is not paused.');return}
+      const s=await r.json();add(true,'Supabase project reachable and key accepted');
+      add(!s.disable_signup,'new sign-ups are enabled','Supabase → Authentication → Sign In / Providers → turn OFF "Disable sign-ups".');
+      add(true,'email confirmation required for new users: '+(s.mailer_autoconfirm?'no (instant login)':'yes (users must click the email link)'))}
+  catch{add(false,'could not reach '+u,'the Project URL is wrong, the project is paused, or the network blocks it.');return}
+  const l=document.createElement('li');l.className='ok';l.innerHTML='<b>All checks passed.</b> If /register still shows “unavailable”, hard-refresh (Ctrl+Shift+R) — your browser is serving the old cached file.';out.appendChild(l);
+})();
+</script></body></html>
